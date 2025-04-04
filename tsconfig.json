@@ -17,6 +17,10 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
-    "paths": {}
+    "paths": {
+      "@admin/*": ["src/admin/*"],
+      "@config/*": ["src/config/*"],
+      "@library/*": ["src/library/*"]
+    }
   }
 }
