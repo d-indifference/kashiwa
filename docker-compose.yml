@@ -1,0 +1,19 @@
+services:
+  postgres:
+    container_name: db.kashiwa
+    hostname: db.kashiwa
+    image: postgres:13.3
+    env_file:
+      - .env
+    ports:
+      - '${POSTGRES_PORT}:${POSTGRES_PORT}'
+    volumes:
+      - ./volumes/db.kashiwa:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - kashiwa-network
+
+networks:
+  kashiwa-network:
+    name: 'net.kashiwa'
+    driver: bridge
