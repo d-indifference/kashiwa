@@ -1,0 +1,40 @@
+include _inc/thread/_reply
+include _inc/thread/_post
+include _inc/thread/_form
+include _inc/thread/_user_delete
+include _inc/thread/_footer
+include _inc/thread/_head
+
+html(lang='en')
+    +Head(_CONTENT.board.name)
+    body.replypage
+        div.adminbar
+            | [
+            a(href='/kashiwa') Management
+            | ]
+            | [
+            a(href='/') Main Page
+            | ]
+        div.logo= _CONTENT.board.name
+        hr
+        | [
+        a(href=`/${_CONTENT.board.url}`) Go back
+        | ]
+        div.theader Reply
+
+        div.postarea
+            form#postform(action=`/kashiwa/post/${_CONTENT.board.url}/${_CONTENT.openingPost.num}` method='post' enctype='multipart/form-data')
+                + Form(_CONTENT.board)
+
+        form#delform(action=`/kashiwa/delete/${_CONTENT.board.url}/${_CONTENT.openingPost.num}` method='post')
+            +Post(_CONTENT.board, _CONTENT.openingPost, true)
+
+            each reply in _CONTENT.replies
+              +Reply(_CONTENT.board, _CONTENT.openingPost, reply, true)
+
+            br(clear='left')
+            hr
+            +UserDelete
+        br(clear='all')
+
+        +Footer

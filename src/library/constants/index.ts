@@ -40,4 +40,13 @@ export class Constants {
 
   /** Potential reserved board URLs */
   public static RESERVED_BOARD_URLS = ['img', 'css', 'js', 'icons'];
+
+  /** Default string file size format */
+  public static FILE_SIZE_FORMAT: 'si' | 'iec' | 'jedec' = 'jedec';
+
+  /** Default string datetime format */
+  public static DATE_DISPLAY_FORMAT = 'EEE dd MMM yyyy HH:mm:ss';
+
+  /** Default HTML suffix */
+  public static HTML_SUFFIX = '.html';
 }
