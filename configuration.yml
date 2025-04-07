@@ -1,2 +1,8 @@
 http:
   port: 3000
+
+secure:
+  user:
+    salt-rounds: 3
+  session:
+    secret: 'insecure-48e8b0f4-64f4-40e7-8bfe-f5bf8374864e'

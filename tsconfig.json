@@ -20,7 +20,8 @@
     "paths": {
       "@admin/*": ["src/admin/*"],
       "@config/*": ["src/config/*"],
-      "@library/*": ["src/library/*"]
+      "@library/*": ["src/library/*"],
+      "@persistence/*": ["src/persistence/*"]
     }
   }
 }

@@ -5,6 +5,9 @@ import { Constants } from '@library/constants';
 import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
 import { FilesystemOperator } from '@library/filesystem';
+import * as cookieParser from 'cookie-parser';
+import * as session from 'express-session';
+import { sessionConfig } from '@config/session.configuration';
 
 const bootstrap = async (): Promise<void> => {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -16,6 +19,9 @@ const bootstrap = async (): Promise<void> => {
   app.useStaticAssets(Constants.Paths.STATIC);
   app.setBaseViewsDir(Constants.Paths.TEMPLATES);
   app.setViewEngine('pug');
+
+  app.use(cookieParser());
+  app.use(session(sessionConfig(config)));
 
   await FilesystemOperator.mkdir(Constants.SETTINGS_DIR);
 
