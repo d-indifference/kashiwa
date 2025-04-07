@@ -1,0 +1,13 @@
+mixin UserDelete()
+    table.userdelete
+        tr
+            td
+                | Delete post [
+                label
+                    input(type='checkbox' name='fileOnly')
+                    | Only file
+                | ]
+                br
+                | Password
+                input(type='password' name='password' size='8')
+                input(type='submit' value='Delete')

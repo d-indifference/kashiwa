@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
-import { ImageboardFileProvider } from './filesystem';
+import { PageCompilerService } from 'src/library/page-compiler';
+import { ImageboardFileProvider } from '@library/filesystem';
 
 /**
  * Module for library / shared functionality & utils
  */
 @Module({
-  imports: [],
-  providers: [ImageboardFileProvider],
-  exports: [ImageboardFileProvider]
+  providers: [ImageboardFileProvider, PageCompilerService],
+  exports: [ImageboardFileProvider, PageCompilerService]
 })
 export class LibraryModule {}

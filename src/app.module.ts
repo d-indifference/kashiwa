@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { TestingController } from './testing.controller';
 import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
 import { LibraryModule } from '@library/library.module';
 import { ConfigModule } from '@nestjs/config';
@@ -20,7 +19,7 @@ import { AdminModule } from '@admin/admin.module';
     LibraryModule,
     AdminModule
   ],
-  controllers: [TestingController],
+  controllers: [],
   providers: []
 })
 export class AppModule {}
