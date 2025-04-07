@@ -15,9 +15,9 @@ html(lang='en')
         | [
         a(href=`/`) Go back
         | ]
-        div.theader Sign up
+        div.theader Sign in
         div.postarea
-            form(action='/kashiwa/auth/sign-up' method='post')
+            form(action='/kashiwa/auth/sign-in' method='post')
                 table
                     tbody
                         tr
@@ -25,12 +25,8 @@ html(lang='en')
                             td
                                 input(type='text' name='username' size=28)
                         tr
-                            td.postblock Email
-                            td
-                                input(type='email' name='email' size=28)
-                        tr
                             td.postblock Password
                             td
                                 input(type='password' name='password' size=28)
                 div(align='center')
-                    input(type='submit' value='Sign up' size=28)
+                    input(type='submit' value='Sign in' size=28)
