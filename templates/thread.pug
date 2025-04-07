@@ -1,0 +1,185 @@
+html(lang='en')
+    head
+        meta(charset='utf-8')
+        link(rel='stylesheet' type='text/css' href='/css/global.css')
+        link(rel='stylesheet' type='text/css' href='/css/futaba.css' title='Futaba')
+    body.replypage
+        div.adminbar
+            | [
+            a(href='#') Management
+            | ]
+            | [
+            a(href='#') Main Page
+            | ]
+        div.logo Kashiwa Image Board
+        hr
+        | [
+        a(href='#') Go back
+        | ]
+        div.theader Reply
+        div.postarea
+            form#postform(action='#' method='post' enctype='multipart/form-data')
+                table
+                    tbody
+                        tr
+                        td.postblock Name
+                        td
+                            input(type='text' name='name' size=28)
+                        tr
+                            td.postblock Email
+                            td
+                                input(type='text' name='email' size=28)
+                        tr
+                            td.postblock Subject
+                            td
+                                input(type='text' name='subject' size=35)
+                                input(type='submit' value='Submit')
+                        tr
+                            td.postblock Comment
+                            td
+                                textarea(name='comment' rows=6 cols=60)
+                        tr
+                            td.postblock File
+                            td
+                                input(type='file' name='file' size=35)
+                        tr
+                            td.postblock Password
+                            td
+                                input(type='password' name='password' size=8)
+                                |  (to delete posts and files)
+                        tr
+                            td(colspan=2)
+                                div.rules
+                                    ul
+                                        li Allowed file types are: GIF, JPG, PNG
+                                        li Max file size is 3MB
+                                        li Images with dimensions larger than 200x200 px will be downscaled
+        hr
+        form#delform(action='#' method='post')
+            span.filesize
+                | File:
+                =' '
+                a(target='_blank' href='#') 123456789.png
+                =' '
+                | (
+                em 34KB, 300x300
+                | )
+                =' '
+            span.thumbnailmsg A reduced copy is shown, the original can be viewed by clicking on it.
+            br
+            a(target='_blank' href='#')
+                img.thumb(src='https://410chan.org/b/thumb/165018953431s.jpg' width=200 height=193 alt='34000')
+            a(name='1001')
+            label
+                input(type='checkbox' name='delete' value='1001')
+                =' '
+                span.filetitle Lorem ipsum
+                =' '
+                span.postername Anonymous
+                =' '
+                | Monday 06 April 2025 09:04:00
+                =' '
+            span.reflink
+                a(href='#') No. 1001
+            | &nbsp;
+            blockquote
+                p Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eius necessitatibus porro quisquam! Alias assumenda consequatur corporis dolorum fugit illum iste, nam necessitatibus nemo neque perspiciatis reprehenderit sapiente sit ut voluptate!
+
+            table
+                tbody
+                    tr
+                    td.doubledash >>
+                    td.reply(id='reply1002')
+                        a(name='1002')
+                        label
+                            input(type='checkbox' name='delete' value='1002')
+                            =' '
+                            span.replytitle Lorem Reply
+                            =' '
+                            span.commentpostername Anonymous
+                            =' '
+                            | Monday 06 April 2025 10:08:00
+                            =' '
+                        span.reflink
+                            a(href='#') No. 1002
+                        | &nbsp;
+                        blockquote
+                            p Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium ad aliquam consequatur deleniti ducimus earum et eveniet expedita, explicabo laudantium nam nihil officia porro praesentium quae, repellat sapiente, similique ullam.Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium ad aliquam consequatur deleniti ducimus earum et eveniet expedita, explicabo laudantium nam nihil officia porro praesentium quae, repellat sapiente, similique ullam.
+
+            table
+                tbody
+                    tr
+                    td.doubledash >>
+                    td.reply(id='reply1003')
+                        a(name='1002')
+                        label
+                            input(type='checkbox' name='delete' value='1003')
+                            =' '
+                            span.replytitle Lorem Reply
+                            =' '
+                            span.commentpostername Anonymous
+                            =' '
+                            | Monday 06 April 2025 10:08:00
+                            =' '
+                        span.reflink
+                            a(href='#') No. 1003
+                        | &nbsp;
+                        br
+                        span.filesize
+                            | File:
+                            =' '
+                            a(target='_blank' href='#') 123456789.png
+                            =' '
+                            | (
+                            em 34KB, 300x300
+                            | )
+                            =' '
+                        span.thumbnailmsg A reduced copy is shown, the original can be viewed by clicking on it.
+                        br
+                        a(target='_blank' href='#')
+                            img.thumb(src='https://410chan.org/b/thumb/165018953431s.jpg' width=200 height=193 alt='34000')
+                        blockquote
+                            p Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium ad aliquam consequatur deleniti ducimus earum et eveniet expedita, explicabo laudantium nam nihil officia porro praesentium quae, repellat sapiente, similique ullam.Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium ad aliquam consequatur deleniti ducimus earum et eveniet expedita, explicabo laudantium nam nihil officia porro praesentium quae, repellat sapiente, similique ullam.
+
+
+            table
+                tbody
+                    tr
+                    td.doubledash >>
+                    td.reply(id='reply1004')
+                        a(name='1002')
+                        label
+                            input(type='checkbox' name='delete' value='1004')
+                            =' '
+                            span.replytitle
+                            =' '
+                            span.commentpostername Anonymous
+                            =' '
+                            | Monday 06 April 2025 10:08:00
+                            =' '
+                        span.reflink
+                            a(href='#') No. 1004
+                        | &nbsp;
+                        blockquote
+                            p Тест рака
+
+            br(clear='left')
+            hr
+            table.userdelete
+                tr
+                td
+                    | Delete post [
+                    label
+                        input(type='checkbox' name='fileOnly')
+                        |Only file
+                    | ]
+                    br
+                    | Password
+                    input(type='password' name='password' size='8')
+                    input(type='submit' value='Delete')
+        br(clear='all')
+        p.footer
+            ='- '
+            a(href='https://github.com/d-indifference/kashiwa') Kashiwa 0.0.0
+            =' -'
+

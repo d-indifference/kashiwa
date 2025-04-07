@@ -12,6 +12,10 @@ export class TestingController {
   @Render('index')
   public index(): void {}
 
+  @Get('/thread')
+  @Render('thread')
+  public thread(): void {}
+
   @Post('/upload')
   @FormDataRequest()
   public async upload(@Body() form: FormDto, @Res() res: Response): Promise<void> {
