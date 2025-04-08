@@ -1,0 +1,15 @@
+mixin AdminBar(role)
+    div.adminbar
+        b [#{ role }]
+        =' '
+        | [
+        a(href='/') Go to site
+        | ]
+        | [
+        a(href='/kashiwa/staff/my') Edit profile
+        | ]
+        =' '
+        form(action='/kashiwa/auth/sign-out' method='post' style='display: inline;')
+            input(type='submit' value='Sign out')
+        style
+            | .admin-info-panel {} .admin-info-panel a {text-decoration: underline;}

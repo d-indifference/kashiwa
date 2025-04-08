@@ -1,0 +1,84 @@
+include _inc/thread/_head
+include _inc/admin/_admin-bar
+include _inc/admin/_admin-links
+
+html(lang='en')
+    +Head('Staff Panel - Kashiwa Image Board')
+    body
+        +AdminBar(session.payload.role)
+        div.logo Staff Panel - Kashiwa Image Board
+        hr
+        + AdminLinks
+        div.theader
+            if formType === 'CREATE'
+              | New staff member
+            if formType === 'UPDATE'
+                | Edit staff member
+        div(align='center')
+            ='['
+            a(href='/kashiwa/staff') Go back
+            =']'
+
+        if formType === 'CREATE'
+            form(method='post' action='/kashiwa/staff/new')
+                div.postarea
+                    table
+                        tbody
+                            tr
+                                td.postblock Username
+                                td
+                                    input(type='text' name='username' size=28)
+                            tr
+                                td.postblock Email
+                                td
+                                    input(type='email' name='email' size=28)
+                            tr
+                                td.postblock Role
+                                td
+                                    select(name='role')
+                                        option(value='ADMINISTRATOR') Administrator
+                                        option(value='MODERATOR' selected=true) Moderator
+                            tr
+                                td.postblock Password
+                                td
+                                    input(type='password' name='password' size=28)
+                    div(align='center')
+                        input(type='submit' value='Create' size=28)
+
+        if formType === 'UPDATE'
+            form(method='post' action=`/kashiwa/staff/edit`)
+                input(type='hidden' name='id' value=content.id)
+                div.postarea
+                    table
+                        tbody
+                            tr
+                                td.postblock Username
+                                td
+                                    input(type='text' name='username' size=28 value=content.username)
+                            tr
+                                td.postblock Email
+                                td
+                                    input(type='email' name='email' size=28 value=content.email)
+                            tr
+                                td.postblock Role
+                                td
+                                    select(name='role')
+                                        if content.role === 'ADMINISTRATOR'
+                                            option(value='ADMINISTRATOR' checked=true) Administrator
+                                        else
+                                            option(value='ADMINISTRATOR') Administrator
+                                        if content.role === 'MODERATOR'
+                                            option(value='MODERATOR' selected=true) Moderator
+                                        else
+                                            option(value='MODERATOR') Moderator
+                            tr
+                                td.postblock Password
+                                td
+                                    input(type='password' name='password' size=28)
+                    div(align='center')
+                        input(type='submit' value='Update' size=28)
+
+            hr
+            div(align='center')
+                form(method='post' action=`/kashiwa/staff/delete/${content.id}`)
+                    input(type='Submit' value='Delete this user')

@@ -49,4 +49,7 @@ export class Constants {
 
   /** Default HTML suffix */
   public static HTML_SUFFIX = '.html';
+
+  /** Default page size */
+  public static DEFAULT_PAGE_SIZE = 10;
 }

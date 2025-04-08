@@ -2,6 +2,9 @@ import { CanActivate, ExecutionContext, HttpStatus, Injectable } from '@nestjs/c
 import { UserPersistenceService } from '@persistence/services';
 import { Response } from 'express';
 
+/**
+ * Guard that restricts access to the sign-up route based on the existence of users in the system
+ */
 @Injectable()
 export class SignUpGuard implements CanActivate {
   constructor(private readonly userService: UserPersistenceService) {}

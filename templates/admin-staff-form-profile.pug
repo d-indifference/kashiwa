@@ -1,0 +1,37 @@
+include _inc/thread/_head
+include _inc/admin/_admin-bar
+include _inc/admin/_admin-links
+
+html(lang='en')
+    +Head('Staff Panel - Kashiwa Image Board')
+    body
+        +AdminBar(session.payload.role)
+        div.logo Staff Panel - Kashiwa Image Board
+        hr
+        + AdminLinks
+        div.theader
+            | Edit my profile
+        div(align='center')
+            ='['
+            a(href='/kashiwa') Go back
+            =']'
+
+        form(method='post' action=`/kashiwa/staff/my`)
+            input(type='hidden' name='id' value=content.id)
+            div.postarea
+                table
+                    tbody
+                        tr
+                            td.postblock Username
+                            td
+                                input(type='text' name='username' size=28 value=content.username)
+                        tr
+                            td.postblock Email
+                            td
+                                input(type='email' name='email' size=28 value=content.email)
+                        tr
+                            td.postblock Password
+                            td
+                                input(type='password' name='password' size=28)
+                div(align='center')
+                    input(type='submit' value='Update' size=28)

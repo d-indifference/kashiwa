@@ -3,6 +3,9 @@ import { UserPersistenceService } from '@persistence/services';
 import { Response } from 'express';
 import { ISession } from '@admin/interfaces';
 
+/**
+ * Guard that prevents signed-in users from accessing specific routes (e.g., sign-in page)
+ */
 @Injectable()
 export class SignInGuard implements CanActivate {
   constructor(private readonly userService: UserPersistenceService) {}

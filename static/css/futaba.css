@@ -142,8 +142,19 @@ a:hover {
 .abbrev {
   color: #707070;
 }
+
 .highlight {
   background: #f0e0d6;
   color: #800000;
   border: 2px dashed #eeaa88;
+}
+
+.row1 {
+  background: #eeeecc;
+  color: #800000;
+}
+
+.row2 {
+  background: #ddddaa;
+  color: #800000;
 }
