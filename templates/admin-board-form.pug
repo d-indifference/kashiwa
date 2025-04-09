@@ -1,0 +1,42 @@
+include _inc/thread/_head
+include _inc/admin/_admin-bar
+include _inc/admin/_admin-links
+include _inc/admin/_admin-board-create-form
+include _inc/admin/_admin_board-update-form
+
+html(lang='en')
+    +Head('Boards - Kashiwa Image Board')
+    body
+        +AdminBar(session.payload.role)
+        div.logo Boards - Kashiwa Image Board
+        hr
+        + AdminLinks
+        div.theader
+            if formType === 'CREATE'
+                | New board
+            if formType === 'UPDATE'
+                | Edit board
+        div(align='center')
+            ='['
+            a(href='/kashiwa/board') Go back
+            =']'
+
+        if formType === 'CREATE'
+            form(method='post' action='/kashiwa/board/new')
+                div.postarea
+                    +AdminBoardCreateForm
+                    div(align='center')
+                        input(type='submit' value='Create' size=28)
+
+        if formType === 'UPDATE'
+            form(method='post' action=`/kashiwa/board/edit`)
+                input(type='hidden' name='id' value=content.id)
+                div.postarea
+                    +AdminBoardUpdateForm
+                    div(align='center')
+                        input(type='submit' value='Update' size=28)
+
+            hr
+            div(align='center')
+                form(method='post' action=`/kashiwa/board/delete/${content.id}`)
+                    input(type='Submit' value='Delete this board')

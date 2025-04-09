@@ -59,6 +59,14 @@ export class FilesystemOperator {
     await fsExtra.ensureDir(dirPath);
   }
 
+  public static async renameDir(pth: string[], oldName: string, newName: string): Promise<void> {
+    const dirPath = path.join(Constants.Paths.APP_VOLUME, ...pth);
+    const oldPath = path.join(dirPath, oldName);
+    const newPath = path.join(dirPath, newName);
+
+    await fsExtra.rename(oldPath, newPath);
+  }
+
   /**
    * Removes path in application volume. If the path does not exist, silently does nothing.
    * @param pth Path fragments in app volume
