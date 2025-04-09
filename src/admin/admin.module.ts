@@ -1,10 +1,14 @@
 import { Module } from '@nestjs/common';
 import { LibraryModule } from '@library/library.module';
-import { AuthController, DashboardController } from '@admin/controllers';
+import { AuthController, DashboardController, StaffController } from '@admin/controllers';
 import { PersistenceModule } from '@persistence/persistence.module';
-import { AuthService } from '@admin/services';
+import { AuthService, DashboardService, StaffService } from '@admin/services';
 import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
+import { PrismaService } from '@persistence/lib';
 
+/**
+ * Module for administration / moderation panel
+ */
 @Module({
   imports: [
     NestjsFormDataModule.config({
@@ -15,7 +19,7 @@ import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
     LibraryModule,
     PersistenceModule
   ],
-  providers: [AuthService],
-  controllers: [AuthController, DashboardController]
+  providers: [PrismaService, AuthService, DashboardService, StaffService],
+  controllers: [AuthController, DashboardController, StaffController]
 })
 export class AdminModule {}

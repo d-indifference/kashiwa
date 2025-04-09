@@ -6,10 +6,19 @@ import { UserCreateDto } from '@persistence/dto/user';
 import { UserRole } from '@prisma/client';
 import { ISession } from '@admin/interfaces';
 
+/**
+ * Authentication service for admin panel
+ */
 @Injectable()
 export class AuthService {
   constructor(private readonly userService: UserPersistenceService) {}
 
+  /**
+   * Sign up a new user (administrator). First user on admin panel always should be an administrator
+   * @param form Sign up form data
+   * @param session Session object
+   * @param res Express.js `Response` object
+   */
   public async signUp(form: SignUpForm, session: ISession, res: Response): Promise<void> {
     const dto = new UserCreateDto(form.username, form.email, form.password, UserRole.ADMINISTRATOR);
 
@@ -18,6 +27,12 @@ export class AuthService {
     await this.signIn({ username: user.username, password: form.password }, session, res);
   }
 
+  /**
+   * Sign in a user
+   * @param form Sign in form data
+   * @param session Session object
+   * @param res Express.js `Response` object
+   */
   public async signIn(form: SignInForm, session: ISession, res: Response): Promise<void> {
     const user = await this.userService.signIn(form.username, form.password);
 
@@ -26,6 +41,11 @@ export class AuthService {
     res.redirect('/kashiwa');
   }
 
+  /**
+   * Sign out for a user
+   * @param req Express.js `Request` object
+   * @param res Express.js `Response` object
+   */
   public signOut(req: Request, res: Response): void {
     req.session.destroy(err => {
       if (err) {

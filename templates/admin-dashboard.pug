@@ -1,21 +1,134 @@
 include _inc/thread/_head
+include _inc/admin/_admin-bar
+include _inc/admin/_admin-links
 
 html(lang='en')
     +Head('Dashboard - Kashiwa Image Board')
     body
-        div.adminbar
-            b [#{ role }]
-            =' '
-            | [
-            a(href='/') Go to site
-            | ]
-            | [
-            a(href='#') Edit profile
-            | ]
-            =' '
-            form(action='/kashiwa/auth/sign-out' method='post' style='display: inline;')
-                input(type='submit' value='Sign out')
+        +AdminBar(session.payload.role)
         div.logo Management - Kashiwa Image Board
         hr
-        div.theader Dashboard
-        p Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusantium ad atque dolores ea explicabo facilis, odio officiis perspiciatis quibusdam, quo rerum voluptate! Culpa earum explicabo itaque molestias perspiciatis quas voluptatibus?
+        + AdminLinks
+        div.theader
+            if session.payload.role !== 'ADMINISTRATOR'
+               | Moderation panel
+            else
+                | Dashboard
+
+        if session.payload.role !== 'ADMINISTRATOR'
+          p Welcome to Kashiwa Image board moderation panel.
+        else
+            div.admin-info-panel
+                table(style='margin: 0 auto')
+                    tr
+                        td
+                            p Currently, there are #{totalComments} comments on #{totalBoards} boards.
+
+                            if session.payload.role === 'ADMINISTRATOR'
+                                p Disk space used: #{fileSize(diskSpaceUsed)}
+
+                                h3 Technical info
+                                ul
+                                    li
+                                        | uptime (seconds) -
+                                        =' '
+                                        b #{uptime}
+
+                                h5 CPU Details (#{cpus.length})
+                                div#cpu_section
+                                    hr
+                                    each cpu, index in cpus
+                                      b CPU ##{index + 1}
+                                      ul
+                                          li
+                                            | Model -&nbsp;
+                                            b #{cpu.model}
+                                          li
+                                              | Speed -&nbsp;
+                                              b #{cpu.speed}
+                                          li
+                                              | User time -&nbsp;
+                                              b #{cpu.times.user}
+                                          li
+                                              | System time -&nbsp;
+                                              b #{cpu.times.sys}
+                                          li
+                                              | Idle time -&nbsp;
+                                              b #{cpu.times.idle}
+                                          li
+                                              | IRQ time -&nbsp;
+                                              b #{cpu.times.irq}
+                                    hr
+
+                                p Memory Usage
+                                ul
+                                    li
+                                        | Total -&nbsp;
+                                        b #{fileSize(memory.total)}
+                                    li
+                                        | Free -&nbsp;
+                                        b #{fileSize(memory.free)}
+                                    li
+                                        | In usage -&nbsp;
+                                        b #{fileSize(memory.inUsage)}
+
+                                p
+                                    | Debug port:
+                                    =' '
+                                    b #{debugPort}
+                                    =' '
+                                    | (see
+                                    =' '
+                                    a(href='https://nodejs.org/en/learn/getting-started/debugging') Node.js debugging guide
+                                    | )
+
+                                p
+                                    ='Application port: '
+                                    b #{port}
+
+                                p
+                                    abbr(title='Docker container ID') Host name:
+                                    =' '
+                                    b #{host}
+
+                                h3 Node.js
+                                p
+                                    a(href='https://nodejs.org/' target='_blank') Node.js
+                                    =' version - '
+                                    b v#{processVersions.node}
+
+                                h5 Node.js details
+                                ol
+                                    each proc in Object.keys(processVersions)
+                                      li
+                                        | #{proc}:
+                                        =' '
+                                        b #{processVersions[proc]}
+
+                                h3 PostgreSQL
+                                p
+                                    a(href='https://www.postgresql.org/' target='_blank') PostgreSQL
+                                    =' version: '
+                                    b #{postgresVersion}
+
+                                h3 ImageMagick
+                                p
+                                    a(href='https://imagemagick.org/index.php' target='_blank') ImageMagick
+                                    =' version: '
+                                    b #{imageMagickVersion}
+
+                                h3 Dependencies
+                                ul
+                                    each dependency in Object.keys(dependencies)
+                                      li
+                                        a(href=`https://www.npmjs.com/package/${dependency}` target='_blank') #{dependency}
+                                        =': '
+                                        b #{dependencies[dependency]}
+
+                                h3 Dev dependencies
+                                ul
+                                  each dependency in Object.keys(devDependencies)
+                                      li
+                                          a(href=`https://www.npmjs.com/package/${dependency}` target='_blank') #{dependency}
+                                          =': '
+                                          b #{devDependencies[dependency]}

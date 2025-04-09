@@ -4,6 +4,9 @@ import { UserPersistenceService } from '@persistence/services';
 import { ISession } from '@admin/interfaces';
 import { Response } from 'express';
 
+/**
+ * Guard that validates the existence of a user session and checks user roles against required roles
+ */
 @Injectable()
 export class SessionGuard implements CanActivate {
   constructor(
