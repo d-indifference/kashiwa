@@ -45,11 +45,12 @@ html(lang='en')
                               | ]
 
         div(align='center')
-            if content.previous
-              a(href=`/kashiwa/staff?page=${content.previous}`) <-
-            if content.next
-                a(href=`/kashiwa/staff?page=${content.next}`)
+            if content.previous !== null
+              a(href=`/kashiwa/staff?page=${content.previous}` title='Previous') ←
+            if content.next !== null
+                a(href=`/kashiwa/staff?page=${content.next}` title='Next') →
 
+            br
             ='['
             a(href='/kashiwa/staff/new') Add new
             =']'

@@ -1,0 +1,54 @@
+include _inc/thread/_head
+include _inc/admin/_admin-bar
+include _inc/admin/_admin-links
+
+html(lang='en')
+    +Head('Staff Panel - Kashiwa Image Board')
+    body
+        +AdminBar(session.payload.role)
+        div.logo Boards - Kashiwa Image Board
+        hr
+        + AdminLinks
+        div.theader
+            | Board list
+
+        table(align='center' style='white-space: nowrap')
+            thead
+                tr.row1
+                    th URL
+                    th Name
+                    th Post count
+                    th
+            tbody
+              each board, index in content.content
+                  if index + 1 % 2 === 0
+                      tr.row1
+                          td
+                            a(href=`/${board.url}`) /#{board.url}/
+                          td #{board.name}
+                          td #{board.postCount}
+                          td
+                              | [
+                              a(href=`/kashiwa/board/edit/${board.id}`) Edit
+                              | ]
+                  else
+                      tr.row2
+                          td
+                              a(href=`/${board.url}`) /#{board.url}/
+                          td #{board.name}
+                          td #{board.postCount}
+                          td
+                              | [
+                              a(href=`/kashiwa/board/edit/${board.id}`) Edit
+                              | ]
+
+        div(align='center')
+            if content.previous !== null
+                a(href=`/kashiwa/board?page=${content.previous}` title='Previous') ←
+            if content.next !== null
+                a(href=`/kashiwa/board?page=${content.next}` title='Next') →
+
+            br
+            ='['
+            a(href='/kashiwa/board/new') Add new
+            =']'

@@ -1,0 +1,16 @@
+mixin HlpFileAttachmentPolicy(_name, _option)
+    select(name=_name)
+        if _option === 'STRICT'
+            option(value='STRICT' selected=true) File is strictly required
+        else
+            option(value='STRICT') File is strictly required
+
+        if _option === 'OPTIONAL'
+            option(value='OPTIONAL' selected=true) File attachment is optional
+        else
+            option(value='OPTIONAL') File attachment is optional
+
+        if _option === 'FORBIDDEN'
+            option(value='FORBIDDEN' selected=true) Files are strictly prohibited
+        else
+            option(value='FORBIDDEN') Files are strictly prohibited

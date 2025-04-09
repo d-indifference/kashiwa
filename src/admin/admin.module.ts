@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { LibraryModule } from '@library/library.module';
-import { AuthController, DashboardController, StaffController } from '@admin/controllers';
+import { AuthController, BoardController, DashboardController, StaffController } from '@admin/controllers';
 import { PersistenceModule } from '@persistence/persistence.module';
-import { AuthService, DashboardService, StaffService } from '@admin/services';
+import { AuthService, BoardService, DashboardService, StaffService } from '@admin/services';
 import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
 import { PrismaService } from '@persistence/lib';
 
@@ -19,7 +19,7 @@ import { PrismaService } from '@persistence/lib';
     LibraryModule,
     PersistenceModule
   ],
-  providers: [PrismaService, AuthService, DashboardService, StaffService],
-  controllers: [AuthController, DashboardController, StaffController]
+  providers: [PrismaService, AuthService, DashboardService, StaffService, BoardService],
+  controllers: [AuthController, DashboardController, StaffController, BoardController]
 })
 export class AdminModule {}

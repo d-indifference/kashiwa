@@ -1,0 +1,44 @@
+model Board {
+  id        String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  url       String @unique @db.VarChar(64)
+  name      String @db.VarChar(256)
+  postCount Int    @default(0) @map("post_count")
+
+  boardSettings BoardSettings?
+
+  @@map("board")
+}
+
+enum FileAttachmentMode {
+  STRICT
+  OPTIONAL
+  FORBIDDEN
+}
+
+model BoardSettings {
+  id    String @id @db.Uuid
+  board Board  @relation(fields: [id], references: [id], onDelete: Cascade)
+
+  allowPosting             Boolean            @map("allow_posting") @db.Boolean
+  strictAnonymity          Boolean            @map("strict_anonymity") @db.Boolean
+  threadFileAttachmentMode FileAttachmentMode @map("thread_file_attachment_mode")
+  replyFileAttachmentMode  FileAttachmentMode @map("reply_file_attachment_mode")
+  delayAfterThread         Int                @map("delay_after_thread") @db.Integer
+  delayAfterReply          Int                @map("delay_after_reply") @db.Integer
+  minFileSize              Int                @map("min_file_size") @db.Integer
+  maxFileSize              Int                @map("max_file_size") @db.Integer
+  allowMarkdown            Boolean            @map("allow_markdown") @db.Boolean
+  allowTripcodes           Boolean            @map("allow_tripcodes") @db.Boolean
+  maxThreadsOnBoard        Int                @map("max_threads_on_board") @db.Integer
+  bumpLimit                Int                @map("bump_limit") @db.Integer
+  maxStringFieldSize       Int                @map("max_string_field_size") @db.Integer
+  maxCommentSize           Int                @map("max_comment_size") @db.Integer
+  defaultPosterName        String             @map("default_poster_name") @db.VarChar(256)
+  defaultModeratorName     String             @map("default_moderator_name") @db.VarChar(256)
+  enableCaptcha            Boolean            @map("enable_captcha") @db.Boolean
+  isCaptchaCaseSensitive   Boolean            @map("is_captcha_case_sensetive") @db.Boolean
+  allowedFileTypes         Json               @map("allowed_file_types")
+  rules                    String             @db.Text
+
+  @@map("board_settings")
+}

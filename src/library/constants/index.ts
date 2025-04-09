@@ -52,4 +52,13 @@ export class Constants {
 
   /** Default page size */
   public static DEFAULT_PAGE_SIZE = 10;
+
+  public static SUPPORTED_FILE_TYPES = [
+    'image/png',
+    'image/jpeg',
+    'image/gif',
+    'image/svg+xml',
+    'image/webp',
+    'application/x-bittorrent'
+  ];
 }
