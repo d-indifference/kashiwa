@@ -21,7 +21,8 @@
       "@admin/*": ["src/admin/*"],
       "@config/*": ["src/config/*"],
       "@library/*": ["src/library/*"],
-      "@persistence/*": ["src/persistence/*"]
+      "@persistence/*": ["src/persistence/*"],
+      "@posting/*": ["src/posting/*"]
     }
   }
 }

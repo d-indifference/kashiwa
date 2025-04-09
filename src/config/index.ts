@@ -1,2 +1,3 @@
 export * from './configuration.config';
-export * from './session.configuration';
+export * from './session.config';
+export * from './nestjs-form-data.config';

@@ -4,6 +4,9 @@ import { ConfigModule } from '@nestjs/config';
 import { BoardMapper, UserMapper } from '@persistence/mappers';
 import { BoardPersistenceService, UserPersistenceService } from '@persistence/services';
 
+/**
+ * Module for Prisma queries
+ */
 @Module({
   imports: [ConfigModule],
   providers: [PrismaService, UserMapper, UserPersistenceService, BoardMapper, BoardPersistenceService],

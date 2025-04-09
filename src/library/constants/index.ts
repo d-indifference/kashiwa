@@ -53,6 +53,7 @@ export class Constants {
   /** Default page size */
   public static DEFAULT_PAGE_SIZE = 10;
 
+  /** List of supported file types (MIME) */
   public static SUPPORTED_FILE_TYPES = [
     'image/png',
     'image/jpeg',

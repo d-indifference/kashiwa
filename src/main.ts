@@ -7,7 +7,7 @@ import { Logger } from '@nestjs/common';
 import { FilesystemOperator } from '@library/filesystem';
 import * as cookieParser from 'cookie-parser';
 import * as session from 'express-session';
-import { sessionConfig } from '@config/session.configuration';
+import { sessionConfig } from '@config/session.config';
 
 const bootstrap = async (): Promise<void> => {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);

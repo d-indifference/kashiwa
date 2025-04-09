@@ -12,16 +12,29 @@ import { BoardSettings } from '@prisma/client';
 import { getSupportedFileTypes } from '@admin/lib/helpers';
 import { BoardUpdateDto } from '@persistence/dto/board/board.update.dto';
 
+/**
+ * Service for working with boards
+ */
 @Injectable()
 export class BoardService {
   constructor(private readonly boardPersistenceService: BoardPersistenceService) {}
 
+  /**
+   * Get page of boards
+   * @param page Page request
+   * @param session Session data
+   */
   public async findAll(session: ISession, page: PageRequest): Promise<ListPage<BoardShortDto>> {
     const content = await this.boardPersistenceService.findAll(page);
 
     return new ListPage(session, content);
   }
 
+  /**
+   * Get form for updating of board by its ID
+   * @param session Session data
+   * @param id Board's ID
+   */
   public async getForUpdate(
     session: ISession,
     id: string
@@ -60,6 +73,11 @@ export class BoardService {
     return new FormPage(session, 'UPDATE', content);
   }
 
+  /**
+   * Create new board and make its file catalogs
+   * @param form Form data
+   * @param res Express.js `res` object
+   */
   public async create(form: BoardCreateForm, res: Response): Promise<void> {
     const dto = new BoardCreateDto(
       form.url,
@@ -95,6 +113,11 @@ export class BoardService {
     res.redirect(`/kashiwa/board/edit/${newBoard.id}`);
   }
 
+  /**
+   * Update board and rename board catalogs
+   * @param form Form data
+   * @param res Express.js `res` object
+   */
   public async update(form: BoardUpdateForm, res: Response): Promise<void> {
     const board = await this.boardPersistenceService.findById(form.id);
 
@@ -131,6 +154,11 @@ export class BoardService {
     res.redirect(`/kashiwa/board/edit/${updatedBoard.id}`);
   }
 
+  /**
+   * Delete board
+   * @param id Object ID
+   * @param res Express.js `res` object
+   */
   public async remove(id: string, res: Response): Promise<void> {
     const board = await this.boardPersistenceService.findById(id);
 
