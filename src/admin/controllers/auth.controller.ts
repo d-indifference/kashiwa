@@ -11,9 +11,9 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Get('sign-up')
-  @UseGuards(SignUpGuard)
-  @Render('admin-sign-up')
-  public getSignUpForm(): void {}
+  public async getSignUpForm(@Res() res: Response): Promise<void> {
+    await this.authService.checkSignUpAccessAndResponse(res);
+  }
 
   @Get('sign-in')
   @UseGuards(SignInGuard)
@@ -21,8 +21,8 @@ export class AuthController {
   public getSignInForm(): void {}
 
   @Post('sign-up')
-  @UseGuards(SignUpGuard)
   @FormDataRequest()
+  @UseGuards(SignUpGuard)
   public async signUp(
     @Body(new ValidationPipe({ transform: true })) form: SignUpForm,
     @Session() session: ISession,

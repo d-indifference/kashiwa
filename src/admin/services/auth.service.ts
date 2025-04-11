@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { HttpStatus, Injectable, InternalServerErrorException, Res } from '@nestjs/common';
 import { UserPersistenceService } from '@persistence/services';
 import { SignInForm, SignUpForm } from '@admin/forms/auth';
 import { Response, Request } from 'express';
@@ -12,6 +12,20 @@ import { ISession } from '@admin/interfaces';
 @Injectable()
 export class AuthService {
   constructor(private readonly userService: UserPersistenceService) {}
+
+  /**
+   * Check if sign up option is available and returns sign up form or throws 403
+   * @param res `Express.js` response
+   */
+  public async checkSignUpAccessAndResponse(@Res() res: Response): Promise<void> {
+    const count = await this.userService.countAll();
+
+    if (count === 0) {
+      res.render('admin-sign-up');
+    } else {
+      res.status(HttpStatus.FORBIDDEN).render('error', { message: 'You don`t need to sign up a new account' });
+    }
+  }
 
   /**
    * Sign up a new user (administrator). First user on admin panel always should be an administrator

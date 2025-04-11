@@ -8,6 +8,13 @@ import { FilesystemOperator } from '@library/filesystem';
 import * as cookieParser from 'cookie-parser';
 import * as session from 'express-session';
 import { sessionConfig } from '@config/session.config';
+import {
+  BadRequestExceptionFilter,
+  ForbiddenExceptionFilter,
+  InternalServerErrorExceptionFilter,
+  NotFoundExceptionFilter,
+  UnauthorizedExceptionFilter
+} from '@library/filters';
 
 const bootstrap = async (): Promise<void> => {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -24,6 +31,12 @@ const bootstrap = async (): Promise<void> => {
   app.use(session(sessionConfig(config)));
 
   await FilesystemOperator.mkdir(Constants.SETTINGS_DIR);
+
+  app.useGlobalFilters(new NotFoundExceptionFilter());
+  app.useGlobalFilters(new InternalServerErrorExceptionFilter());
+  app.useGlobalFilters(new BadRequestExceptionFilter());
+  app.useGlobalFilters(new UnauthorizedExceptionFilter());
+  app.useGlobalFilters(new ForbiddenExceptionFilter());
 
   await app.listen(port);
 
