@@ -1,0 +1,32 @@
+include _inc/thread/_reply
+include _inc/thread/_post
+include _inc/thread/_form
+include _inc/thread/_user_delete
+include _inc/thread/_footer
+include _inc/thread/_head
+
+html(lang='en')
+    +Head(board.name)
+    body.replypage
+        div.adminbar
+            | [
+            a(href='/kashiwa') Management
+            | ]
+            | [
+            a(href='/') Main Page
+            | ]
+        div.logo= board.name
+        hr
+
+        div.postarea
+            if board.boardSettings.allowPosting
+                form#postform(action=`/kashiwa/post/${board.url}` method='post' enctype='multipart/form-data')
+                    +Form(board, false)
+
+        form#delform(action=`/kashiwa/delete/${board.url}` method='post')
+            br(clear='left')
+            hr
+            +UserDelete
+        br(clear='all')
+
+        +Footer

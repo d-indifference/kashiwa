@@ -6,28 +6,7 @@ import * as im from 'imagemagick';
 import * as path from 'node:path';
 import { Constants } from '@library/constants';
 import { IFile } from '@library/filesystem/file.interface';
-
-type AttachedFile = {
-  name: string;
-
-  size: number;
-
-  width: number;
-
-  height: number;
-
-  mime: string;
-
-  isImage: boolean;
-
-  md5: string;
-
-  thumbnail?: string;
-
-  thumbnailWidth?: number;
-
-  thumbnailHeight?: number;
-};
+import { AttachedFile, Prisma } from '@prisma/client';
 
 /**
  * File provider to saving file binaries and creating of `AttachedFile` entity
@@ -40,12 +19,22 @@ export class ImageboardFileProvider {
    * @param board Board URL
    * @param md5 MD5 file hash
    */
-  public async saveFile(file: MemoryStoredFile, board: string, md5: string): Promise<AttachedFile | null> {
+  public async saveFile(
+    file: MemoryStoredFile,
+    board: string,
+    md5: string
+  ): Promise<Prisma.AttachedFileCreateInput | null> {
     if (!file) {
       return null;
     }
 
-    const result: AttachedFile = { height: 0, isImage: false, mime: '', name: '', size: 0, width: 0, md5 };
+    const result: Prisma.AttachedFileCreateInput = {
+      isImage: false,
+      mime: '',
+      name: '',
+      size: 0,
+      md5
+    };
 
     const savedSrcFile = await FilesystemOperator.fromFormData(file)
       .toTarget(board, Constants.SRC_DIR)
@@ -120,26 +109,33 @@ export class ImageboardFileProvider {
     file: IFile,
     dimensions: Pick<AttachedFile, 'width' | 'height'>
   ): Promise<Pick<AttachedFile, 'thumbnail' | 'thumbnailWidth' | 'thumbnailHeight'>> {
-    if (dimensions.width === undefined && dimensions.height === undefined) {
+    if (!dimensions.width && !dimensions.height) {
       throw new InternalServerErrorException();
     }
 
+    if (dimensions.width === null && dimensions.height === null) {
+      throw new InternalServerErrorException();
+    }
+
+    const srcWidth = dimensions.width ?? -1;
+    const srcHeight = dimensions.height ?? -1;
+
     const filePath = path.join(file.path, file.originalName);
 
-    let tnWidth: number = dimensions.width;
-    let tnHeight: number = dimensions.height;
+    let tnWidth: number = srcWidth;
+    let tnHeight: number = srcHeight;
 
     const thumbName = `${file.originalName.split('.')[0]}s.${file.ext}`;
     const thumbDir = path.join(Constants.Paths.APP_VOLUME, board, Constants.THUMB_DIR);
     const thumbPath = path.join(thumbDir, thumbName);
 
-    if (dimensions.width > Constants.DEFAULT_THUMBNAIL_SIDE && dimensions.height > Constants.DEFAULT_THUMBNAIL_SIDE) {
-      if (dimensions.width > dimensions.height) {
+    if (srcWidth > Constants.DEFAULT_THUMBNAIL_SIDE && srcHeight > Constants.DEFAULT_THUMBNAIL_SIDE) {
+      if (srcWidth > srcHeight) {
         tnWidth = Constants.DEFAULT_THUMBNAIL_SIDE;
-        tnHeight = Math.floor((tnWidth * dimensions.height) / dimensions.width);
-      } else if (dimensions.width < dimensions.height) {
+        tnHeight = Math.floor((tnWidth * srcHeight) / srcHeight);
+      } else if (srcWidth < srcHeight) {
         tnHeight = Constants.DEFAULT_THUMBNAIL_SIDE;
-        tnWidth = Math.floor((tnHeight * dimensions.width) / dimensions.height);
+        tnWidth = Math.floor((tnHeight * srcWidth) / srcHeight);
       } else {
         tnWidth = 200;
         tnHeight = 200;

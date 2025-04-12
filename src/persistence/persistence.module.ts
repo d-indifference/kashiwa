@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { PrismaService } from '@persistence/lib';
 import { ConfigModule } from '@nestjs/config';
-import { BoardMapper, UserMapper } from '@persistence/mappers';
+import { BoardMapper, CommentMapper, UserMapper } from '@persistence/mappers';
 import { BoardPersistenceService, UserPersistenceService } from '@persistence/services';
 
 /**
@@ -9,7 +9,7 @@ import { BoardPersistenceService, UserPersistenceService } from '@persistence/se
  */
 @Module({
   imports: [ConfigModule],
-  providers: [PrismaService, UserMapper, UserPersistenceService, BoardMapper, BoardPersistenceService],
+  providers: [PrismaService, UserMapper, UserPersistenceService, BoardMapper, BoardPersistenceService, CommentMapper],
   exports: [UserPersistenceService, BoardPersistenceService]
 })
 export class PersistenceModule {}

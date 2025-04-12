@@ -109,7 +109,7 @@ export class BoardMapper {
         boardSettings.defaultModeratorName,
         boardSettings.enableCaptcha,
         boardSettings.isCaptchaCaseSensitive,
-        boardSettings.allowedFileTypes as string[],
+        this.mapStringArray(boardSettings.allowedFileTypes),
         boardSettings.rules
       );
 
@@ -125,5 +125,12 @@ export class BoardMapper {
    */
   public toShortDto(board: Board): BoardShortDto {
     return new BoardShortDto(board.id, board.url, board.name, board.postCount);
+  }
+
+  private mapStringArray(strArrayJson: Prisma.JsonValue): string[] {
+    const jsonStr = strArrayJson as string;
+    const clearedStr = jsonStr.replace('[', '').replace(']', '').replaceAll('"', '');
+
+    return clearedStr.split(',');
   }
 }

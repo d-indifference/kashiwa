@@ -1,14 +1,15 @@
-mixin Form(_board)
+mixin Form(_board, isThread)
     table
         tbody
-            tr
-                td.postblock Name
-                td
-                    input(type='text' name='name' size=28)
-            tr
-                td.postblock Email
-                td
-                    input(type='text' name='email' size=28)
+            if !board.boardSettings.strictAnonymity
+                tr
+                    td.postblock Name
+                    td
+                        input(type='text' name='name' size=28)
+                tr
+                    td.postblock Email
+                    td
+                        input(type='text' name='email' size=28)
             tr
                 td.postblock Subject
                 td
@@ -18,10 +19,12 @@ mixin Form(_board)
                 td.postblock Comment
                 td
                     textarea(name='comment' rows=6 cols=60)
-            tr
-                td.postblock File
-                td
-                    input(type='file' name='file' size=35)
+            if !isThread
+              if board.boardSettings.threadFileAttachmentMode !== 'FORBIDDEN'
+                  tr
+                      td.postblock File
+                      td
+                          input(type='file' name='file' size=35 accept=board.boardSettings.allowedFileTypes.join(','))
             tr
                 td.postblock Password
                 td
@@ -31,7 +34,8 @@ mixin Form(_board)
                 td(colspan=2)
                     div.rules
                         ul
-                            li Allowed file types are: GIF, JPG, PNG
-                            li Max file size is 3MB
+                            li Allowed file types are: #{board.boardSettings.allowedFileTypes.join(', ').toUpperCase()}
+                            li Max file size is #{fileSize(board.boardSettings.maxFileSize)}
                             li Images with dimensions larger than 200x200 px will be downscaled
+                        | !{board.boardSettings.rules}
     hr

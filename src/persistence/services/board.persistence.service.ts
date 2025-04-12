@@ -61,6 +61,10 @@ export class BoardPersistenceService {
     return this.boardMapper.toDto(board, board.boardSettings);
   }
 
+  public async countAll(): Promise<number> {
+    return (await this.prisma.board.count()) as number;
+  }
+
   /**
    * Create a new board and return board DTO
    * @param dto Board's creation input
