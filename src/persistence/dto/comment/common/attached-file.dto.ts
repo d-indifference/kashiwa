@@ -1,20 +1,50 @@
+/**
+ * DTO of attached file
+ */
 export class AttachedFileDto {
+  /**
+   * File name
+   */
   name: string;
 
+  /**
+   * File size
+   */
   size: number;
 
+  /**
+   * Image width
+   */
   width: number | null;
 
+  /**
+   * Image height
+   */
   height: number | null;
 
+  /**
+   * MIME-type
+   */
   mime: string;
 
+  /**
+   * Is file an image
+   */
   isImage: boolean;
 
+  /**
+   * Thumbnail file name (actual for images)
+   */
   thumbnail: string | null;
 
+  /**
+   * Thumbnail image width (actual for images)
+   */
   thumbnailWidth: number | null;
 
+  /**
+   * Thumbnail image height (actual for images)
+   */
   thumbnailHeight: number | null;
 
   constructor(

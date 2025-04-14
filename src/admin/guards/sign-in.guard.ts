@@ -18,7 +18,7 @@ export class SignInGuard implements CanActivate {
       const user = await this.userService.findByIdStrict(session.payload.id);
 
       if (user) {
-        throw new ForbiddenException('You are already registered');
+        throw new ForbiddenException('You are already registered<br>[<a href="/kashiwa">To management panel</a>]');
       }
 
       return true;

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Comment, AttachedFile } from '@prisma/client';
-import { CommentDto, AttachedFileDto } from '@persistence/dto/comment';
+import { CommentDto, AttachedFileDto } from '@persistence/dto/comment/common';
 
 @Injectable()
 export class CommentMapper {

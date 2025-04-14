@@ -1,22 +1,49 @@
-import { AttachedFileDto } from '@persistence/dto/comment/attached-file.dto';
+import { AttachedFileDto } from '@persistence/dto/comment/common/attached-file.dto';
 
 export class CommentDto {
+  /**
+   * Number on board
+   */
   num: bigint;
 
+  /**
+   * Creation date
+   */
   createdAt: Date;
 
+  /**
+   * Is comment written by admin
+   */
   isAdmin: boolean;
 
+  /**
+   * Poster's name
+   */
   name: string;
 
+  /**
+   * Poster's tripcode
+   */
   tripcode: string | null;
 
+  /**
+   * Subject
+   */
   subject: string | null;
 
+  /**
+   * Comment text
+   */
   comment: string;
 
+  /**
+   * Attached file
+   */
   attachedFile: AttachedFileDto | null;
 
+  /**
+   * List of replies (actual for opening posts)
+   */
   children: CommentDto[];
 
   constructor(

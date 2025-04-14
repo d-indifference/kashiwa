@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Render, Req, Res, Session, UseGuards, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res, Session, UseGuards, ValidationPipe } from '@nestjs/common';
 import { FormDataRequest } from 'nestjs-form-data';
 import { SignInForm, SignUpForm } from '@admin/forms/auth';
 import { ISession } from '@admin/interfaces';
@@ -16,9 +16,9 @@ export class AuthController {
   }
 
   @Get('sign-in')
-  @UseGuards(SignInGuard)
-  @Render('admin-sign-in')
-  public getSignInForm(): void {}
+  public getSignInForm(@Res() res: Response, @Session() session: ISession): void {
+    this.authService.checkSignInAccessAndResponse(res, session);
+  }
 
   @Post('sign-up')
   @FormDataRequest()

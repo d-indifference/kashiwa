@@ -1,8 +1,7 @@
-import { CanActivate, ExecutionContext, ForbiddenException, HttpStatus, Injectable } from '@nestjs/common';
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { UserPersistenceService } from '@persistence/services';
 import { ISession } from '@admin/interfaces';
-import { Response } from 'express';
 
 /**
  * Guard that validates the existence of a user session and checks user roles against required roles
@@ -16,7 +15,6 @@ export class SessionGuard implements CanActivate {
 
   public async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();
-    const res: Response = context.switchToHttp().getResponse();
 
     const session = req.session as ISession;
 
@@ -39,12 +37,18 @@ export class SessionGuard implements CanActivate {
           return true;
         }
       } else {
-        res.status(HttpStatus.FOUND).redirect('/kashiwa/auth/sign-in');
+        this.throwForbiddenWithSignInLink();
         return false;
       }
     } else {
-      res.status(HttpStatus.FOUND).redirect('/kashiwa/auth/sign-in');
+      this.throwForbiddenWithSignInLink();
       return false;
     }
+  }
+
+  private throwForbiddenWithSignInLink() {
+    throw new ForbiddenException(
+      'You need to be authorized to access this page.<br>[<a href="/kashiwa/auth/sign-in">Authorize</a>]'
+    );
   }
 }

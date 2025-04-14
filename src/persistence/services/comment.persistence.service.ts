@@ -1,9 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@persistence/lib';
 import { CommentMapper } from '@persistence/mappers';
-import { AttachedFile } from '@prisma/client';
-import { CommentDto } from '@persistence/dto/comment';
+import { CommentDto } from '@persistence/dto/comment/common';
 
+/**
+ * Database queries for `Comment` model
+ */
 @Injectable()
 export class CommentPersistenceService {
   constructor(
@@ -11,16 +13,11 @@ export class CommentPersistenceService {
     private readonly commentMapper: CommentMapper
   ) {}
 
-  public async findFileByMd5(md5: string): Promise<AttachedFile | null> {
-    const entity = await this.prisma.attachedFile.findFirst({ where: { md5 } });
-
-    if (!entity) {
-      return null;
-    }
-
-    return entity;
-  }
-
+  /**
+   * Find full thread by board URL and thread number. If not found, throws 404.
+   * @param url Board URL
+   * @param num Thread number on board
+   */
   public async findThread(url: string, num: bigint): Promise<CommentDto> {
     const openingPost = await this.prisma.comment.findFirst({
       include: { board: true, attachedFile: true },
