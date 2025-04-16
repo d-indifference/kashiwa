@@ -103,6 +103,39 @@ export class CommentPersistenceService {
   }
 
   /**
+   * Get actual threads count on board
+   * @param boardId Board ID
+   */
+  public async getThreadsCount(boardId: string): Promise<number> {
+    return (await this.prisma.comment.count({ where: { boardId, NOT: { lastHit: null }, parentId: null } })) as number;
+  }
+
+  /**
+   * Find thread with the oldest last hit by board ID
+   * @param boardId Board ID
+   */
+  public async findThreadIdWithOldestLastHit(boardId: string): Promise<string | null> {
+    const comment = await this.prisma.comment.findFirst({
+      where: { boardId, NOT: { lastHit: null } },
+      orderBy: { lastHit: 'asc' },
+      select: { id: true }
+    });
+
+    if (comment) {
+      return comment.id;
+    }
+
+    return null;
+  }
+
+  /**
+   * Get all comments count
+   */
+  public async countAll(): Promise<number> {
+    return (await this.prisma.comment.count()) as number;
+  }
+
+  /**
    * Create new comment
    * @param url Board URL
    * @param input Comment creation input

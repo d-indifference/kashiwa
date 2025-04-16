@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { BoardPersistenceService, CommentPersistenceService } from '@persistence/services';
 import { ReplyCreateForm, ThreadCreateForm } from '@posting/forms';
 import { Response } from 'express';
@@ -66,6 +66,8 @@ export class PostingService {
     const pagePayload = this.threadMapper.mapPage(board, newThread);
 
     await this.pageCompilerService.saveThreadPage(pagePayload);
+
+    await this.deleteOldestPostOnMaxThreadsOnBoard(board);
 
     res.cookie('kashiwa_pass', form.password, { maxAge: 315360000000 });
 
@@ -282,5 +284,25 @@ export class PostingService {
     input.hasSage = form.sage;
 
     return input;
+  }
+
+  /**
+   * Delete post with the oldest last hit if current post count is bigger than baord capacity
+   * @param board Board DTO
+   */
+  private async deleteOldestPostOnMaxThreadsOnBoard(board: BoardDto): Promise<void> {
+    if (!board.boardSettings) {
+      throw new InternalServerErrorException('Cannot clear a post on board without any settings');
+    }
+
+    const currentThreadCount = await this.commentPersistenceService.getThreadsCount(board.id);
+
+    if (currentThreadCount > board.boardSettings.maxThreadsOnBoard) {
+      const deletionCandidateId = await this.commentPersistenceService.findThreadIdWithOldestLastHit(board.id);
+
+      if (deletionCandidateId) {
+        await this.commentPersistenceService.removeCommentById(deletionCandidateId);
+      }
+    }
   }
 }
