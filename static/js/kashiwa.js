@@ -58,6 +58,21 @@ function setNameFromCookies(cookieName, formId) {
   }
 }
 
+function setEmailFromCookies(cookieName, formId) {
+  var email = getCookie(cookieName);
+  var form = document.getElementById(formId);
+
+  if (form) {
+    if (form.email) {
+      if (email !== null) {
+        form.email.value = decodeURIComponent(email);
+      } else {
+        form.email.value = '';
+      }
+    }
+  }
+}
+
 function highlightPost(postNum) {
   $('.highlight').removeClass('highlight').addClass('reply');
 

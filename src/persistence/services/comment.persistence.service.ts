@@ -54,6 +54,10 @@ export class CommentPersistenceService {
     return result.map(r => r.num);
   }
 
+  /**
+   * Find all comments ID on board
+   * @param boardId Board ID
+   */
   public async findAllCommentIds(boardId: string): Promise<string[]> {
     const ids = await this.prisma.comment.findMany({ select: { id: true }, where: { boardId } });
 
@@ -100,6 +104,23 @@ export class CommentPersistenceService {
     }
 
     return null;
+  }
+
+  /**
+   * Find comments by passwor, nums and board URL
+   * @param url Board URL
+   * @param nums Comments number on board
+   * @param password Poster's password
+   */
+  public async findCommentUserDeletionCandidates(url: string, nums: bigint[], password: string): Promise<string[]> {
+    const board = await this.boardPersistenceService.findByUrl(url);
+
+    const comments = await this.prisma.comment.findMany({
+      select: { id: true },
+      where: { boardId: board.id, password, num: { in: nums } }
+    });
+
+    return comments.map(comment => comment.id);
   }
 
   /**

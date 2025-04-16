@@ -65,4 +65,10 @@ export class Constants {
 
   /** Preview replies count of board page */
   public static DEFAULT_LAST_REPLIES_COUNT = 7;
+
+  /** Milliseconds of 10 years */
+  public static COOKIES_10_YEARS = 315360000000;
+
+  /** Milliseconds for removing cookies */
+  public static COOKIES_ERASING_VALUE = -9999;
 }
