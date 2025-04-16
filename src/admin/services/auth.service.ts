@@ -35,7 +35,6 @@ export class AuthService {
    * @param session Session object
    */
   public checkSignInAccessAndResponse(res: Response, session: ISession): void {
-    console.log(session.payload);
     if (!session.payload) {
       res.render('admin-sign-in');
     } else {

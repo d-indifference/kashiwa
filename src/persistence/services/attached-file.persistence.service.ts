@@ -10,11 +10,15 @@ export class AttachedFilePersistenceService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * Find file by MD5. If file not found, returns `null`.
+   * Find file on board by MD5. If file not found, returns `null`.
    * @param md5 MD5 hash of file
+   * @param board Board URL
    */
-  public async findFileByMd5(md5: string): Promise<AttachedFile | null> {
-    const entity = await this.prisma.attachedFile.findFirst({ where: { md5 } });
+  public async findFileByMd5(md5: string, board: string): Promise<AttachedFile | null> {
+    const entity = await this.prisma.attachedFile.findFirst({
+      where: { md5, comments: { every: { board: { url: board } } } },
+      include: { comments: { include: { board: true } } }
+    });
 
     if (!entity) {
       return null;

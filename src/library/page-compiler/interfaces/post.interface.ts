@@ -12,12 +12,12 @@ export class IPost {
   /**
    * Post number shown on board
    */
-  num: number;
+  num: bigint;
 
   /**
    * Comment subject
    */
-  subject: string;
+  subject: string | null;
 
   /**
    * Poster's name. It will be hidden if poster has a tripcode.
@@ -27,12 +27,12 @@ export class IPost {
   /**
    * Poster's email
    */
-  email: string;
+  email: string | null;
 
   /**
    * Poster's tripcode
    */
-  tripcode: string;
+  tripcode: string | null;
 
   /**
    * Post creation date (will be formatted in template)
@@ -42,7 +42,7 @@ export class IPost {
   /**
    * Check if the poster raises the thread
    */
-  hasSage: boolean;
+  hasSage: boolean = false;
 
   /**
    * Comment (with not-inlined HTML)

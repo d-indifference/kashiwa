@@ -2,8 +2,12 @@ import { Module } from '@nestjs/common';
 import { PrismaService } from '@persistence/lib';
 import { ConfigModule } from '@nestjs/config';
 import { BoardMapper, CommentMapper, UserMapper } from '@persistence/mappers';
-import { AttachedFilePersistenceService, BoardPersistenceService, UserPersistenceService } from '@persistence/services';
-import { CommentPersistenceService } from '@persistence/services/comment.persistence.service';
+import {
+  AttachedFilePersistenceService,
+  BoardPersistenceService,
+  UserPersistenceService,
+  CommentPersistenceService
+} from '@persistence/services';
 
 /**
  * Module for Prisma queries

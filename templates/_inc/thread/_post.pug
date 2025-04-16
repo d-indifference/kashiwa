@@ -1,6 +1,5 @@
 mixin Post(_board, _post, is_thread)
     if _post.attachedFile
-        br
         span.filesize
             | File:
             =' '
@@ -22,37 +21,40 @@ mixin Post(_board, _post, is_thread)
                 if _post.attachedFile.isImage
                     img.thumb(src=`/${_board.url}/thumb/${_post.attachedFile.thumbnail}` width=_post.attachedFile.thumbnailWidth height=_post.attachedFile.thumbnailHeight alt=_post.attachedFile.size)
                 else
-                    img.thumb(src=`/img/${compileFileStub(_post.attachedFile.mime)}` width=86 height=86 alt=_post.attachedFile.size)
-    a(name=_post.num)
+                    img.thumb(src=`/img/file.png` width=86 height=86 alt=_post.attachedFile.size)
+    a(name=_post.num.toString())
     label
-        input(type='checkbox' name='delete' value=_post.num)
+        input(type='checkbox' name='delete' value=_post.num.toString())
         =' '
         span.filetitle=_post.subject
         =' '
         if _post.email
-            if _post.tripcode
-                span.postertrip
-                    a(href=`mailto:${_post.email}`)= _post.tripcode
-            else
-                span.postername
-                    a(href=`mailto:${_post.email}`)= _post.name
+            span.commentpostername
+                a(href=`mailto:${_post.email}`)= _post.name
         else
-            if _post.tripcode
-                span.postertrip= _post.tripcode
-            else
-                span.postername= _post.name
+            span.commentpostername= _post.name
         =' '
-        | #{formatDateTime(_post.date)}
+        if _post.tripcode
+            span.postertrip
+                | !#{_post.tripcode}
+        =' '
+        if !is_thread
+            | #{formatDateTime(_post.createdAt)}
+        else
+            | #{formatDateTime(_post.date)}
         =' '
     span.reflink
         if is_thread
-            a(href=`javascript:insert(\'>>${_post.num}\')`) No. #{_post.num}
+            a(href=`javascript:insert(\'>>${_post.num.toString()}\')`) No. #{_post.num.toString()}
         else
-            a(href=`/${_board.url}/res/${_post.num}.html#i${_post.num}`) No. #{_post.num}
+            a(href=`/${_board.url}/res/${_post.num.toString()}.html#i${_post.num.toString()}`) No. #{_post.num.toString()}
         | &nbsp;
     if !is_thread
         span.replytothread
             | [
-            a(href=`/${_board.url}/res/${_post.num}.html`) Reply
+            a(href=`/${_board.url}/res/${_post.num.toString()}.html`) Reply
             | ]
-    blockquote !{_post.comment}
+    if !is_thread
+        blockquote !{truncateText(_post.comment, _board.url, _post.num, _post.num)}
+    else
+        blockquote !{_post.comment}

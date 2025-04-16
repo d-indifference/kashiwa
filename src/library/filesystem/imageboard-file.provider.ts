@@ -132,7 +132,7 @@ export class ImageboardFileProvider {
     if (srcWidth > Constants.DEFAULT_THUMBNAIL_SIDE && srcHeight > Constants.DEFAULT_THUMBNAIL_SIDE) {
       if (srcWidth > srcHeight) {
         tnWidth = Constants.DEFAULT_THUMBNAIL_SIDE;
-        tnHeight = Math.floor((tnWidth * srcHeight) / srcHeight);
+        tnHeight = Math.floor((tnWidth * srcHeight) / srcWidth);
       } else if (srcWidth < srcHeight) {
         tnHeight = Constants.DEFAULT_THUMBNAIL_SIDE;
         tnWidth = Math.floor((tnHeight * srcWidth) / srcHeight);

@@ -1,6 +1,11 @@
 import { TransformFnParams } from 'class-transformer';
 
 /**
+ * If string == `''`, cast it to `undefined`
+ */
+export const normalizeFormEmptyString = (params: TransformFnParams) => (params.value === '' ? undefined : params.value);
+
+/**
  * Transform function for empty form fields (converts them to `undefined`)
  */
 export const emptyFormText = (params: TransformFnParams) => params.value ?? undefined;

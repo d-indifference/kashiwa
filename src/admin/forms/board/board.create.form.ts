@@ -1,5 +1,17 @@
 import { FileAttachmentMode } from '@prisma/client';
-import { IsArray, IsBoolean, IsIn, IsNotEmpty, IsNumber, IsPositive, IsString, Length, Matches } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsIn,
+  IsNotEmpty,
+  IsNumber,
+  IsPositive,
+  IsString,
+  Length,
+  Matches,
+  Max,
+  Min
+} from 'class-validator';
 import { Transform } from 'class-transformer';
 import { normalizeBooleanCheckbox, normalizeNumber, normalizeStringArray } from '@admin/transforms';
 import { Constants } from '@library/constants';
@@ -141,7 +153,8 @@ export class BoardCreateForm {
   @Transform(normalizeNumber)
   @IsNumber()
   @IsNotEmpty()
-  @IsPositive()
+  @Min(0)
+  @Max(256)
   maxStringFieldSize: number;
 
   /**

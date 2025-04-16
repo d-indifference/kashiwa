@@ -62,4 +62,7 @@ export class Constants {
     'image/webp',
     'application/x-bittorrent'
   ];
+
+  /** Preview replies count of board page */
+  public static DEFAULT_LAST_REPLIES_COUNT = 7;
 }

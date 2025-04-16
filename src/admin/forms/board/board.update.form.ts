@@ -9,7 +9,9 @@ import {
   IsString,
   IsUUID,
   Length,
-  Matches
+  Matches,
+  Max,
+  Min
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { normalizeBooleanCheckbox, normalizeNumber, normalizeStringArray } from '@admin/transforms';
@@ -161,7 +163,8 @@ export class BoardUpdateForm {
   @IsOptional()
   @Transform(normalizeNumber)
   @IsNumber()
-  @IsPositive()
+  @Min(0)
+  @Max(256)
   maxStringFieldSize: number;
 
   /**

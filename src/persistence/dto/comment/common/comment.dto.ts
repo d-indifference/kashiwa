@@ -1,5 +1,8 @@
 import { AttachedFileDto } from '@persistence/dto/comment/common/attached-file.dto';
 
+/**
+ * DTO for comment and its replies
+ */
 export class CommentDto {
   /**
    * Number on board
@@ -32,6 +35,11 @@ export class CommentDto {
   subject: string | null;
 
   /**
+   * Email
+   */
+  email: string | null;
+
+  /**
    * Comment text
    */
   comment: string;
@@ -51,6 +59,7 @@ export class CommentDto {
     createdAt: Date,
     isAdmin: boolean,
     name: string,
+    email: string | null,
     tripcode: string | null,
     subject: string | null,
     comment: string,
@@ -61,6 +70,7 @@ export class CommentDto {
     this.createdAt = createdAt;
     this.isAdmin = isAdmin;
     this.name = name;
+    this.email = email;
     this.tripcode = tripcode;
     this.subject = subject;
     this.comment = comment;

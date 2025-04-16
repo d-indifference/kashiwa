@@ -44,6 +44,16 @@ export class BoardPersistenceService {
   }
 
   /**
+   * Find board by ID and map it to `BoardDTO`
+   * @param id Board's ID
+   */
+  public async findDtoById(id: string): Promise<BoardDto> {
+    const board = await this.findById(id);
+
+    return this.boardMapper.toDto(board, board['boardSettings']);
+  }
+
+  /**
    * Find board entity by URL and map it to DTO.
    * @param url Board's URL
    */
@@ -114,6 +124,30 @@ export class BoardPersistenceService {
   }
 
   /**
+   * Increment board post count by URL
+   * @param url Board URL
+   */
+  public async incrementPostCount(url: string): Promise<void> {
+    const board = await this.findByUrlNoMapping(url);
+
+    await this.prisma.board.update({ data: { postCount: board.postCount + 1 }, where: { id: board.id } });
+  }
+
+  /**
+   * Get actual board post count by URL
+   * @param url Board URL
+   */
+  public async getCurrentPostCount(url: string): Promise<number> {
+    const response = await this.prisma.board.findFirst({ select: { postCount: true }, where: { url } });
+
+    if (response === null) {
+      throw new NotFoundException(`Board with url: ${url} was not found`);
+    }
+
+    return response.postCount;
+  }
+
+  /**
    * Check board URL on creation
    */
   private async checkOnCreate(dto: BoardCreateDto): Promise<void> {
@@ -151,5 +185,18 @@ export class BoardPersistenceService {
         }
       }
     }
+  }
+
+  /**
+   * Find board entity by URL and return model
+   */
+  private async findByUrlNoMapping(url: string): Promise<Board> {
+    const board = await this.prisma.board.findFirst({ where: { url } });
+
+    if (!board) {
+      throw new NotFoundException(`Board with url: ${url} was not found`);
+    }
+
+    return board;
   }
 }

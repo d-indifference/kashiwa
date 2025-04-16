@@ -82,6 +82,13 @@ export class BoardController {
     await this.boardService.update(form, res);
   }
 
+  @Post('reload/:id')
+  @Roles(UserRole.ADMINISTRATOR)
+  @UseGuards(SessionGuard)
+  public async reloadBoard(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response): Promise<void> {
+    await this.boardService.reloadBoard(id, res);
+  }
+
   @Post('delete/:id')
   @Roles(UserRole.ADMINISTRATOR)
   @UseGuards(SessionGuard)

@@ -10,10 +10,12 @@ model Comment {
   ip       String    @db.VarChar(64)
   name     String    @db.VarChar(256)
   tripcode String?   @db.VarChar(256)
+  email    String?   @db.VarChar(256)
   subject  String?   @db.VarChar(256)
   comment  String    @db.Text
   password String    @db.VarChar(8)
   lastHit  DateTime? @map("last_hit")
+  hasSage  Boolean   @map("has_sage") @db.Boolean
 
   attachedFileId String?       @map("attached_file_id") @db.Uuid
   attachedFile   AttachedFile? @relation(fields: [attachedFileId], references: [id], onDelete: SetNull)
