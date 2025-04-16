@@ -73,6 +73,9 @@ export class BoardPersistenceService {
     return this.boardMapper.toDto(board, board.boardSettings);
   }
 
+  /**
+   * Get count of boards
+   */
   public async countAll(): Promise<number> {
     return (await this.prisma.board.count()) as number;
   }

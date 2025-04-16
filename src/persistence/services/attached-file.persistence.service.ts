@@ -48,6 +48,33 @@ export class AttachedFilePersistenceService {
   }
 
   /**
+   * User clear file by comment ID
+   * @param commentId Comemnt ID
+   */
+  public async clearFileByCommentId(commentId: string): Promise<void> {
+    this.logger.log(`clearFileByCommentId, commentId: ${commentId}`);
+
+    const comment = await this.prisma.comment.findFirst({
+      include: { attachedFile: true, board: true },
+      where: { id: commentId }
+    });
+
+    if (comment) {
+      if (comment.attachedFile) {
+        await FilesystemOperator.remove(comment.board.url, Constants.SRC_DIR, comment.attachedFile.name);
+        if (comment.attachedFile.thumbnail) {
+          await FilesystemOperator.remove(comment.board.url, Constants.THUMB_DIR, comment.attachedFile.thumbnail);
+        }
+
+        await this.prisma.attachedFile.update({
+          where: { id: comment.attachedFile.id },
+          data: { name: 'NO_THUMB', thumbnail: null }
+        });
+      }
+    }
+  }
+
+  /**
    * Remove orphaned `AttachedFile` from database and from disk
    */
   public async removeOrphaned(): Promise<void> {

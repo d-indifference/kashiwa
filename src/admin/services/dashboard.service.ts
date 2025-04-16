@@ -10,7 +10,7 @@ import * as fs from 'fs/promises';
 import * as os from 'node:os';
 import { Request } from 'express';
 import { exec } from 'child_process';
-import { BoardPersistenceService } from '@persistence/services';
+import { BoardPersistenceService, CommentPersistenceService } from '@persistence/services';
 
 /**
  * Service for site dashboard page
@@ -19,7 +19,8 @@ import { BoardPersistenceService } from '@persistence/services';
 export class DashboardService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly boardPersistenceService: BoardPersistenceService
+    private readonly boardPersistenceService: BoardPersistenceService,
+    private readonly commentPersistenceService: CommentPersistenceService
   ) {}
 
   /**
@@ -29,7 +30,7 @@ export class DashboardService {
    */
   public async getDashboardPage(req: Request, session: ISession): Promise<DashboardPage> {
     const totalBoards = await this.boardPersistenceService.countAll();
-    const totalComments = 0;
+    const totalComments = await this.commentPersistenceService.countAll();
     const diskSpaceUsed = await FilesystemOperator.dirSize();
     const postgresVersion = await this.getPostgresVersion();
     const { dependencies, devDependencies } = await this.getDependencies();

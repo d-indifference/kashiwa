@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { BoardPersistenceService, CommentPersistenceService } from '@persistence/services';
 import { ReplyCreateForm, ThreadCreateForm } from '@posting/forms';
 import { Response } from 'express';
@@ -8,7 +8,7 @@ import { Comment, Prisma } from '@prisma/client';
 import { PageCompilerService } from '@library/page-compiler';
 import { Constants } from '@library/constants';
 import { AttachedFileService } from '@posting/services/attached-file.service';
-import { ThreadMapper } from '@library//mappers';
+import { ThreadMapper } from '@library/mappers';
 
 /**
  * Service of comment posting
@@ -67,7 +67,9 @@ export class PostingService {
 
     await this.pageCompilerService.saveThreadPage(pagePayload);
 
-    res.cookie('kashiwa_pass', form.password, { maxAge: 315360000000 });
+    await this.deleteOldestPostOnMaxThreadsOnBoard(board);
+
+    this.setCookies(form, res);
 
     res.redirect(`/${url}/res/${newThread.num}${Constants.HTML_SUFFIX}#${newThread.num}`);
   }
@@ -126,7 +128,7 @@ export class PostingService {
       }
     }
 
-    res.cookie('kashiwa_pass', form.password, { maxAge: 315360000000 });
+    this.setCookies(form, res);
 
     res.redirect(`/${url}/res/${num}${Constants.HTML_SUFFIX}#${newReply.num}`);
   }
@@ -282,5 +284,41 @@ export class PostingService {
     input.hasSage = form.sage;
 
     return input;
+  }
+
+  /**
+   * Delete post with the oldest last hit if current post count is bigger than board capacity
+   * @param board Board DTO
+   */
+  private async deleteOldestPostOnMaxThreadsOnBoard(board: BoardDto): Promise<void> {
+    if (!board.boardSettings) {
+      throw new InternalServerErrorException('Cannot clear a post on board without any settings');
+    }
+
+    const currentThreadCount = await this.commentPersistenceService.getThreadsCount(board.id);
+
+    if (currentThreadCount > board.boardSettings.maxThreadsOnBoard) {
+      const deletionCandidateId = await this.commentPersistenceService.findThreadIdWithOldestLastHit(board.id);
+
+      if (deletionCandidateId) {
+        await this.commentPersistenceService.removeCommentById(deletionCandidateId);
+      }
+    }
+  }
+
+  private setCookies(form: ThreadCreateForm | ReplyCreateForm, res: Response): void {
+    res.cookie('kashiwa_pass', form.password, { maxAge: Constants.COOKIES_10_YEARS });
+
+    if (form.name) {
+      res.cookie('kashiwa_name', form.name, { maxAge: Constants.COOKIES_10_YEARS });
+    } else {
+      res.cookie('kashiwa_name', '', { maxAge: Constants.COOKIES_ERASING_VALUE });
+    }
+
+    if (form.email) {
+      res.cookie('kashiwa_email', form.email, { maxAge: Constants.COOKIES_10_YEARS });
+    } else {
+      res.cookie('kashiwa_email', '', { maxAge: Constants.COOKIES_ERASING_VALUE });
+    }
   }
 }

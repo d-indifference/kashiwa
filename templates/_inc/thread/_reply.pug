@@ -32,35 +32,40 @@ mixin Reply(_board, _opening_post, _post, is_thread)
                         a(href=`/${_board.url}/res/${_opening_post.num.toString()}.html#i${_post.num.toString()}`) No. #{_post.num.toString()}
                 | &nbsp;
                 if _post.attachedFile
-                  br
-                  span.filesize
-                    | File:
-                    =' '
-                    a(target='_blank' href=`/${_board.url}/src/${_post.attachedFile.name}`) #{_post.attachedFile.name}
-                    =' '
-                    | (
-                    em
-                      | #{fileSize(_post.attachedFile.size)}
-                      if _post.attachedFile.isImage
-                        | ,
-                        =' '
-                        | #{_post.attachedFile.width}x#{_post.attachedFile.height}
-                    | )
-                    =' '
-                    if _post.attachedFile.isImage
-                      if _post.attachedFile.width > 200 && _post.attachedFile.height > 200
-                          span.thumbnailmsg A reduced copy is shown, the original can be viewed by clicking on it.
+                  if _post.attachedFile.name === 'NO_THUMB'
                     br
-                    a(target='_blank' href=`/${_board.url}/src/${_post.attachedFile.name}`)
+                    div.nothumb
+                      | No file
+                  else
+                    br
+                    span.filesize
+                      | File:
+                      =' '
+                      a(target='_blank' href=`/${_board.url}/src/${_post.attachedFile.name}`) #{_post.attachedFile.name}
+                      =' '
+                      | (
+                      em
+                        | #{fileSize(_post.attachedFile.size)}
                         if _post.attachedFile.isImage
-                            img.thumb(
-                                src=`/${_board.url}/thumb/${_post.attachedFile.thumbnail}`
-                                width=_post.attachedFile.thumbnailWidth
-                                height=_post.attachedFile.thumbnailHeight
-                                alt=_post.attachedFile.size
-                            )
-                        else
-                            img.thumb(src=`/img/file.png` width=86 height=86 alt=_post.attachedFile.size)
+                          | ,
+                          =' '
+                          | #{_post.attachedFile.width}x#{_post.attachedFile.height}
+                      | )
+                      =' '
+                      if _post.attachedFile.isImage
+                        if _post.attachedFile.width > 200 && _post.attachedFile.height > 200
+                            span.thumbnailmsg A reduced copy is shown, the original can be viewed by clicking on it.
+                      br
+                      a(target='_blank' href=`/${_board.url}/src/${_post.attachedFile.name}`)
+                          if _post.attachedFile.isImage
+                              img.thumb(
+                                  src=`/${_board.url}/thumb/${_post.attachedFile.thumbnail}`
+                                  width=_post.attachedFile.thumbnailWidth
+                                  height=_post.attachedFile.thumbnailHeight
+                                  alt=_post.attachedFile.size
+                              )
+                          else
+                              img.thumb(src=`/img/file.png` width=86 height=86 alt=_post.attachedFile.size)
                 if !is_thread
                     blockquote !{truncateText(_post.comment, _board.url, _opening_post.num, _post.num)}
                 else

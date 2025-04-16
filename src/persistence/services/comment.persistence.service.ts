@@ -54,6 +54,10 @@ export class CommentPersistenceService {
     return result.map(r => r.num);
   }
 
+  /**
+   * Find all comments ID on board
+   * @param boardId Board ID
+   */
   public async findAllCommentIds(boardId: string): Promise<string[]> {
     const ids = await this.prisma.comment.findMany({ select: { id: true }, where: { boardId } });
 
@@ -100,6 +104,56 @@ export class CommentPersistenceService {
     }
 
     return null;
+  }
+
+  /**
+   * Find comments by passwor, nums and board URL
+   * @param url Board URL
+   * @param nums Comments number on board
+   * @param password Poster's password
+   */
+  public async findCommentUserDeletionCandidates(url: string, nums: bigint[], password: string): Promise<string[]> {
+    const board = await this.boardPersistenceService.findByUrl(url);
+
+    const comments = await this.prisma.comment.findMany({
+      select: { id: true },
+      where: { boardId: board.id, password, num: { in: nums } }
+    });
+
+    return comments.map(comment => comment.id);
+  }
+
+  /**
+   * Get actual threads count on board
+   * @param boardId Board ID
+   */
+  public async getThreadsCount(boardId: string): Promise<number> {
+    return (await this.prisma.comment.count({ where: { boardId, NOT: { lastHit: null }, parentId: null } })) as number;
+  }
+
+  /**
+   * Find thread with the oldest last hit by board ID
+   * @param boardId Board ID
+   */
+  public async findThreadIdWithOldestLastHit(boardId: string): Promise<string | null> {
+    const comment = await this.prisma.comment.findFirst({
+      where: { boardId, NOT: { lastHit: null } },
+      orderBy: { lastHit: 'asc' },
+      select: { id: true }
+    });
+
+    if (comment) {
+      return comment.id;
+    }
+
+    return null;
+  }
+
+  /**
+   * Get all comments count
+   */
+  public async countAll(): Promise<number> {
+    return (await this.prisma.comment.count()) as number;
   }
 
   /**

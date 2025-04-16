@@ -1,27 +1,31 @@
 mixin Post(_board, _post, is_thread)
     if _post.attachedFile
-        span.filesize
-            | File:
-            =' '
-            a(target='_blank' href=`/${_board.url}/src/${_post.attachedFile.name}`) #{_post.attachedFile.name}
-            =' '
-            | (
-            em
-                | #{fileSize(_post.attachedFile.size)}
+        if _post.attachedFile.name === 'NO_THUMB'
+          div.nothumb
+            | No file
+        else
+            span.filesize
+                | File:
+                =' '
+                a(target='_blank' href=`/${_board.url}/src/${_post.attachedFile.name}`) #{_post.attachedFile.name}
+                =' '
+                | (
+                em
+                    | #{fileSize(_post.attachedFile.size)}
+                    if _post.attachedFile.isImage
+                        = ", "
+                        | #{_post.attachedFile.width}x#{_post.attachedFile.height}
+                | )
+                =' '
                 if _post.attachedFile.isImage
-                    = ", "
-                    | #{_post.attachedFile.width}x#{_post.attachedFile.height}
-            | )
-            =' '
-            if _post.attachedFile.isImage
-                if _post.attachedFile.width > 200 && _post.attachedFile.height > 200
-                    span.thumbnailmsg A reduced copy is shown, the original can be viewed by clicking on it.
-            br
-            a(target='_blank' href=`/${_board.url}/src/${_post.attachedFile.name}`)
-                if _post.attachedFile.isImage
-                    img.thumb(src=`/${_board.url}/thumb/${_post.attachedFile.thumbnail}` width=_post.attachedFile.thumbnailWidth height=_post.attachedFile.thumbnailHeight alt=_post.attachedFile.size)
-                else
-                    img.thumb(src=`/img/file.png` width=86 height=86 alt=_post.attachedFile.size)
+                    if _post.attachedFile.width > 200 && _post.attachedFile.height > 200
+                        span.thumbnailmsg A reduced copy is shown, the original can be viewed by clicking on it.
+                br
+                a(target='_blank' href=`/${_board.url}/src/${_post.attachedFile.name}`)
+                    if _post.attachedFile.isImage
+                        img.thumb(src=`/${_board.url}/thumb/${_post.attachedFile.thumbnail}` width=_post.attachedFile.thumbnailWidth height=_post.attachedFile.thumbnailHeight alt=_post.attachedFile.size)
+                    else
+                        img.thumb(src=`/img/file.png` width=86 height=86 alt=_post.attachedFile.size)
     a(name=_post.num.toString())
     label
         input(type='checkbox' name='delete' value=_post.num.toString())

@@ -11,12 +11,14 @@ mixin Head(title)
         script.
           var styleCookie = 'kashiwa_style';
           var nameCookie = 'kashiwa_name';
+          var emailCookie = 'kashiwa_email'
           var passwordCookie = 'kashiwa_pass';
 
         script.
           window.onload = function() {
             // setStyle(styleCookie);
             setNameFromCookies(nameCookie, 'postform');
+            setEmailFromCookies(emailCookie, 'postform');
 
             var match;
 
