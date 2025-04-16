@@ -89,6 +89,13 @@ export class BoardController {
     await this.boardService.reloadBoard(id, res);
   }
 
+  @Post('clear/:id')
+  @Roles(UserRole.ADMINISTRATOR)
+  @UseGuards(SessionGuard)
+  public async clearBoardCache(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response): Promise<void> {
+    await this.boardService.clearBoardCache(id, res);
+  }
+
   @Post('delete/:id')
   @Roles(UserRole.ADMINISTRATOR)
   @UseGuards(SessionGuard)

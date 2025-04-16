@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { BoardPersistenceService, CommentPersistenceService } from '@persistence/services';
 import { BoardCreateForm, BoardUpdateForm } from '@admin/forms/board';
 import { Response } from 'express';
-import { BoardCreateDto, BoardDto, BoardShortDto } from '@persistence/dto/board';
+import { BoardCreateDto, BoardDto, BoardShortDto, BoardUpdateDto } from '@persistence/dto/board';
 import { FilesystemOperator } from '@library/filesystem';
 import { Constants } from '@library/constants';
 import { PageRequest } from '@persistence/lib/page';
@@ -10,7 +10,6 @@ import { FormPage, ListPage } from '@admin/pages';
 import { ISession } from '@admin/interfaces';
 import { BoardSettings } from '@prisma/client';
 import { getSupportedFileTypes } from '@admin/lib/helpers';
-import { BoardUpdateDto } from '@persistence/dto/board/board.update.dto';
 import { ThreadMapper } from '@library/mappers';
 import { PageCompilerService } from '@library/page-compiler';
 
@@ -185,6 +184,23 @@ export class BoardService {
    */
   public async reloadBoard(id: string, res: Response): Promise<void> {
     await this.updateBoardCache(id);
+
+    res.redirect(`/kashiwa/board/edit/${id}`);
+  }
+
+  /**
+   * Clear cached pages and files of all comments on board
+   * @param id Board ID
+   * @param res `Express.js` response
+   */
+  public async clearBoardCache(id: string, res: Response): Promise<void> {
+    const comments = await this.commentPersistenceService.findAllCommentIds(id);
+
+    for (const commentId of comments) {
+      await this.commentPersistenceService.removeCommentById(commentId);
+    }
+
+    await this.boardPersistenceService.nullifyPostCount(id);
 
     res.redirect(`/kashiwa/board/edit/${id}`);
   }

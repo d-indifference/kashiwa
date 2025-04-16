@@ -42,5 +42,9 @@ html(lang='en')
 
             hr
             div(align='center')
+                form(method='post' action=`/kashiwa/board/clear/${content.id}`)
+                    input(type='Submit' value='Clear board cache')
+
+            div(align='center')
                 form(method='post' action=`/kashiwa/board/delete/${content.id}`)
                     input(type='Submit' value='Delete this board')

@@ -6,6 +6,9 @@ import { Comment, Prisma } from '@prisma/client';
 import { BoardPersistenceService } from '@persistence/services/board.persistence.service';
 import { Page, PageRequest } from '@persistence/lib/page';
 import { ThreadCollapsedDto } from '@persistence/dto/comment/collapsed';
+import { AttachedFilePersistenceService } from '@persistence/services/attached-file.persistence.service';
+import { FilesystemOperator } from '@library/filesystem';
+import { Constants } from '@library/constants';
 
 /**
  * Database queries for `Comment` model
@@ -17,7 +20,8 @@ export class CommentPersistenceService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly boardPersistenceService: BoardPersistenceService,
-    private readonly commentMapper: CommentMapper
+    private readonly commentMapper: CommentMapper,
+    private readonly attachedFilePersistenceService: AttachedFilePersistenceService
   ) {}
 
   /**
@@ -48,6 +52,12 @@ export class CommentPersistenceService {
     });
 
     return result.map(r => r.num);
+  }
+
+  public async findAllCommentIds(boardId: string): Promise<string[]> {
+    const ids = await this.prisma.comment.findMany({ select: { id: true }, where: { boardId } });
+
+    return ids.map(comment => comment.id);
   }
 
   /**
@@ -118,6 +128,8 @@ export class CommentPersistenceService {
    * @param num Thread number
    */
   public async updateThreadLastHit(url: string, num: bigint): Promise<void> {
+    this.logger.log(`updateThreadLastHit: url: ${url}, num: ${num.toString()}`);
+
     const board = await this.boardPersistenceService.findByUrl(url);
 
     await this.prisma.comment.update({
@@ -125,6 +137,42 @@ export class CommentPersistenceService {
       include: { board: true },
       data: { lastHit: new Date() }
     });
+  }
+
+  /**
+   * Remove comment and its `AttachedFile` by ID
+   * @param id Comment ID
+   */
+  public async removeCommentById(id: string): Promise<void> {
+    this.logger.log(`removeCommentById: id: ${id}`);
+
+    const comment = await this.prisma.comment.findFirst({
+      where: { id },
+      include: { attachedFile: true, board: true }
+    });
+
+    if (comment) {
+      if (comment.attachedFile) {
+        await this.attachedFilePersistenceService.removeById(comment.attachedFile.id);
+      }
+
+      await FilesystemOperator.remove(comment.board.url, Constants.RES_DIR, `${comment.num}${Constants.HTML_SUFFIX}`);
+      await this.prisma.comment.delete({ where: { id } });
+
+      await this.removeOrphanReplies(comment.board.url);
+    }
+  }
+
+  /**
+   * Remove replies without opening post from databases with their files
+   * @param url Board URL
+   */
+  public async removeOrphanReplies(url: string): Promise<void> {
+    this.logger.log(`removeOrphanReplies: url: ${url}`);
+    const board = await this.boardPersistenceService.findByUrl(url);
+
+    await this.prisma.comment.deleteMany({ where: { boardId: board.id, parentId: null, lastHit: null } });
+    await this.attachedFilePersistenceService.removeOrphaned();
   }
 
   /**
