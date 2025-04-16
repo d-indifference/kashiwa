@@ -2,10 +2,11 @@ import { BadRequestException, Injectable, Logger, NotFoundException } from '@nes
 import { PrismaService } from '@persistence/lib';
 import { BoardMapper } from '@persistence/mappers';
 import { Page, PageRequest } from '@persistence/lib/page';
-import { BoardCreateDto, BoardDto, BoardShortDto } from '@persistence/dto/board';
+import { BoardCreateDto, BoardDto, BoardShortDto, BoardUpdateDto } from '@persistence/dto/board';
 import { Board } from '@prisma/client';
 import { Constants } from '@library/constants';
-import { BoardUpdateDto } from '@persistence/dto/board/board.update.dto';
+import { FilesystemOperator } from '@library/filesystem';
+import { AttachedFilePersistenceService } from '@persistence/services/attached-file.persistence.service';
 
 /**
  * Database queries for `Board` model
@@ -16,7 +17,8 @@ export class BoardPersistenceService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly boardMapper: BoardMapper
+    private readonly boardMapper: BoardMapper,
+    private readonly attachedFilePersistenceService: AttachedFilePersistenceService
   ) {}
 
   /**
@@ -76,6 +78,20 @@ export class BoardPersistenceService {
   }
 
   /**
+   * Get actual board post count by URL
+   * @param url Board URL
+   */
+  public async getCurrentPostCount(url: string): Promise<number> {
+    const response = await this.prisma.board.findFirst({ select: { postCount: true }, where: { url } });
+
+    if (response === null) {
+      throw new NotFoundException(`Board with url: ${url} was not found`);
+    }
+
+    return response.postCount;
+  }
+
+  /**
    * Create a new board and return board DTO
    * @param dto Board's creation input
    */
@@ -112,15 +128,13 @@ export class BoardPersistenceService {
   }
 
   /**
-   * Remove board by ID
-   * @param id Board's ID
+   * Set board's `postCount` value to `0`
+   * @param id `Board` ID
    */
-  public async remove(id: string): Promise<void> {
-    this.logger.log(`remove: id: ${id}`);
+  public async nullifyPostCount(id: string): Promise<void> {
+    this.logger.log(`nullifyPostCount: id: ${id}`);
 
-    await this.findById(id);
-
-    await this.prisma.board.delete({ where: { id }, include: { boardSettings: true } });
+    await this.prisma.board.update({ data: { postCount: 0 }, where: { id } });
   }
 
   /**
@@ -128,23 +142,26 @@ export class BoardPersistenceService {
    * @param url Board URL
    */
   public async incrementPostCount(url: string): Promise<void> {
+    this.logger.log(`incrementPostCount: url: ${url}`);
+
     const board = await this.findByUrlNoMapping(url);
 
     await this.prisma.board.update({ data: { postCount: board.postCount + 1 }, where: { id: board.id } });
   }
 
   /**
-   * Get actual board post count by URL
-   * @param url Board URL
+   * Fully remove board by ID
+   * @param id Board's ID
    */
-  public async getCurrentPostCount(url: string): Promise<number> {
-    const response = await this.prisma.board.findFirst({ select: { postCount: true }, where: { url } });
+  public async remove(id: string): Promise<void> {
+    this.logger.log(`remove: id: ${id}`);
 
-    if (response === null) {
-      throw new NotFoundException(`Board with url: ${url} was not found`);
-    }
+    const board = await this.findById(id);
 
-    return response.postCount;
+    await this.prisma.comment.deleteMany({ where: { boardId: id } });
+    await FilesystemOperator.remove(board.url);
+    await this.attachedFilePersistenceService.removeOrphaned();
+    await this.prisma.board.delete({ where: { id }, include: { boardSettings: true } });
   }
 
   /**
