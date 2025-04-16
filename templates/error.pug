@@ -1,0 +1,11 @@
+include _inc/thread/_head
+
+html(lang='en')
+    +Head('Error')
+    body
+        h1(align='center') Error
+        div(align='center')
+            p
+                b !{message}
+            p
+                a(href='/') To main page

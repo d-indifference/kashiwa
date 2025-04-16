@@ -1,0 +1,72 @@
+include _inc/thread/_reply
+include _inc/thread/_post
+include _inc/thread/_form
+include _inc/thread/_user_delete
+include _inc/thread/_footer
+include _inc/thread/_head
+
+html(lang='en')
+    +Head(board.name)
+    body
+        div.adminbar
+            | [
+            a(href='/kashiwa') Management
+            | ]
+            | [
+            a(href='/') Main Page
+            | ]
+        div.logo= board.name
+        hr
+
+        div.postarea
+            if board.boardSettings.allowPosting
+                form#postform(action=`/kashiwa/post/${board.url}` method='post' enctype='multipart/form-data')
+                    +Form(board, false)
+
+        form#delform(action=`/kashiwa/delete/${board.url}` method='post')
+            each thread in threads.content
+              +Post(board, thread.thread, false)
+              if thread.omittedPosts > 0
+                  if thread.omittedFiles > 0
+                      span.omittedposts
+                          | There are #{thread.omittedPosts} posts and #{thread.omittedFiles} files are omitted. Click "Reply" to view them
+                  else
+                      span.omittedposts
+                          | There are #{thread.omittedPosts} posts are omitted. Click "Reply" to view them
+
+              each reply in thread.thread.children
+                +Reply(board, thread.thread, reply, false)
+              br(clear='left')
+              hr
+
+            +UserDelete
+
+        table(border=1)
+            tbody
+                tr
+                    td
+                        if threads.previous !== null
+                          form(method='get' action=`/${board.url}/${threads.previous}`)
+                            input(type='submit' value='Previous')
+                        else
+                            span Previous
+                    td
+                        - let i = 0;
+                        while i < threads.total
+                          if i === threads.current
+                            | [#{ threads.current }]
+                          else
+                            ='['
+                            a(href=`/${board.url}/${i}`) #{i}
+                            =']'
+                          - i++;
+                    td
+                        if threads.next !== null
+                            form(method='get' action=`/${board.url}/${threads.next}`)
+                                input(type='submit' value='Next')
+                        else
+                            span Next
+
+        br(clear='all')
+
+        +Footer

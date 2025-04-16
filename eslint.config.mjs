@@ -167,7 +167,7 @@ export default tseslint.config(
       'no-unsafe-optional-chaining': 'error',
       'no-unused-expressions': 'error',
       'no-unused-vars': 'off',
-      'no-use-before-define': ['error', { classes: false }],
+      'no-use-before-define': 'off',
       'no-useless-backreference': 'error',
       'no-useless-call': 'error',
       'no-useless-computed-key': 'error',

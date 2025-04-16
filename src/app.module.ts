@@ -4,6 +4,7 @@ import { LibraryModule } from '@library/library.module';
 import { ConfigModule } from '@nestjs/config';
 import applicationConfig from '@config/configuration.config';
 import { AdminModule } from '@admin/admin.module';
+import { PostingModule } from '@posting/posting.module';
 
 @Module({
   imports: [
@@ -17,7 +18,8 @@ import { AdminModule } from '@admin/admin.module';
       cleanupAfterFailedHandle: true
     }),
     LibraryModule,
-    AdminModule
+    AdminModule,
+    PostingModule
   ],
   controllers: [],
   providers: []

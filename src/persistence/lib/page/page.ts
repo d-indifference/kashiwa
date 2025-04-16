@@ -2,6 +2,18 @@ import { PrismaService } from '@persistence/lib';
 import { PageRequest } from '@persistence/lib/page/page-request';
 import { NotFoundException } from '@nestjs/common';
 
+type PrismaFindInput = {
+  take: number;
+
+  skip: number;
+
+  where?: unknown;
+
+  orderBy?: unknown;
+
+  include?: unknown;
+};
+
 /**
  * Generic pagination wrapper for Prisma models.
  */
@@ -38,18 +50,75 @@ export class Page<T> {
    * @param pageRequest The pagination request object containing limit and page number.
    */
   public static async of<T>(prisma: PrismaService, model: string, pageRequest: PageRequest): Promise<Page<T>> {
+    return await Page.templateOf(prisma, model, pageRequest);
+  }
+
+  /**
+   * Static factory method that creates a `Page<T>` instance from a Prisma model query with conditions, ordering and including
+   * @param prisma The Prisma service instance used to access the database
+   * @param model The name of the Prisma model (as a key of `prisma`)
+   * @param pageRequest The pagination request object containing limit and page number.
+   * @param whereInput Prisma `where` input
+   * @param orderBy Prisma `orderBy` input
+   * @param include Prisma `include` input
+   */
+  public static async ofFilter<T, W, O, I>(
+    prisma: PrismaService,
+    model: string,
+    pageRequest: PageRequest,
+    whereInput: W,
+    orderBy: O,
+    include: I
+  ): Promise<Page<T>> {
+    return await Page.templateOf(prisma, model, pageRequest, whereInput, orderBy, include);
+  }
+
+  /**
+   * Template method for Prisma pagination
+   * @param prisma The Prisma service instance used to access the database
+   * @param model The name of the Prisma model (as a key of `prisma`)
+   * @param pageRequest The pagination request object containing limit and page number.
+   * @param whereInput Prisma `where` input
+   * @param orderBy Prisma `orderBy` input
+   * @param include Prisma `include` input
+   */
+  private static async templateOf<T, W, O, I>(
+    prisma: PrismaService,
+    model: string,
+    pageRequest: PageRequest,
+    whereInput?: W,
+    orderBy?: O,
+    include?: I
+  ): Promise<Page<T>> {
     const page = new Page<T>();
 
-    const content: T[] = await prisma[model].findMany({
-      take: pageRequest.limit,
-      skip: pageRequest.limit * pageRequest.page
-    });
+    const cond: PrismaFindInput = { take: pageRequest.limit, skip: pageRequest.limit * pageRequest.page };
+
+    if (whereInput) {
+      cond.where = whereInput;
+    }
+
+    if (orderBy) {
+      cond.orderBy = orderBy;
+    }
+
+    if (include) {
+      cond.include = include;
+    }
+
+    const content: T[] = await prisma[model].findMany(cond);
 
     if (pageRequest.page > 1 && content.length === 0) {
       throw new NotFoundException('Page not found');
     }
 
-    const total: number = await prisma[model].count();
+    let total: number;
+
+    if (whereInput) {
+      total = await prisma[model].count({ where: whereInput });
+    } else {
+      total = await prisma[model].count();
+    }
 
     const totalPages = Math.ceil(total / pageRequest.limit);
 

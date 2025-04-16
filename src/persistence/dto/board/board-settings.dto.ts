@@ -1,44 +1,115 @@
 import { FileAttachmentMode } from '@prisma/client';
 
+/**
+ * DTO for board settings
+ */
 export class BoardSettingsDto {
+  /**
+   * Is posting enabled
+   */
   allowPosting: boolean;
 
+  /**
+   * Disable Name & Email fields
+   */
   strictAnonymity: boolean;
 
+  /**
+   * Thread file attachment policy
+   * `STRICT` - File is strictly required
+   * `OPTIONAL` - File attachment is optional
+   * `FORBIDDEN` - Files are strictly prohibited
+   */
   threadFileAttachmentMode: FileAttachmentMode;
 
+  /**
+   * Reply file attachment policy <br>
+   * `STRICT` - File is strictly required <br>
+   * `OPTIONAL` - File attachment is optional <br>
+   * `FORBIDDEN` - Files are strictly prohibited
+   */
   replyFileAttachmentMode: FileAttachmentMode;
 
+  /**
+   * Delay between threads creations (seconds)
+   */
   delayAfterThread: number;
 
+  /**
+   * Delay between replies creations (seconds)
+   */
   delayAfterReply: number;
 
+  /**
+   * Minimal uploaded file size (bytes)
+   */
   minFileSize: number;
 
+  /**
+   * Maximal uploaded file size (bytes)
+   */
   maxFileSize: number;
 
+  /**
+   * Allow wakaba markdown.<br>
+   * `true` - full wakaba markdown opportunities are enabled <br>
+   * `false` - only replies (`>>123`), citations (`> test`) and links will be formated. <br>
+   */
   allowMarkdown: boolean;
 
+  /**
+   * Allow tripcode parsing
+   */
   allowTripcodes: boolean;
 
+  /**
+   * Maximum number of threads that can be on the board at the same time
+   */
   maxThreadsOnBoard: number;
 
+  /**
+   * Number of posts after which the thread will not rise
+   */
   bumpLimit: number;
 
+  /**
+   * Maximal size of Name, Email and subject fields
+   */
   maxStringFieldSize: number;
 
+  /**
+   * Maximal size of Comment field
+   */
   maxCommentSize: number;
 
+  /**
+   * Default poster name
+   */
   defaultPosterName: string;
 
+  /**
+   * Default moderator name
+   */
   defaultModeratorName: string;
 
+  /**
+   * Enable captcha
+   */
   enableCaptcha: boolean;
 
+  /**
+   * Set case sensitivity for captcha
+   */
   isCaptchaCaseSensitive: boolean;
 
+  /**
+   * List of supported file types for current board (MIME)
+   */
   allowedFileTypes: string[];
 
+  /**
+   * HTML fragment with board rules
+   */
   rules: string;
 
   constructor(

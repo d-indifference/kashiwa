@@ -25,4 +25,9 @@ export class PageRequest {
   @IsNumber()
   @Transform(normalizePositiveInteger)
   limit: number = Constants.DEFAULT_PAGE_SIZE;
+
+  constructor(page?: number, limit?: number) {
+    this.page = page ?? 0;
+    this.limit = limit ?? Constants.DEFAULT_PAGE_SIZE;
+  }
 }

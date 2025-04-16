@@ -10,13 +10,17 @@ import * as fs from 'fs/promises';
 import * as os from 'node:os';
 import { Request } from 'express';
 import { exec } from 'child_process';
+import { BoardPersistenceService } from '@persistence/services';
 
 /**
  * Service for site dashboard page
  */
 @Injectable()
 export class DashboardService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly boardPersistenceService: BoardPersistenceService
+  ) {}
 
   /**
    * Render dashboard page
@@ -24,7 +28,7 @@ export class DashboardService {
    * @param session Session data
    */
   public async getDashboardPage(req: Request, session: ISession): Promise<DashboardPage> {
-    const totalBoards = 0;
+    const totalBoards = await this.boardPersistenceService.countAll();
     const totalComments = 0;
     const diskSpaceUsed = await FilesystemOperator.dirSize();
     const postgresVersion = await this.getPostgresVersion();

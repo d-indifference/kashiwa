@@ -24,7 +24,7 @@ html(lang='en')
 
         div.postarea
             form#postform(action=`/kashiwa/post/${_CONTENT.board.url}/${_CONTENT.openingPost.num}` method='post' enctype='multipart/form-data')
-                + Form(_CONTENT.board)
+                + Form(_CONTENT.board, true)
 
         form#delform(action=`/kashiwa/delete/${_CONTENT.board.url}/${_CONTENT.openingPost.num}` method='post')
             +Post(_CONTENT.board, _CONTENT.openingPost, true)

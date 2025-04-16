@@ -21,7 +21,41 @@ export const formatDateTime = (dateTime: Date) => DateTime.fromJSDate(dateTime).
 export const applicationVersion = () => process.env.npm_package_version;
 
 /**
- * Get filename page stub for non-images
- * @param mime File MIME-type
+ * Truncates text on board preview
+ * @param text Comment text
+ * @param url Board URL
+ * @param openingPost Opening post num
+ * @param num Truncated post number
  */
-export const compileFileStub = (mime: string) => `${mime.replace('/', '-')}.png`;
+export const truncateText = (text: string, url: string, openingPost: bigint, num: bigint): string => {
+  const truncatedParagraphs = 4;
+  const truncatedLines = 15;
+
+  const paragraphRegex = /<p>(.*?)<\/p>/g;
+  const paragraphs: string[] = [];
+  let match: RegExpExecArray | null;
+
+  while ((match = paragraphRegex.exec(text)) !== null) {
+    paragraphs.push(match[1]);
+  }
+
+  const firstNParagraphs = paragraphs.slice(0, truncatedParagraphs);
+  const allLessThanNLines = firstNParagraphs.every(paragraph => {
+    const lines = paragraph.split('<br>').length;
+    return lines < truncatedLines;
+  });
+
+  if (allLessThanNLines && firstNParagraphs.length === truncatedParagraphs) {
+    return `${firstNParagraphs.map(p => `<p>${p}</p>`).join('')}<div class="abbrev">Comment is too long. <a href="/${url}/${Constants.RES_DIR}/${openingPost.toString()}${Constants.HTML_SUFFIX}#${num}">Full text</a>.</div>`;
+  }
+
+  for (const paragraph of paragraphs) {
+    const lines = paragraph.split('<br>');
+    if (lines.length >= 15) {
+      const truncatedParagraph = `${lines.slice(0, truncatedLines).join('<br>')}<div class="abbrev">Comment is too long. <a href="/${url}/${Constants.RES_DIR}/${openingPost.toString()}${Constants.HTML_SUFFIX}#${num}">Full text</a>.</div>`;
+      return `<p>${truncatedParagraph}</p>`;
+    }
+  }
+
+  return text;
+};

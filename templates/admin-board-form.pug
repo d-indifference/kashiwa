@@ -36,6 +36,10 @@ html(lang='en')
                     div(align='center')
                         input(type='submit' value='Update' size=28)
 
+            div(align='center')
+                form(method='post' action=`/kashiwa/board/reload/${content.id}`)
+                    input(type='Submit' value='Reload board cache')
+
             hr
             div(align='center')
                 form(method='post' action=`/kashiwa/board/delete/${content.id}`)

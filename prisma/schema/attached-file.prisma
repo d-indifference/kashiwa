@@ -1,0 +1,17 @@
+model AttachedFile {
+  id              String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name            String  @db.VarChar(128)
+  size            Int     @db.Integer
+  width           Int?    @db.Integer
+  height          Int?    @db.Integer
+  mime            String  @db.VarChar(128)
+  isImage         Boolean @map("is_image") @db.Boolean
+  md5             String  @db.VarChar(256)
+  thumbnail       String? @db.VarChar(128)
+  thumbnailWidth  Int?    @map("thumbnail_width") @db.Integer
+  thumbnailHeight Int?    @map("thumbnail_height") @db.Integer
+
+  comments Comment[]
+
+  @@map("attached_file")
+}

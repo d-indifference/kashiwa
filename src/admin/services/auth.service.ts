@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { HttpStatus, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { UserPersistenceService } from '@persistence/services';
 import { SignInForm, SignUpForm } from '@admin/forms/auth';
 import { Response, Request } from 'express';
@@ -12,6 +12,37 @@ import { ISession } from '@admin/interfaces';
 @Injectable()
 export class AuthService {
   constructor(private readonly userService: UserPersistenceService) {}
+
+  /**
+   * Check if sign up option is available and returns sign up form or throws 403
+   * @param res `Express.js` response
+   */
+  public async checkSignUpAccessAndResponse(res: Response): Promise<void> {
+    const count = await this.userService.countAll();
+
+    if (count === 0) {
+      res.render('admin-sign-up');
+    } else {
+      res.status(HttpStatus.FORBIDDEN).render('error', {
+        message: 'You don`t need to sign up a new account<br>[<a href="/kashiwa">To management panel</a>]'
+      });
+    }
+  }
+
+  /**
+   * Check if sign in option is available and returns sign up form or throws 403
+   * @param res `Express.js` response
+   * @param session Session object
+   */
+  public checkSignInAccessAndResponse(res: Response, session: ISession): void {
+    if (!session.payload) {
+      res.render('admin-sign-in');
+    } else {
+      res
+        .status(HttpStatus.FORBIDDEN)
+        .render('error', { message: 'You are already signed in<br>[<a href="/kashiwa">To management panel</a>]' });
+    }
+  }
 
   /**
    * Sign up a new user (administrator). First user on admin panel always should be an administrator

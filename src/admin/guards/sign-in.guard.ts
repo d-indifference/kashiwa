@@ -1,6 +1,5 @@
-import { CanActivate, ExecutionContext, HttpStatus, Injectable } from '@nestjs/common';
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { UserPersistenceService } from '@persistence/services';
-import { Response } from 'express';
 import { ISession } from '@admin/interfaces';
 
 /**
@@ -12,7 +11,6 @@ export class SignInGuard implements CanActivate {
 
   public async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();
-    const res: Response = context.switchToHttp().getResponse();
 
     const session = req.session as ISession;
 
@@ -20,9 +18,9 @@ export class SignInGuard implements CanActivate {
       const user = await this.userService.findByIdStrict(session.payload.id);
 
       if (user) {
-        res.status(HttpStatus.FOUND).redirect('/kashiwa');
-        return false;
+        throw new ForbiddenException('You are already registered<br>[<a href="/kashiwa">To management panel</a>]');
       }
+
       return true;
     }
     return true;

@@ -5,6 +5,7 @@ model Board {
   postCount Int    @default(0) @map("post_count")
 
   boardSettings BoardSettings?
+  comments      Comment[]
 
   @@map("board")
 }

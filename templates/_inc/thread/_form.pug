@@ -1,14 +1,15 @@
-mixin Form(_board)
+mixin Form(_board, isThread)
     table
         tbody
-            tr
-                td.postblock Name
-                td
-                    input(type='text' name='name' size=28)
-            tr
-                td.postblock Email
-                td
-                    input(type='text' name='email' size=28)
+            if !_board.boardSettings.strictAnonymity
+                tr
+                    td.postblock Name
+                    td
+                        input(type='text' name='name' size=28)
+                tr
+                    td.postblock Email
+                    td
+                        input(type='text' name='email' size=28)
             tr
                 td.postblock Subject
                 td
@@ -18,20 +19,35 @@ mixin Form(_board)
                 td.postblock Comment
                 td
                     textarea(name='comment' rows=6 cols=60)
-            tr
-                td.postblock File
-                td
-                    input(type='file' name='file' size=35)
+            if !isThread
+              if _board.boardSettings.threadFileAttachmentMode !== 'FORBIDDEN'
+                  tr
+                      td.postblock File
+                      td
+                          input(type='file' name='file' size=35 accept=_board.boardSettings.allowedFileTypes.join(','))
+            if isThread
+                if _board.boardSettings.replyFileAttachmentMode !== 'FORBIDDEN'
+                    tr
+                        td.postblock File
+                        td
+                            input(type='file' name='file' size=35 accept=_board.boardSettings.allowedFileTypes.join(','))
             tr
                 td.postblock Password
                 td
-                    input(type='password' name='password' size=8)
+                    input(type='password' name='password' size=8 value='12345678')
                     |  (to delete posts and files)
+            if isThread
+              td.postblock Options
+              td
+                label
+                    input(type='checkbox' name='sage')
+                    |  Don't hit the thread
             tr
                 td(colspan=2)
                     div.rules
                         ul
-                            li Allowed file types are: GIF, JPG, PNG
-                            li Max file size is 3MB
+                            li Allowed file types are: #{_board.boardSettings.allowedFileTypes.map(t => t.split('/')[1]).join(', ').toUpperCase()}
+                            li Max file size is #{fileSize(_board.boardSettings.maxFileSize)}
                             li Images with dimensions larger than 200x200 px will be downscaled
+                        | !{_board.boardSettings.rules}
     hr

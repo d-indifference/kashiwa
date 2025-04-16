@@ -3,8 +3,15 @@ import { BoardCreateDto, BoardDto, BoardSettingsDto, BoardShortDto } from '@pers
 import { Board, BoardSettings, Prisma } from '@prisma/client';
 import { BoardUpdateDto } from '@persistence/dto/board/board.update.dto';
 
+/**
+ * Mappings for `Board` entities
+ */
 @Injectable()
 export class BoardMapper {
+  /**
+   * Mapping creation DTO to `Prisma.BoardCreateInput`
+   * @param dto Board creation DTO
+   */
   public create(dto: BoardCreateDto): Prisma.BoardCreateInput {
     return {
       boardSettings: {
@@ -36,6 +43,10 @@ export class BoardMapper {
     };
   }
 
+  /**
+   * Mapping updating DTO to `Prisma.BoardUpdateInput`
+   * @param dto Board updating DTO
+   */
   public update(dto: BoardUpdateDto): Prisma.BoardUpdateInput {
     const boardSettings: Prisma.BoardSettingsUpdateOneWithoutBoardNestedInput = {
       update: {
@@ -72,6 +83,11 @@ export class BoardMapper {
     };
   }
 
+  /**
+   * Mapping `Board` object to full DTO
+   * @param board `Board` Prisma object
+   * @param boardSettings `BoardSettings` Prisma object
+   */
   public toDto(board: Board, boardSettings: BoardSettings | null): BoardDto {
     if (boardSettings) {
       const boardSettingsDto = new BoardSettingsDto(
@@ -93,7 +109,7 @@ export class BoardMapper {
         boardSettings.defaultModeratorName,
         boardSettings.enableCaptcha,
         boardSettings.isCaptchaCaseSensitive,
-        boardSettings.allowedFileTypes as string[],
+        this.mapStringArray(boardSettings.allowedFileTypes),
         boardSettings.rules
       );
 
@@ -103,7 +119,18 @@ export class BoardMapper {
     return new BoardDto(board.id, board.url, board.name);
   }
 
+  /**
+   * Mapping `Board` object to short DTO
+   * @param board `Board` Prisma object
+   */
   public toShortDto(board: Board): BoardShortDto {
     return new BoardShortDto(board.id, board.url, board.name, board.postCount);
+  }
+
+  private mapStringArray(strArrayJson: Prisma.JsonValue): string[] {
+    const jsonStr = strArrayJson as string;
+    const clearedStr = jsonStr.replace('[', '').replace(']', '').replaceAll('"', '');
+
+    return clearedStr.split(',');
   }
 }

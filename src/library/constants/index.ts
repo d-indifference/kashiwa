@@ -53,6 +53,7 @@ export class Constants {
   /** Default page size */
   public static DEFAULT_PAGE_SIZE = 10;
 
+  /** List of supported file types (MIME) */
   public static SUPPORTED_FILE_TYPES = [
     'image/png',
     'image/jpeg',
@@ -61,4 +62,7 @@ export class Constants {
     'image/webp',
     'application/x-bittorrent'
   ];
+
+  /** Preview replies count of board page */
+  public static DEFAULT_LAST_REPLIES_COUNT = 7;
 }

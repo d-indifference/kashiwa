@@ -15,12 +15,12 @@ export interface IAttachedFile {
   /**
    * Image width
    */
-  width: number;
+  width: number | null;
 
   /**
    * Image height
    */
-  height: number;
+  height: number | null;
 
   /**
    * Check if the file is an image
@@ -35,15 +35,15 @@ export interface IAttachedFile {
   /**
    * Thumbnail name (for images)
    */
-  thumbnail?: string;
+  thumbnail?: string | null;
 
   /**
    * Thumbnail width (for images)
    */
-  thumbnailWidth?: number;
+  thumbnailWidth?: number | null;
 
   /**
    * Thumbnail height (for images)
    */
-  thumbnailHeight?: number;
+  thumbnailHeight?: number | null;
 }
