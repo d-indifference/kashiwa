@@ -27,7 +27,7 @@ mixin Reply(_board, _opening_post, _post, is_thread)
                     =' '
                 span.reflink
                     if is_thread
-                        a(href=`javascript:insert(\'>>${_post.num.toString()}\')`) No. #{_post.num.toString()}
+                        a(href=`javascript:insert('postform', '>>${_post.num.toString()}')`) No. #{_post.num.toString()}
                     else
                         a(href=`/${_board.url}/res/${_opening_post.num.toString()}.html#i${_post.num.toString()}`) No. #{_post.num.toString()}
                 | &nbsp;

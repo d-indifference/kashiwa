@@ -45,7 +45,7 @@ mixin Post(_board, _post, is_thread)
         =' '
     span.reflink
         if is_thread
-            a(href=`javascript:insert(\'>>${_post.num.toString()}\')`) No. #{_post.num.toString()}
+            a(href=`javascript:insert('postform', '>>${_post.num.toString()}')`) No. #{_post.num.toString()}
         else
             a(href=`/${_board.url}/res/${_post.num.toString()}.html#i${_post.num.toString()}`) No. #{_post.num.toString()}
         | &nbsp;

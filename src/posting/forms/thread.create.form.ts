@@ -45,10 +45,11 @@ export class ThreadCreateForm {
   /**
    * `Password` field
    */
+  @Transform(normalizeFormEmptyString)
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   @Length(8, 8)
-  password: string;
+  password: string = '';
 
   /**
    * `File` field

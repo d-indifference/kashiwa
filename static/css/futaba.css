@@ -116,6 +116,10 @@ a:hover {
   margin: .5em;
 }
 
+.highlight blockquote {
+  margin: .5em;
+}
+
 .doubledash {
   vertical-align: top;
   clear: both;
