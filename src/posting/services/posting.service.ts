@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { BoardPersistenceService, CommentPersistenceService } from '@persistence/services';
 import { ReplyCreateForm, ThreadCreateForm } from '@posting/forms';
 import { Response } from 'express';
-import { processTripcode, WakabaMarkdownService } from '@posting/lib';
+import { processTripcode, setPassword, WakabaMarkdownService } from '@posting/lib';
 import { BoardDto } from '@persistence/dto/board';
 import { Comment, Prisma } from '@prisma/client';
 import { PageCompilerService } from '@library/page-compiler';
@@ -39,6 +39,8 @@ export class PostingService {
     res: Response,
     isAdmin: boolean = false
   ): Promise<void> {
+    form.password = setPassword(form.password);
+
     const { board, name, tripcode, comment } = await this.makeBaseCommentPreparing(
       url,
       form.name,
@@ -65,6 +67,8 @@ export class PostingService {
 
     await this.pageCompilerService.saveThreadPage(pagePayload);
 
+    res.cookie('kashiwa_pass', form.password, { maxAge: 315360000000 });
+
     res.redirect(`/${url}/res/${newThread.num}${Constants.HTML_SUFFIX}#${newThread.num}`);
   }
 
@@ -85,6 +89,8 @@ export class PostingService {
     res: Response,
     isAdmin: boolean = false
   ): Promise<void> {
+    form.password = setPassword(form.password);
+
     const { board, name, tripcode, comment } = await this.makeBaseCommentPreparing(
       url,
       form.name,
@@ -119,6 +125,8 @@ export class PostingService {
         await this.commentPersistenceService.updateThreadLastHit(url, num);
       }
     }
+
+    res.cookie('kashiwa_pass', form.password, { maxAge: 315360000000 });
 
     res.redirect(`/${url}/res/${num}${Constants.HTML_SUFFIX}#${newReply.num}`);
   }
