@@ -12,7 +12,7 @@ export class DashboardController {
 
   @Get()
   @UseGuards(SessionGuard)
-  @Render('admin-dashboard')
+  @Render('admin/dashboard/admin-dashboard')
   public async dashboard(
     @Session() session: ISession,
     @Req() req: Request
