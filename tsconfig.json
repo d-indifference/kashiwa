@@ -22,7 +22,8 @@
       "@config/*": ["src/config/*"],
       "@library/*": ["src/library/*"],
       "@persistence/*": ["src/persistence/*"],
-      "@posting/*": ["src/posting/*"]
+      "@posting/*": ["src/posting/*"],
+      "@restriction/*": ["src/restriction/*"]
     }
   }
 }

@@ -9,6 +9,7 @@ import { PageCompilerService } from '@library/page-compiler';
 import { Constants } from '@library/constants';
 import { AttachedFileService } from '@posting/services/attached-file.service';
 import { ThreadMapper } from '@library/mappers';
+import { RestrictionService, RestrictionType } from '@restriction/services';
 
 /**
  * Service of comment posting
@@ -21,7 +22,8 @@ export class PostingService {
     private readonly wakabaMarkdownService: WakabaMarkdownService,
     private readonly pageCompilerService: PageCompilerService,
     private readonly attachedFileService: AttachedFileService,
-    private readonly threadMapper: ThreadMapper
+    private readonly threadMapper: ThreadMapper,
+    private readonly restrictionService: RestrictionService
   ) {}
 
   /**
@@ -47,6 +49,8 @@ export class PostingService {
       form.comment,
       isAdmin
     );
+
+    this.restrictionService.checkRestrictions(RestrictionType.THREAD, ip, board, form, isAdmin);
 
     const createInput: Prisma.CommentCreateInput = this.makeThreadCreateInput(
       board.id,
@@ -99,6 +103,8 @@ export class PostingService {
       form.comment,
       isAdmin
     );
+
+    this.restrictionService.checkRestrictions(RestrictionType.REPLY, ip, board, form, isAdmin);
 
     const createInput: Prisma.CommentCreateInput = this.makeReplyCreateInput(
       board.id,
