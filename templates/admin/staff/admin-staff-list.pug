@@ -8,7 +8,7 @@ html(lang='en')
         +AdminBar(session.payload.role)
         div.logo Staff Panel - Kashiwa Image Board
         hr
-        + AdminLinks
+        + AdminLinks(session.payload.role)
         div.theader
             | Staff list
 
@@ -21,7 +21,7 @@ html(lang='en')
                     th
             tbody
                 each user, index in content.content
-                  if index + 1 % 2 === 0
+                  if (index + 1) % 2 === 0
                     tr.row1
                         td #{user.username}
                         td

@@ -3,12 +3,13 @@ mixin AdminLinks(role)
         | [
         a(href='/kashiwa') Dashboard
         | ]
-        | [
-        a(href='/kashiwa/staff') Staff panel
-        | ]
-        | [
-        a(href='/kashiwa/board') Boards
-        | ]
+        if role === 'ADMINISTRATOR'
+            | [
+            a(href='/kashiwa/staff') Staff panel
+            | ]
+            | [
+            a(href='/kashiwa/board') Boards
+            | ]
         | [
         a(href='/kashiwa/moderation') Moderation
         | ]

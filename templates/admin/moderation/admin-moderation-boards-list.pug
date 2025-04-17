@@ -8,7 +8,7 @@ html(lang='en')
         +AdminBar(session.payload.role)
         div.logo Moderation - Kashiwa Image Board
         hr
-        + AdminLinks
+        + AdminLinks(session.payload.role)
         div.theader
             | Choose a board for moderation
 
@@ -20,7 +20,7 @@ html(lang='en')
                     th
             tbody
               each board, index in content.content
-                  if index + 1 % 2 === 0
+                  if (index + 1) % 2 === 0
                       tr.row1
                           td
                               a(target='_blank' href=`/${board.url}`) /#{board.url}/
@@ -41,6 +41,6 @@ html(lang='en')
 
         div(align='center')
             if content.previous !== null
-                a(href=`/kashiwa/board?page=${content.previous}` title='Previous') ←
+                a(href=`/kashiwa/moderation?page=${content.previous}` title='Previous') ←
             if content.next !== null
-                a(href=`/kashiwa/board?page=${content.next}` title='Next') →
+                a(href=`/kashiwa/moderation?page=${content.next}` title='Next') →

@@ -56,6 +56,16 @@ export class BoardPersistenceService {
   }
 
   /**
+   * Find board by ID and map it to `BoardShortDto`
+   * @param id Board's ID
+   */
+  public async findShortDtoById(id: string): Promise<BoardShortDto> {
+    const board = await this.findById(id);
+
+    return this.boardMapper.toShortDto(board);
+  }
+
+  /**
    * Find board entity by URL and map it to DTO.
    * @param url Board's URL
    */

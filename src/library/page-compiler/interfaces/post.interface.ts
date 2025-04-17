@@ -42,7 +42,12 @@ export class IPost {
   /**
    * Check if the poster raises the thread
    */
-  hasSage: boolean = false;
+  hasSage: boolean;
+
+  /**
+   * Check if the poster is admin or moderator
+   */
+  isAdmin: boolean;
 
   /**
    * Comment (with not-inlined HTML)

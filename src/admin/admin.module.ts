@@ -8,7 +8,7 @@ import {
   StaffController
 } from '@admin/controllers';
 import { PersistenceModule } from '@persistence/persistence.module';
-import { AuthService, BoardService, DashboardService, ModerationPageService, StaffService } from '@admin/services';
+import { AuthService, BoardService, DashboardService, ModerationService, StaffService } from '@admin/services';
 import { NestjsFormDataModule } from 'nestjs-form-data';
 import { PrismaService } from '@persistence/lib';
 import { nestjsFormDataConfig } from '@config/nestjs-form-data.config';
@@ -18,7 +18,7 @@ import { nestjsFormDataConfig } from '@config/nestjs-form-data.config';
  */
 @Module({
   imports: [NestjsFormDataModule.config(nestjsFormDataConfig), LibraryModule, PersistenceModule],
-  providers: [PrismaService, AuthService, DashboardService, StaffService, BoardService, ModerationPageService],
+  providers: [PrismaService, AuthService, DashboardService, StaffService, BoardService, ModerationService],
   controllers: [AuthController, DashboardController, StaffController, BoardController, ModerationController]
 })
 export class AdminModule {}

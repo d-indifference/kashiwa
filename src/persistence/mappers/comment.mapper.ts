@@ -6,6 +6,8 @@ import { ThreadCollapsedDto } from '@persistence/dto/comment/collapsed';
 import { Page } from '@persistence/lib/page';
 import { Constants } from '@library/constants';
 import { reverse } from 'lodash';
+import { AttachedFileModerationDto, CommentModerationDto } from '@persistence/dto/comment/moderation';
+import { BoardShortDto } from '@persistence/dto/board';
 
 /**
  * Mappings for `Comment` model
@@ -63,6 +65,7 @@ export class CommentMapper {
       model.tripcode,
       model.subject,
       model.comment,
+      model.hasSage,
       attachedFileDto,
       childrenDto
     );
@@ -87,6 +90,56 @@ export class CommentMapper {
       model.thumbnail,
       model.thumbnailWidth,
       model.thumbnailHeight
+    );
+  }
+
+  /**
+   * Map `Comment` to moderation DTO
+   * @param model `Comment` model
+   * @param board Board short DTO
+   */
+  public toModerationDto(board: BoardShortDto, model: Comment): CommentModerationDto {
+    const attachedFile = this.attachedFileToModerationDto(board, model['attachedFile']);
+
+    const parentNum = model['parent'] ? (model['parent'].num as bigint) : model.num;
+
+    return new CommentModerationDto(
+      model.id,
+      model.ip,
+      model.num,
+      parentNum,
+      board.url,
+      model.createdAt,
+      model.name,
+      model.email,
+      model.subject,
+      model.comment,
+      attachedFile
+    );
+  }
+
+  /**
+   * Map `AttachedFile` to moderation DTO
+   * @param model `AttachedFile` model
+   * @param board Board short DTO
+   */
+  public attachedFileToModerationDto(
+    board: BoardShortDto,
+    model: AttachedFile | null
+  ): AttachedFileModerationDto | null {
+    if (!model) {
+      return null;
+    }
+
+    return new AttachedFileModerationDto(
+      model.id,
+      board.url,
+      model.name,
+      model.thumbnail,
+      model.thumbnailWidth,
+      model.thumbnailHeight,
+      model.isImage,
+      model.mime
     );
   }
 

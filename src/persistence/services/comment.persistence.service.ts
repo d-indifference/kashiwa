@@ -9,6 +9,7 @@ import { ThreadCollapsedDto } from '@persistence/dto/comment/collapsed';
 import { AttachedFilePersistenceService } from '@persistence/services/attached-file.persistence.service';
 import { FilesystemOperator } from '@library/filesystem';
 import { Constants } from '@library/constants';
+import { CommentModerationDto } from '@persistence/dto/comment/moderation';
 
 /**
  * Database queries for `Comment` model
@@ -107,7 +108,7 @@ export class CommentPersistenceService {
   }
 
   /**
-   * Find comments by passwor, nums and board URL
+   * Find comments by password, nums and board URL
    * @param url Board URL
    * @param nums Comments number on board
    * @param password Poster's password
@@ -121,6 +122,24 @@ export class CommentPersistenceService {
     });
 
     return comments.map(comment => comment.id);
+  }
+
+  /**
+   * Find all comments and paginate them for moderation page
+   * @param boardId ID of board
+   * @param page Page request
+   */
+  public async findForModeration(boardId: string, page: PageRequest): Promise<Page<CommentModerationDto>> {
+    const board = await this.boardPersistenceService.findShortDtoById(boardId);
+
+    const comments = await Page.ofFilter<
+      Comment,
+      Prisma.CommentWhereInput,
+      Prisma.CommentOrderByWithAggregationInput,
+      Prisma.CommentInclude
+    >(this.prisma, 'comment', page, { boardId }, { createdAt: 'desc' }, { attachedFile: true, parent: true });
+
+    return comments.map(comment => this.commentMapper.toModerationDto(board, comment));
   }
 
   /**
@@ -214,6 +233,21 @@ export class CommentPersistenceService {
       await this.prisma.comment.delete({ where: { id } });
 
       await this.removeOrphanReplies(comment.board.url);
+    }
+  }
+
+  /**
+   * Remove comment and its `AttachedFile` by IP
+   * @param boardId Board ID
+   * @param ip Poster's IP
+   */
+  public async removeAllCommentsByIp(boardId: string, ip: string): Promise<void> {
+    this.logger.log(`removeAllCommentsByIp: ip: ${ip}`);
+
+    const comments = await this.prisma.comment.findMany({ select: { id: true }, where: { ip, boardId } });
+
+    for (const commentId of comments) {
+      await this.removeCommentById(commentId.id);
     }
   }
 

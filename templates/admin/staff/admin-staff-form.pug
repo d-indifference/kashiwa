@@ -8,7 +8,7 @@ html(lang='en')
         +AdminBar(session.payload.role)
         div.logo Staff Panel - Kashiwa Image Board
         hr
-        + AdminLinks
+        + AdminLinks(session.payload.role)
         div.theader
             if formType === 'CREATE'
               | New staff member

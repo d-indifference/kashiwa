@@ -41,7 +41,8 @@ export class ThreadMapper {
       tripcode: comment.tripcode,
       date: comment.createdAt,
       comment: comment.comment,
-      hasSage: false
+      hasSage: comment.hasSage,
+      isAdmin: comment.isAdmin
     };
   }
 

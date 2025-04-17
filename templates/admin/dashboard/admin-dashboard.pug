@@ -8,7 +8,7 @@ html(lang='en')
         +AdminBar(session.payload.role)
         div.logo Management - Kashiwa Image Board
         hr
-        + AdminLinks
+        + AdminLinks(session.payload.role)
         div.theader
             if session.payload.role !== 'ADMINISTRATOR'
                | Moderation panel
