@@ -1,0 +1,46 @@
+include ../../_inc/thread/_head
+include ../../_inc/admin/_admin-bar
+include ../../_inc/admin/_admin-links
+
+html(lang='en')
+    +Head('Moderation - Kashiwa Image Board')
+    body
+        +AdminBar(session.payload.role)
+        div.logo Moderation - Kashiwa Image Board
+        hr
+        + AdminLinks(session.payload.role)
+        div.theader
+            | Choose a board for moderation
+
+        table(align='center' style='white-space: nowrap')
+            thead
+                tr.row1
+                    th URL
+                    th Name
+                    th
+            tbody
+              each board, index in content.content
+                  if (index + 1) % 2 === 0
+                      tr.row1
+                          td
+                              a(target='_blank' href=`/${board.url}`) /#{board.url}/
+                          td #{board.name}
+                          td
+                              | [
+                              a(href=`/kashiwa/moderation/${board.id}?limit=30`) Go to moderation
+                              | ]
+                  else
+                      tr.row2
+                          td
+                              a(target='_blank' href=`/${board.url}`) /#{board.url}/
+                          td #{board.name}
+                          td
+                              | [
+                              a(href=`/kashiwa/moderation/${board.id}?limit=30`) Go to moderation
+                              | ]
+
+        div(align='center')
+            if content.previous !== null
+                a(href=`/kashiwa/moderation?page=${content.previous}` title='Previous') ←
+            if content.next !== null
+                a(href=`/kashiwa/moderation?page=${content.next}` title='Next') →

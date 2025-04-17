@@ -31,7 +31,7 @@ export class StaffController {
   @Get()
   @Roles(UserRole.ADMINISTRATOR)
   @UseGuards(SessionGuard)
-  @Render('admin-staff-list')
+  @Render('admin/staff/admin-staff-list')
   public async getList(
     @Query(new ValidationPipe({ transform: true })) page: PageRequest,
     @Session() session: ISession
@@ -41,7 +41,7 @@ export class StaffController {
 
   @Get('my')
   @UseGuards(SessionGuard)
-  @Render('admin-staff-form-profile')
+  @Render('admin/staff/admin-staff-form-profile')
   public async getMyProfileForm(@Session() session: ISession): Promise<FormPage<StaffUpdateForm>> {
     return await this.staffService.getMyProfileForm(session);
   }
@@ -49,7 +49,7 @@ export class StaffController {
   @Get('new')
   @Roles(UserRole.ADMINISTRATOR)
   @UseGuards(SessionGuard)
-  @Render('admin-staff-form')
+  @Render('admin/staff/admin-staff-form')
   public getCreationForm(@Session() session: ISession): FormPage<UserDto> {
     return new FormPage(session, 'CREATE');
   }
@@ -57,7 +57,7 @@ export class StaffController {
   @Get('edit/:id')
   @Roles(UserRole.ADMINISTRATOR)
   @UseGuards(SessionGuard)
-  @Render('admin-staff-form')
+  @Render('admin/staff/admin-staff-form')
   public async getUpdateForm(
     @Session() session: ISession,
     @Param('id', ParseUUIDPipe) id: string

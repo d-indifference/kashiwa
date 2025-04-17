@@ -1,0 +1,130 @@
+include ../../_inc/thread/_head
+include ../../_inc/admin/_admin-bar
+include ../../_inc/admin/_admin-links
+
+html(lang='en')
+    +Head('Moderation - Kashiwa Image Board')
+    body
+        +AdminBar(session.payload.role)
+        div.logo Moderation - Kashiwa Image Board
+        hr
+        + AdminLinks(session.payload.role)
+        div.theader
+            | Comments moderation
+
+        div(align='center')
+            ='['
+            a(href='/kashiwa/moderation') Go back
+            =']'
+
+        table(align='center' style='white-space: nowrap')
+            thead
+                tr.row1
+                    th Created
+                    th IP
+                    th Name
+                    th Email
+                    th Subject
+                    th Comment
+                    th File
+                    th Link
+                    th Actions
+            tbody
+              each comment, index in content.content
+                  if ((index + 1) % 2) === 0
+                      tr.row1
+                          td #{formatDateTime(comment.createdAt)}
+                          td #{comment.ip}
+                          td #{comment.name}
+                          td #{comment.email ? comment.email : '-'}
+                          td #{comment.subject ? comment.subject : '-'}
+                          td !{comment.comment}
+                          td
+                              if comment.attachedFile
+                                  if comment.attachedFile.isImage
+                                      if comment.attachedFile.thumbnail
+                                          a(href=`/${comment.attachedFile.boardUrl}/src/${comment.attachedFile.name}` target='blank')
+                                              img(
+                                                  alt='no thumb'
+                                                  width=comment.attachedFile.thumbnailWidth
+                                                  height=comment.attachedFile.thumbnailHeight
+                                                  src=`/${comment.attachedFile.boardUrl}/thumb/${comment.attachedFile.thumbnail}`
+                                              )
+                                      else
+                                          div.nothumb File was deleted
+                                  else
+                                      if comment.attachedFile.name === 'NO_THUMB'
+                                          div.nothumb File was deleted
+                                      else
+                                          a(href=`/${comment.attachedFile.boardUrl}/src/${comment.attachedFile.name}` target='blank')
+                                              img(
+                                                  alt='File'
+                                                  width=86
+                                                  height=86
+                                                  src=`/img/file.png`
+                                              )
+                              else
+                                  ='-'
+                          td
+                            ='['
+                            a(target='_blank' href=`/${comment.boardUrl}/res/${comment.parentNum.toString()}.html#${comment.num.toString()}`) Go to post
+                            =']'
+                          td
+                              form(method='post' action=`/kashiwa/moderation/delete-post/${comment.id}`)
+                                  input(type='hidden' name='ip' value=comment.ip)
+                                  input(type='hidden' name='redirect' value=`/kashiwa/moderation/${boardId}?page=${content.current}&limit=30`)
+                                  input(type='submit' name='post' value='Delete this post')
+                                  input(type='submit' name='file' value='Delete this file')
+                                  input(type='submit' name='allByIp' value='Delete all posts of this IP')
+                  else
+                      tr.row2
+                          td #{formatDateTime(comment.createdAt)}
+                          td #{comment.ip}
+                          td #{comment.name}
+                          td #{comment.email ? comment.email : '-'}
+                          td #{comment.subject ? comment.subject : '-'}
+                          td !{comment.comment}
+                          td
+                            if comment.attachedFile
+                              if comment.attachedFile.isImage
+                                if comment.attachedFile.thumbnail
+                                    a(href=`/${comment.attachedFile.boardUrl}/src/${comment.attachedFile.name}` target='blank')
+                                        img(
+                                            alt='no thumb'
+                                            width=comment.attachedFile.thumbnailWidth
+                                            height=comment.attachedFile.thumbnailHeight
+                                            src=`/${comment.attachedFile.boardUrl}/thumb/${comment.attachedFile.thumbnail}`
+                                        )
+                                else
+                                    div.nothumb File was deleted
+                              else
+                                if comment.attachedFile.name === 'NO_THUMB'
+                                  div.nothumb File was deleted
+                                else
+                                    a(href=`/${comment.attachedFile.boardUrl}/src/${comment.attachedFile.name}` target='blank')
+                                        img(
+                                            alt='File'
+                                            width=86
+                                            height=86
+                                            src=`/img/file.png`
+                                        )
+                            else
+                                ='-'
+                          td
+                              ='['
+                              a(target='_blank' href=`/${comment.boardUrl}/res/${comment.parentNum.toString()}.html#${comment.num.toString()}`) Go to post
+                              =']'
+                          td
+                            form(method='post' action=`/kashiwa/moderation/delete-post/${comment.id}`)
+                                input(type='hidden' name='boardId' value=boardId)
+                                input(type='hidden' name='ip' value=comment.ip)
+                                input(type='hidden' name='redirect' value=`/kashiwa/moderation/${boardId}?page=${content.current}&limit=30`)
+                                input(type='submit' name='post' value='Delete this post')
+                                input(type='submit' name='file' value='Delete this file')
+                                input(type='submit' name='allByIp' value='Delete all posts of this IP')
+
+        div(align='center')
+            if content.previous !== null
+                a(href=`/kashiwa/moderation/${boardId}?page=${content.previous}` title='Previous') ←
+            if content.next !== null
+                a(href=`/kashiwa/moderation/${boardId}?page=${content.next}` title='Next') →

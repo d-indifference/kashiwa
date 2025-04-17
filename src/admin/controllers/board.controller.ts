@@ -33,7 +33,7 @@ export class BoardController {
   @Get()
   @Roles(UserRole.ADMINISTRATOR)
   @UseGuards(SessionGuard)
-  @Render('admin-board-list')
+  @Render('admin/board/admin-board-list')
   public async getBoardList(
     @Query(new ValidationPipe({ transform: true })) page: PageRequest,
     @Session() session: ISession
@@ -44,7 +44,7 @@ export class BoardController {
   @Get('new')
   @Roles(UserRole.ADMINISTRATOR)
   @UseGuards(SessionGuard)
-  @Render('admin-board-form')
+  @Render('admin/board/admin-board-form')
   public getBoardForm(@Session() session: ISession): FormPage<{ getSupportedFileTypes: () => string[][] }> {
     return new FormPage(session, 'CREATE', { getSupportedFileTypes });
   }
@@ -52,7 +52,7 @@ export class BoardController {
   @Get('edit/:id')
   @Roles(UserRole.ADMINISTRATOR)
   @UseGuards(SessionGuard)
-  @Render('admin-board-form')
+  @Render('admin/board/admin-board-form')
   public async getEditBoardForm(
     @Session() session: ISession,
     @Param('id', ParseUUIDPipe) id: string

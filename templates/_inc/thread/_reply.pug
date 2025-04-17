@@ -8,6 +8,11 @@ mixin Reply(_board, _opening_post, _post, is_thread)
                 label
                     input(type='checkbox' name='delete' value=_post.num.toString())
                     =' '
+                    if _post.hasSage
+                      span.sage ⇩
+                    if _post.isAdmin
+                      span.adminPost(title='Post by moderator or administrator') ↯
+                    =' '
                     span.replytitle #{_post.subject}
                     =' '
                     if _post.email

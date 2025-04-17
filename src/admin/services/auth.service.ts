@@ -21,7 +21,7 @@ export class AuthService {
     const count = await this.userService.countAll();
 
     if (count === 0) {
-      res.render('admin-sign-up');
+      res.render('admin/auth/admin-sign-up');
     } else {
       res.status(HttpStatus.FORBIDDEN).render('error', {
         message: 'You don`t need to sign up a new account<br>[<a href="/kashiwa">To management panel</a>]'
@@ -36,7 +36,7 @@ export class AuthService {
    */
   public checkSignInAccessAndResponse(res: Response, session: ISession): void {
     if (!session.payload) {
-      res.render('admin-sign-in');
+      res.render('admin/auth/admin-sign-in');
     } else {
       res
         .status(HttpStatus.FORBIDDEN)
