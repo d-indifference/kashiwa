@@ -13,3 +13,10 @@ mixin AdminLinks(role)
         | [
         a(href='/kashiwa/moderation') Moderation
         | ]
+        if role === 'ADMINISTRATOR'
+            | [
+            a(href='/kashiwa/spam') Spam list
+            | ]
+            | [
+            a(href='/kashiwa/ip-filter') IP Filter
+            | ]

@@ -1,0 +1,19 @@
+include ../../_inc/thread/_head
+include ../../_inc/admin/_admin-bar
+include ../../_inc/admin/_admin-links
+
+html(lang='en')
+    +Head('IP Filter - Kashiwa Image Board')
+    body
+        +AdminBar(session.payload.role)
+        div.logo IP Filter - Kashiwa Image Board
+        hr
+        + AdminLinks(session.payload.role)
+        div.theader
+            | Edit IP blacklist
+
+        div(align='center')
+            form(method='post' action='/kashiwa/ip-filter')
+                textarea(rows=45 cols=60 name='blackList') #{blackList}
+                br
+                input(type='submit' value='Update')

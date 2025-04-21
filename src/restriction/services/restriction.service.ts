@@ -19,6 +19,7 @@ import {
   strictAnonymity
 } from '@restriction/lib';
 import { DateTime } from 'luxon';
+import { AntiSpamService } from '@restriction/modules/antispam/services';
 
 /**
  * Type for describing of Exception class
@@ -41,7 +42,10 @@ export enum RestrictionType {
  */
 @Injectable()
 export class RestrictionService {
-  constructor(private readonly commentPersistenceService: CommentPersistenceService) {}
+  constructor(
+    private readonly commentPersistenceService: CommentPersistenceService,
+    private readonly antiSpamService: AntiSpamService
+  ) {}
 
   /**
    * Apply posting restrictions
@@ -86,6 +90,7 @@ export class RestrictionService {
       () => maxCommentSize(settings, form),
       `'Comment', cannot be longer than ${settings.maxCommentSize} symbols.'`
     );
+    this.antiSpamService.checkSpam(form, isAdmin);
     this.checkRestriction(() => forbiddenFiles(restrictionType, settings, form), 'File attachment is forbidden here.');
     this.checkRestriction(() => requiredFiles(restrictionType, settings, form), 'Please attach any file.');
     this.checkRestriction(() => allowedFileTypes(settings, form), 'Disallowed file type.');

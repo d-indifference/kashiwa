@@ -18,6 +18,18 @@ export class Constants {
 
     /** full path to settings directory */
     public static SETTINGS = path.join(process.cwd(), 'volumes', 'application.kashiwa', '_settings');
+
+    public static PRESETS = path.join(process.cwd(), '.presets');
+
+    public static FILE_SPAM = path.join(process.cwd(), 'volumes', 'application.kashiwa', '_settings', 'spam');
+
+    public static FILE_BLACK_LIST = path.join(
+      process.cwd(),
+      'volumes',
+      'application.kashiwa',
+      '_settings',
+      'black_list'
+    );
   };
 
   /** Settings directory name */

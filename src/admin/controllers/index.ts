@@ -3,3 +3,5 @@ export * from './dashboard.controller';
 export * from './staff.controller';
 export * from './board.controller';
 export * from './moderation.controller';
+export * from './spam.controller';
+export * from './ip-filter.controller';
