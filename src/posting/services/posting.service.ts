@@ -50,7 +50,7 @@ export class PostingService {
       isAdmin
     );
 
-    this.restrictionService.checkRestrictions(RestrictionType.THREAD, ip, board, form, isAdmin);
+    await this.restrictionService.checkRestrictions(RestrictionType.THREAD, ip, board, form, isAdmin);
 
     const createInput: Prisma.CommentCreateInput = this.makeThreadCreateInput(
       board.id,
@@ -104,7 +104,7 @@ export class PostingService {
       isAdmin
     );
 
-    this.restrictionService.checkRestrictions(RestrictionType.REPLY, ip, board, form, isAdmin);
+    await this.restrictionService.checkRestrictions(RestrictionType.REPLY, ip, board, form, isAdmin);
 
     const createInput: Prisma.CommentCreateInput = this.makeReplyCreateInput(
       board.id,

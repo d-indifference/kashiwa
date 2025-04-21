@@ -72,12 +72,14 @@ export const requiredFiles = (
     if (boardSettings.threadFileAttachmentMode === FileAttachmentMode.STRICT) {
       return Boolean(form.file);
     }
+    return true;
   }
 
   if (restrictionType === RestrictionType.REPLY) {
     if (boardSettings.replyFileAttachmentMode === FileAttachmentMode.STRICT) {
       return Boolean(form.file);
     }
+    return true;
   }
 
   return false;
