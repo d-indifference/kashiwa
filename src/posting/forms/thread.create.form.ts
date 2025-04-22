@@ -59,4 +59,20 @@ export class ThreadCreateForm {
   @MaxFileSize(20e6 - 1)
   @Transform(normalizeFormEmptyString)
   file?: MemoryStoredFile;
+
+  /**
+   * `Captcha` field with answer
+   */
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  captcha?: string;
+
+  /**
+   * Hidden encrypted captcha answer
+   */
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  nya?: string;
 }

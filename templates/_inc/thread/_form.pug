@@ -1,4 +1,4 @@
-mixin Form(_board, isThread)
+mixin Form(_board, isThread, captcha)
     table
         tbody
             if !_board.boardSettings.strictAnonymity
@@ -31,6 +31,14 @@ mixin Form(_board, isThread)
                         td.postblock File
                         td
                             input(type='file' name='file' size=35 accept=_board.boardSettings.allowedFileTypes.join(','))
+            if _board.boardSettings.enableCaptcha
+              tr
+                td.postblock Captcha
+                td
+                    | !{captcha.image}
+                    br
+                    input(type='text' size=15 name='captcha')
+                    input(type='hidden' name='nya' value=captcha.cryptoAnswer)
             tr
                 td.postblock Password
                 td

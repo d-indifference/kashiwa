@@ -19,6 +19,7 @@
     "noFallthroughCasesInSwitch": false,
     "paths": {
       "@admin/*": ["src/admin/*"],
+      "@captcha/*": ["src/captcha/*"],
       "@config/*": ["src/config/*"],
       "@library/*": ["src/library/*"],
       "@persistence/*": ["src/persistence/*"],

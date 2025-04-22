@@ -6,3 +6,11 @@ secure:
     salt-rounds: 3
   session:
     secret: 'insecure-48e8b0f4-64f4-40e7-8bfe-f5bf8374864e'
+
+captcha:
+  salt-rounds: 3
+  size: 6
+  ignoreChars: '0o1i'
+  noise: 3
+  color: true
+  background: '#cc9966'

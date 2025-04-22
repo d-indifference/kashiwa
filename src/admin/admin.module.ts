@@ -24,12 +24,13 @@ import {
 import { NestjsFormDataModule } from 'nestjs-form-data';
 import { PrismaService } from '@persistence/lib';
 import { nestjsFormDataConfig } from '@config/nestjs-form-data.config';
+import { CaptchaModule } from '@captcha/captcha.module';
 
 /**
  * Module for administration / moderation panel
  */
 @Module({
-  imports: [NestjsFormDataModule.config(nestjsFormDataConfig), LibraryModule, PersistenceModule],
+  imports: [NestjsFormDataModule.config(nestjsFormDataConfig), LibraryModule, PersistenceModule, CaptchaModule],
   providers: [
     PrismaService,
     AuthService,

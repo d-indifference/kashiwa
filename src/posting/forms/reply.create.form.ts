@@ -67,4 +67,20 @@ export class ReplyCreateForm {
   @IsBoolean()
   @IsNotEmpty()
   sage: boolean = false;
+
+  /**
+   * `Captcha` field with answer
+   */
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  captcha?: string;
+
+  /**
+   * Hidden encrypted captcha answer
+   */
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  nya?: string;
 }

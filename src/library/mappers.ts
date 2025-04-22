@@ -2,14 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { AttachedFileDto, CommentDto } from '@persistence/dto/comment/common';
 import { IAttachedFile, IBoard, IPage, IPost } from '@library/page-compiler';
 import { BoardDto } from '@persistence/dto/board';
+import { ICaptcha } from '@captcha/interfaces';
 
 @Injectable()
 export class ThreadMapper {
-  public mapPage(board: BoardDto, openingPost: CommentDto): IPage {
+  public mapPage(board: BoardDto, openingPost: CommentDto, captcha?: ICaptcha): IPage {
     return {
       board: this.mapBoard(board),
       openingPost: this.mapPost(openingPost),
-      replies: openingPost.children.map(comment => this.mapPost(comment))
+      replies: openingPost.children.map(comment => this.mapPost(comment)),
+      captcha
     };
   }
 
