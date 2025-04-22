@@ -20,6 +20,7 @@ import {
 } from '@restriction/lib';
 import { DateTime } from 'luxon';
 import { AntiSpamService } from '@restriction/modules/antispam/services';
+import { BanService } from '@restriction/services/ban.service';
 
 /**
  * Type for describing of Exception class
@@ -44,7 +45,8 @@ export enum RestrictionType {
 export class RestrictionService {
   constructor(
     private readonly commentPersistenceService: CommentPersistenceService,
-    private readonly antiSpamService: AntiSpamService
+    private readonly antiSpamService: AntiSpamService,
+    private readonly banService: BanService
   ) {}
 
   /**
@@ -81,6 +83,7 @@ export class RestrictionService {
     isAdmin: boolean
   ): Promise<void> {
     this.checkRestriction(() => allowPosting(settings), 'This board is closed for posting.', ForbiddenException);
+    await this.banService.checkBan(ip, isAdmin);
     this.checkRestriction(() => strictAnonymity(settings, form), 'Please stay anonymous on this board.');
     this.checkRestriction(
       () => maxStringFieldSize(settings, form),

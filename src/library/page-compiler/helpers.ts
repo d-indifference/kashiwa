@@ -16,6 +16,13 @@ export const fileSize = (size: number): string => filesize(size, { standard: Con
 export const formatDateTime = (dateTime: Date) => DateTime.fromJSDate(dateTime).toFormat(Constants.DATE_DISPLAY_FORMAT);
 
 /**
+ * Converts JS-date to simple datetime format of application on Pug thread template
+ * @param dateTime JS `Date` object
+ */
+export const simpleFormatDateTime = (dateTime: Date) =>
+  DateTime.fromJSDate(dateTime).toFormat(Constants.SIMPLE_DATE_FORMAT);
+
+/**
  * Get NPM project version to Pug thread template
  */
 export const applicationVersion = () => process.env.npm_package_version;

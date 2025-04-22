@@ -3,3 +3,4 @@ export * from './board.persistence.service';
 export * from './attached-file.persistence.service';
 export * from './comment.persistence.service';
 export * from './attached-file.persistence.service';
+export * from './ban.persistence.service';

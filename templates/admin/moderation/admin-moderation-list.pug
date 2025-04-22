@@ -71,6 +71,9 @@ html(lang='en')
                             =']'
                           td
                               form(method='post' action=`/kashiwa/moderation/delete-post/${comment.id}`)
+                                  ='['
+                                  a(href=`/kashiwa/ban/new?ip=${comment.ip}` target='_blank') Ban this poster
+                                  =']'
                                   input(type='hidden' name='ip' value=comment.ip)
                                   input(type='hidden' name='redirect' value=`/kashiwa/moderation/${boardId}?page=${content.current}&limit=30`)
                                   input(type='submit' name='post' value='Delete this post')
@@ -116,6 +119,9 @@ html(lang='en')
                               =']'
                           td
                             form(method='post' action=`/kashiwa/moderation/delete-post/${comment.id}`)
+                                ='['
+                                a(href=`/kashiwa/ban/new?ip=${comment.ip}` target='_blank') Ban this poster
+                                =']'
                                 input(type='hidden' name='boardId' value=boardId)
                                 input(type='hidden' name='ip' value=comment.ip)
                                 input(type='hidden' name='redirect' value=`/kashiwa/moderation/${boardId}?page=${content.current}&limit=30`)

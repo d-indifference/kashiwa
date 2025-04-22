@@ -83,4 +83,6 @@ export class Constants {
 
   /** Milliseconds for removing cookies */
   public static COOKIES_ERASING_VALUE = -9999;
+
+  public static SIMPLE_DATE_FORMAT = 'dd MMM yyyy HH:mm';
 }

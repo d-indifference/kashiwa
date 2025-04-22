@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 import { PrismaService } from '@persistence/lib';
 import { ConfigModule } from '@nestjs/config';
-import { BoardMapper, CommentMapper, UserMapper } from '@persistence/mappers';
+import { BanMapper, BoardMapper, CommentMapper, UserMapper } from '@persistence/mappers';
 import {
   AttachedFilePersistenceService,
   BoardPersistenceService,
   UserPersistenceService,
-  CommentPersistenceService
+  CommentPersistenceService,
+  BanPersistenceService
 } from '@persistence/services';
 
 /**
@@ -22,8 +23,16 @@ import {
     BoardPersistenceService,
     CommentMapper,
     CommentPersistenceService,
-    AttachedFilePersistenceService
+    AttachedFilePersistenceService,
+    BanMapper,
+    BanPersistenceService
   ],
-  exports: [UserPersistenceService, BoardPersistenceService, CommentPersistenceService, AttachedFilePersistenceService]
+  exports: [
+    UserPersistenceService,
+    BoardPersistenceService,
+    CommentPersistenceService,
+    AttachedFilePersistenceService,
+    BanPersistenceService
+  ]
 })
 export class PersistenceModule {}

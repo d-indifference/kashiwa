@@ -13,6 +13,9 @@ mixin AdminLinks(role)
         | [
         a(href='/kashiwa/moderation') Moderation
         | ]
+        | [
+        a(href='/kashiwa/ban') Banned posters
+        | ]
         if role === 'ADMINISTRATOR'
             | [
             a(href='/kashiwa/spam') Spam list

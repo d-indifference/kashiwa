@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { LibraryModule } from '@library/library.module';
 import { PersistenceModule } from '@persistence/persistence.module';
-import { RestrictionService } from '@restriction/services';
+import { BanService, RestrictionService } from '@restriction/services';
 import { AntiSpamModule } from '@restriction/modules/antispam/anti-spam.module';
 
 /**
@@ -9,7 +9,7 @@ import { AntiSpamModule } from '@restriction/modules/antispam/anti-spam.module';
  */
 @Module({
   imports: [LibraryModule, PersistenceModule, AntiSpamModule],
-  providers: [RestrictionService],
+  providers: [RestrictionService, BanService],
   exports: [RestrictionService]
 })
 export class RestrictionModule {}

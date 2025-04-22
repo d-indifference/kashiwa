@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { LibraryModule } from '@library/library.module';
 import {
   AuthController,
+  BanController,
   BoardController,
   DashboardController,
   IpFilterController,
@@ -12,6 +13,7 @@ import {
 import { PersistenceModule } from '@persistence/persistence.module';
 import {
   AuthService,
+  BanService,
   BoardService,
   DashboardService,
   IpFilterService,
@@ -36,7 +38,8 @@ import { nestjsFormDataConfig } from '@config/nestjs-form-data.config';
     BoardService,
     ModerationService,
     SpamService,
-    IpFilterService
+    IpFilterService,
+    BanService
   ],
   controllers: [
     AuthController,
@@ -45,7 +48,8 @@ import { nestjsFormDataConfig } from '@config/nestjs-form-data.config';
     BoardController,
     ModerationController,
     SpamController,
-    IpFilterController
+    IpFilterController,
+    BanController
   ]
 })
 export class AdminModule {}
