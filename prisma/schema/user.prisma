@@ -10,5 +10,7 @@ model User {
   email        String   @unique @db.VarChar(256)
   role         UserRole
 
+  bans Ban[]
+
   @@map("user")
 }

@@ -15,6 +15,7 @@ import {
   NotFoundExceptionFilter,
   UnauthorizedExceptionFilter
 } from '@library/filters';
+import { IpFilterGuard, loadBlackList } from '@library/guards';
 
 const bootstrap = async (): Promise<void> => {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -37,6 +38,11 @@ const bootstrap = async (): Promise<void> => {
   app.useGlobalFilters(new BadRequestExceptionFilter());
   app.useGlobalFilters(new UnauthorizedExceptionFilter());
   app.useGlobalFilters(new ForbiddenExceptionFilter());
+
+  await loadBlackList();
+
+  app.useGlobalGuards(new IpFilterGuard());
+  app.getHttpAdapter().getInstance().set('trust proxy', true);
 
   await app.listen(port);
 

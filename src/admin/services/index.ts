@@ -3,3 +3,6 @@ export * from './dashboard.service';
 export * from './staff.service';
 export * from './board.service';
 export * from './moderation.service';
+export * from './spam.service';
+export * from './ip-filter.service';
+export * from './ban.service';

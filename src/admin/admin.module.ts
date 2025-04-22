@@ -2,13 +2,25 @@ import { Module } from '@nestjs/common';
 import { LibraryModule } from '@library/library.module';
 import {
   AuthController,
+  BanController,
   BoardController,
   DashboardController,
+  IpFilterController,
   ModerationController,
+  SpamController,
   StaffController
 } from '@admin/controllers';
 import { PersistenceModule } from '@persistence/persistence.module';
-import { AuthService, BoardService, DashboardService, ModerationService, StaffService } from '@admin/services';
+import {
+  AuthService,
+  BanService,
+  BoardService,
+  DashboardService,
+  IpFilterService,
+  ModerationService,
+  SpamService,
+  StaffService
+} from '@admin/services';
 import { NestjsFormDataModule } from 'nestjs-form-data';
 import { PrismaService } from '@persistence/lib';
 import { nestjsFormDataConfig } from '@config/nestjs-form-data.config';
@@ -18,7 +30,26 @@ import { nestjsFormDataConfig } from '@config/nestjs-form-data.config';
  */
 @Module({
   imports: [NestjsFormDataModule.config(nestjsFormDataConfig), LibraryModule, PersistenceModule],
-  providers: [PrismaService, AuthService, DashboardService, StaffService, BoardService, ModerationService],
-  controllers: [AuthController, DashboardController, StaffController, BoardController, ModerationController]
+  providers: [
+    PrismaService,
+    AuthService,
+    DashboardService,
+    StaffService,
+    BoardService,
+    ModerationService,
+    SpamService,
+    IpFilterService,
+    BanService
+  ],
+  controllers: [
+    AuthController,
+    DashboardController,
+    StaffController,
+    BoardController,
+    ModerationController,
+    SpamController,
+    IpFilterController,
+    BanController
+  ]
 })
 export class AdminModule {}

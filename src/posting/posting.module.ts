@@ -6,12 +6,13 @@ import { nestjsFormDataConfig } from '@config/nestjs-form-data.config';
 import { BoardController, DeletionController, PostingController } from '@posting/controllers';
 import { AttachedFileService, BoardService, DeletionService, PostingService } from '@posting/services';
 import { WakabaMarkdownService } from '@posting/lib';
+import { RestrictionModule } from '@restriction/restriction.module';
 
 /**
  * Module for thread posting
  */
 @Module({
-  imports: [NestjsFormDataModule.config(nestjsFormDataConfig), LibraryModule, PersistenceModule],
+  imports: [NestjsFormDataModule.config(nestjsFormDataConfig), LibraryModule, PersistenceModule, RestrictionModule],
   providers: [BoardService, PostingService, WakabaMarkdownService, AttachedFileService, DeletionService],
   controllers: [BoardController, PostingController, DeletionController]
 })

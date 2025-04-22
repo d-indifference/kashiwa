@@ -1,0 +1,19 @@
+include ../../_inc/thread/_head
+include ../../_inc/admin/_admin-bar
+include ../../_inc/admin/_admin-links
+
+html(lang='en')
+    +Head('Staff Panel - Kashiwa Image Board')
+    body
+        +AdminBar(session.payload.role)
+        div.logo Spam List - Kashiwa Image Board
+        hr
+        + AdminLinks(session.payload.role)
+        div.theader
+            | Edit spam list
+
+        div(align='center')
+            form(method='post' action='/kashiwa/spam')
+                textarea(rows=45 cols=60 name='spamList') #{spamList}
+                br
+                input(type='submit' value='Update')

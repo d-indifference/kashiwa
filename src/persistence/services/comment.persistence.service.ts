@@ -169,6 +169,42 @@ export class CommentPersistenceService {
   }
 
   /**
+   * Find last comment (thread or reply) from this IP
+   * @param ip Poster's IP
+   */
+  public async findLastCommentByIp(ip: string): Promise<{ createdAt: Date } | null> {
+    const comment = await this.prisma.comment.findFirst({
+      where: { ip },
+      orderBy: { createdAt: 'desc' },
+      select: { createdAt: true }
+    });
+
+    if (!comment) {
+      return null;
+    }
+
+    return comment;
+  }
+
+  /**
+   * Find last thread from this IP
+   * @param ip Poster's IP
+   */
+  public async findLastThreadByIp(ip: string): Promise<Pick<Comment, 'createdAt'> | null> {
+    const comment = await this.prisma.comment.findFirst({
+      where: { ip, parentId: null },
+      orderBy: { createdAt: 'desc' },
+      select: { createdAt: true }
+    });
+
+    if (!comment) {
+      return null;
+    }
+
+    return comment;
+  }
+
+  /**
    * Get all comments count
    */
   public async countAll(): Promise<number> {

@@ -1,0 +1,12 @@
+model Ban {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+  ip        String   @db.VarChar(64)
+  till      DateTime
+  reason    String   @db.VarChar(512)
+
+  userId String? @map("user_id") @db.Uuid
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("ban")
+}
