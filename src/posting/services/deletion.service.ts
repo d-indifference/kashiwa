@@ -9,6 +9,7 @@ import {
 import { PageCompilerService } from '@library/page-compiler';
 import { ThreadMapper } from '@library/mappers';
 import { Constants } from '@library/constants';
+import { CaptchaGeneratorProvider } from '@captcha/providers';
 
 /**
  * Service for posts deletion
@@ -20,7 +21,8 @@ export class DeletionService {
     private readonly boardPersistenceService: BoardPersistenceService,
     private readonly pageCompilerService: PageCompilerService,
     private readonly threadMapper: ThreadMapper,
-    private readonly attachedFilePersistenceService: AttachedFilePersistenceService
+    private readonly attachedFilePersistenceService: AttachedFilePersistenceService,
+    private readonly captchaGeneratorProvider: CaptchaGeneratorProvider
   ) {}
 
   /**
@@ -84,10 +86,15 @@ export class DeletionService {
 
     for (const num of threadNums) {
       const parentThread = await this.commentPersistenceService.findThread(board.url, num);
+      const page = this.threadMapper.mapPage(board, parentThread);
 
-      const pagePayload = this.threadMapper.mapPage(board, parentThread);
+      if (board.boardSettings) {
+        if (board.boardSettings.enableCaptcha) {
+          page.captcha = await this.captchaGeneratorProvider.generate(board.boardSettings.isCaptchaCaseSensitive);
+        }
+      }
 
-      await this.pageCompilerService.saveThreadPage(pagePayload);
+      await this.pageCompilerService.saveThreadPage(page);
     }
   }
 }

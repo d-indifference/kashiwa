@@ -21,7 +21,7 @@ html(lang='en')
         div.postarea
             if board.boardSettings.allowPosting
                 form#postform(action=`/kashiwa/post/${board.url}` method='post' enctype='multipart/form-data')
-                    +Form(board, false)
+                    +Form(board, false, captcha)
 
         form#delform(action=`/kashiwa/delete/${board.url}` method='post')
             each thread in threads.content

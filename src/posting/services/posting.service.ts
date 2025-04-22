@@ -5,11 +5,12 @@ import { Response } from 'express';
 import { processTripcode, setPassword, WakabaMarkdownService } from '@posting/lib';
 import { BoardDto } from '@persistence/dto/board';
 import { Comment, Prisma } from '@prisma/client';
-import { PageCompilerService } from '@library/page-compiler';
+import { IPage, PageCompilerService } from '@library/page-compiler';
 import { Constants } from '@library/constants';
 import { AttachedFileService } from '@posting/services/attached-file.service';
 import { ThreadMapper } from '@library/mappers';
 import { RestrictionService, RestrictionType } from '@restriction/services';
+import { CaptchaGeneratorProvider } from '@captcha/providers';
 
 /**
  * Service of comment posting
@@ -23,7 +24,8 @@ export class PostingService {
     private readonly pageCompilerService: PageCompilerService,
     private readonly attachedFileService: AttachedFileService,
     private readonly threadMapper: ThreadMapper,
-    private readonly restrictionService: RestrictionService
+    private readonly restrictionService: RestrictionService,
+    private readonly captchaGeneratorProvider: CaptchaGeneratorProvider
   ) {}
 
   /**
@@ -68,6 +70,7 @@ export class PostingService {
     const newThread = await this.commentPersistenceService.createComment(url, createInput);
 
     const pagePayload = this.threadMapper.mapPage(board, newThread);
+    await this.setCaptcha(board, pagePayload);
 
     await this.pageCompilerService.saveThreadPage(pagePayload);
 
@@ -125,6 +128,7 @@ export class PostingService {
     const parentThread = await this.commentPersistenceService.findThread(url, num);
 
     const pagePayload = this.threadMapper.mapPage(board, parentThread);
+    await this.setCaptcha(board, pagePayload);
 
     await this.pageCompilerService.saveThreadPage(pagePayload);
 
@@ -325,6 +329,14 @@ export class PostingService {
       res.cookie('kashiwa_email', form.email, { maxAge: Constants.COOKIES_10_YEARS });
     } else {
       res.cookie('kashiwa_email', '', { maxAge: Constants.COOKIES_ERASING_VALUE });
+    }
+  }
+
+  private async setCaptcha(board: BoardDto, page: IPage): Promise<void> {
+    if (board.boardSettings) {
+      if (board.boardSettings.enableCaptcha) {
+        page.captcha = await this.captchaGeneratorProvider.generate(board.boardSettings.isCaptchaCaseSensitive);
+      }
     }
   }
 }

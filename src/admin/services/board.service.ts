@@ -12,6 +12,7 @@ import { BoardSettings } from '@prisma/client';
 import { getSupportedFileTypes } from '@admin/lib/helpers';
 import { ThreadMapper } from '@library/mappers';
 import { PageCompilerService } from '@library/page-compiler';
+import { CaptchaGeneratorProvider } from '@captcha/providers';
 
 /**
  * Service for working with boards
@@ -22,7 +23,8 @@ export class BoardService {
     private readonly boardPersistenceService: BoardPersistenceService,
     private readonly commentPersistenceService: CommentPersistenceService,
     private readonly threadMapper: ThreadMapper,
-    private readonly pageCompilerService: PageCompilerService
+    private readonly pageCompilerService: PageCompilerService,
+    private readonly captchaGeneratorProvider: CaptchaGeneratorProvider
   ) {}
 
   /**
@@ -225,6 +227,12 @@ export class BoardService {
     const parentThread = await this.commentPersistenceService.findThread(board.url, num);
 
     const pagePayload = this.threadMapper.mapPage(board, parentThread);
+
+    if (board.boardSettings) {
+      if (board.boardSettings.enableCaptcha) {
+        pagePayload.captcha = await this.captchaGeneratorProvider.generate(board.boardSettings.isCaptchaCaseSensitive);
+      }
+    }
 
     await this.pageCompilerService.saveThreadPage(pagePayload);
   }

@@ -21,6 +21,7 @@ import {
 import { DateTime } from 'luxon';
 import { AntiSpamService } from '@restriction/modules/antispam/services';
 import { BanService } from '@restriction/services/ban.service';
+import { CaptchaSolvingPredicateProvider } from '@captcha/providers';
 
 /**
  * Type for describing of Exception class
@@ -46,7 +47,8 @@ export class RestrictionService {
   constructor(
     private readonly commentPersistenceService: CommentPersistenceService,
     private readonly antiSpamService: AntiSpamService,
-    private readonly banService: BanService
+    private readonly banService: BanService,
+    private readonly captchaSolvingPredicateProvider: CaptchaSolvingPredicateProvider
   ) {}
 
   /**
@@ -82,6 +84,16 @@ export class RestrictionService {
     form: FormsType,
     isAdmin: boolean
   ): Promise<void> {
+    if (settings.enableCaptcha) {
+      await this.checkRestrictionAsync(
+        async () => {
+          return await this.captchaSolvingPredicateProvider.isCaptchaSolved(isAdmin, form.nya, form.captcha);
+        },
+        'Captcha is invalid',
+        ForbiddenException
+      );
+    }
+
     this.checkRestriction(() => allowPosting(settings), 'This board is closed for posting.', ForbiddenException);
     await this.banService.checkBan(ip, isAdmin);
     this.checkRestriction(() => strictAnonymity(settings, form), 'Please stay anonymous on this board.');
