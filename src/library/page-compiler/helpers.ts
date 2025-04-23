@@ -2,6 +2,8 @@ import { filesize } from 'filesize';
 import { DateTime } from 'luxon';
 import { Constants } from '@library/constants';
 import * as process from 'node:process';
+import * as fs from 'fs';
+import * as path from 'node:path';
 
 /**
  * Converts number of bytes to pretty string format on Pug thread template
@@ -65,4 +67,15 @@ export const truncateText = (text: string, url: string, openingPost: bigint, num
   }
 
   return text;
+};
+
+/**
+ * Helper to getting random banner link from disk
+ */
+export const getRandomBanner = () => {
+  const files = fs.readdirSync(path.join(process.cwd(), 'static', 'img', 'banners'));
+
+  const randomIndex = Math.floor(Math.random() * files.length);
+
+  return `/img/banners/${files[randomIndex]}`;
 };

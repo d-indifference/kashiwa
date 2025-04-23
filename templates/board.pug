@@ -20,6 +20,8 @@ html(lang='en')
             a(href='/') Main Page
             | ]
         div.logo
+            div.banner
+                img(src=getRandomBanner() alt='banner')
             | #{board.name} - #{SITE_SETTINGS().siteName}
         div.sublogo= SITE_SETTINGS().siteSlogan
         hr

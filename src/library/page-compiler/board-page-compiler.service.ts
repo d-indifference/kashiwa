@@ -4,6 +4,7 @@ import * as pug from 'pug';
 import * as path from 'node:path';
 import { Constants } from '@library/constants';
 import { FilesystemOperator } from '@library/filesystem';
+import { getRandomBanner } from '@library/page-compiler/helpers';
 
 /**
  * Page compiler for boards pages
@@ -43,6 +44,6 @@ export class BoardPageCompilerService {
   private compileTemplate(boardPage: BoardPage): string {
     const compiledFunction = pug.compileFile(path.join(Constants.Paths.TEMPLATES, this.template));
 
-    return compiledFunction({ ...boardPage, SITE_SETTINGS: () => global.GLOBAL_SETTINGS });
+    return compiledFunction({ ...boardPage, SITE_SETTINGS: () => global.GLOBAL_SETTINGS, getRandomBanner });
   }
 }

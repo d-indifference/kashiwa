@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import * as pug from 'pug';
 import * as path from 'node:path';
 import { Constants } from '@library/constants';
-import { applicationVersion, fileSize, formatDateTime } from '@library/page-compiler/helpers';
+import { applicationVersion, fileSize, formatDateTime, getRandomBanner } from '@library/page-compiler/helpers';
 import { IPage } from '@library/page-compiler/interfaces/page.interface';
 import { FilesystemOperator } from '@library/filesystem';
 
@@ -39,7 +39,8 @@ export class ThreadPageCompilerService {
       formatDateTime,
       applicationVersion,
       _CONTENT: content,
-      SITE_SETTINGS: () => global.GLOBAL_SETTINGS
+      SITE_SETTINGS: () => global.GLOBAL_SETTINGS,
+      getRandomBanner
     });
   }
 }
