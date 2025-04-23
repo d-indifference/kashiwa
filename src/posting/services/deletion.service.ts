@@ -6,10 +6,11 @@ import {
   BoardPersistenceService,
   CommentPersistenceService
 } from '@persistence/services';
-import { PageCompilerService } from '@library/page-compiler';
+import { ThreadPageCompilerService } from '@library/page-compiler';
 import { ThreadMapper } from '@library/mappers';
 import { Constants } from '@library/constants';
 import { CaptchaGeneratorProvider } from '@captcha/providers';
+import { PageCachingProvider } from '@posting/providers';
 
 /**
  * Service for posts deletion
@@ -19,10 +20,11 @@ export class DeletionService {
   constructor(
     private readonly commentPersistenceService: CommentPersistenceService,
     private readonly boardPersistenceService: BoardPersistenceService,
-    private readonly pageCompilerService: PageCompilerService,
+    private readonly pageCompilerService: ThreadPageCompilerService,
     private readonly threadMapper: ThreadMapper,
     private readonly attachedFilePersistenceService: AttachedFilePersistenceService,
-    private readonly captchaGeneratorProvider: CaptchaGeneratorProvider
+    private readonly captchaGeneratorProvider: CaptchaGeneratorProvider,
+    private readonly pageCachingProvider: PageCachingProvider
   ) {}
 
   /**
@@ -38,7 +40,7 @@ export class DeletionService {
     if (num) {
       res.redirect(this.makeRedirectionString(url, form, num));
     } else {
-      res.redirect(`/${url}`);
+      res.redirect(`/${url}/kashiwa${Constants.HTML_SUFFIX}`);
     }
   }
 
@@ -95,6 +97,7 @@ export class DeletionService {
       }
 
       await this.pageCompilerService.saveThreadPage(page);
+      await this.pageCachingProvider.cacheBoardPages(url);
     }
   }
 }

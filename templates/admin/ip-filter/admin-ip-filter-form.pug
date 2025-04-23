@@ -3,10 +3,10 @@ include ../../_inc/admin/_admin-bar
 include ../../_inc/admin/_admin-links
 
 html(lang='en')
-    +Head('IP Filter - Kashiwa Image Board')
+    +Head('IP Filter')
     body
         +AdminBar(session.payload.role)
-        div.logo IP Filter - Kashiwa Image Board
+        div.logo IP Filter - #{SITE_SETTINGS().siteName}
         hr
         + AdminLinks(session.payload.role)
         div.theader

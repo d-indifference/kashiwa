@@ -6,3 +6,4 @@ export * from './moderation.controller';
 export * from './spam.controller';
 export * from './ip-filter.controller';
 export * from './ban.controller';
+export * from './global-settings.controller';

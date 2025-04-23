@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import * as pug from 'pug';
 import * as path from 'node:path';
 import { Constants } from '@library/constants';
-import { applicationVersion, fileSize, formatDateTime } from '@library/page-compiler/helpers';
+import { applicationVersion, fileSize, formatDateTime, getRandomBanner } from '@library/page-compiler/helpers';
 import { IPage } from '@library/page-compiler/interfaces/page.interface';
 import { FilesystemOperator } from '@library/filesystem';
 
@@ -10,7 +10,7 @@ import { FilesystemOperator } from '@library/filesystem';
  * Service for thread page saving on disk
  */
 @Injectable()
-export class PageCompilerService {
+export class ThreadPageCompilerService {
   private readonly template = 'thread.pug';
 
   /**
@@ -34,6 +34,13 @@ export class PageCompilerService {
   private compileTemplate(content: IPage): string {
     const compiledFunction = pug.compileFile(path.join(Constants.Paths.TEMPLATES, this.template));
 
-    return compiledFunction({ fileSize, formatDateTime, applicationVersion, _CONTENT: content });
+    return compiledFunction({
+      fileSize,
+      formatDateTime,
+      applicationVersion,
+      _CONTENT: content,
+      SITE_SETTINGS: () => global.GLOBAL_SETTINGS,
+      getRandomBanner
+    });
   }
 }

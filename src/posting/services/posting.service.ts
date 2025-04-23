@@ -5,12 +5,13 @@ import { Response } from 'express';
 import { processTripcode, setPassword, WakabaMarkdownService } from '@posting/lib';
 import { BoardDto } from '@persistence/dto/board';
 import { Comment, Prisma } from '@prisma/client';
-import { IPage, PageCompilerService } from '@library/page-compiler';
+import { IPage, ThreadPageCompilerService } from '@library/page-compiler';
 import { Constants } from '@library/constants';
 import { AttachedFileService } from '@posting/services/attached-file.service';
 import { ThreadMapper } from '@library/mappers';
 import { RestrictionService, RestrictionType } from '@restriction/services';
 import { CaptchaGeneratorProvider } from '@captcha/providers';
+import { PageCachingProvider } from '@posting/providers';
 
 /**
  * Service of comment posting
@@ -21,11 +22,12 @@ export class PostingService {
     private readonly boardPersistenceService: BoardPersistenceService,
     private readonly commentPersistenceService: CommentPersistenceService,
     private readonly wakabaMarkdownService: WakabaMarkdownService,
-    private readonly pageCompilerService: PageCompilerService,
+    private readonly pageCompilerService: ThreadPageCompilerService,
     private readonly attachedFileService: AttachedFileService,
     private readonly threadMapper: ThreadMapper,
     private readonly restrictionService: RestrictionService,
-    private readonly captchaGeneratorProvider: CaptchaGeneratorProvider
+    private readonly captchaGeneratorProvider: CaptchaGeneratorProvider,
+    private readonly pageCachingProvider: PageCachingProvider
   ) {}
 
   /**
@@ -75,6 +77,8 @@ export class PostingService {
     await this.pageCompilerService.saveThreadPage(pagePayload);
 
     await this.deleteOldestPostOnMaxThreadsOnBoard(board);
+
+    await this.pageCachingProvider.cacheBoardPages(url);
 
     this.setCookies(form, res);
 
@@ -137,6 +141,8 @@ export class PostingService {
         await this.commentPersistenceService.updateThreadLastHit(url, num);
       }
     }
+
+    await this.pageCachingProvider.cacheBoardPages(url);
 
     this.setCookies(form, res);
 

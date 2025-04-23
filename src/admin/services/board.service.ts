@@ -11,8 +11,9 @@ import { ISession } from '@admin/interfaces';
 import { BoardSettings } from '@prisma/client';
 import { getSupportedFileTypes } from '@admin/lib/helpers';
 import { ThreadMapper } from '@library/mappers';
-import { PageCompilerService } from '@library/page-compiler';
+import { ThreadPageCompilerService } from '@library/page-compiler';
 import { CaptchaGeneratorProvider } from '@captcha/providers';
+import { PageCachingProvider } from '@posting/providers';
 
 /**
  * Service for working with boards
@@ -23,8 +24,9 @@ export class BoardService {
     private readonly boardPersistenceService: BoardPersistenceService,
     private readonly commentPersistenceService: CommentPersistenceService,
     private readonly threadMapper: ThreadMapper,
-    private readonly pageCompilerService: PageCompilerService,
-    private readonly captchaGeneratorProvider: CaptchaGeneratorProvider
+    private readonly pageCompilerService: ThreadPageCompilerService,
+    private readonly captchaGeneratorProvider: CaptchaGeneratorProvider,
+    private readonly pageCachingProvider: PageCachingProvider
   ) {}
 
   /**
@@ -118,6 +120,8 @@ export class BoardService {
     await FilesystemOperator.mkdir(dto.url, Constants.SRC_DIR);
     await FilesystemOperator.mkdir(dto.url, Constants.THUMB_DIR);
 
+    await this.updateBoardCache(newBoard.id);
+
     res.redirect(`/kashiwa/board/edit/${newBoard.id}`);
   }
 
@@ -203,6 +207,7 @@ export class BoardService {
     }
 
     await this.boardPersistenceService.nullifyPostCount(id);
+    await this.pageCachingProvider.cacheBoardPages(id, true);
 
     res.redirect(`/kashiwa/board/edit/${id}`);
   }
@@ -218,6 +223,8 @@ export class BoardService {
     for (const num of threadNums) {
       await this.updateThreadCache(board, num);
     }
+
+    await this.pageCachingProvider.cacheBoardPages(board.url);
   }
 
   /**

@@ -4,7 +4,7 @@ import {
   AuthController,
   BanController,
   BoardController,
-  DashboardController,
+  DashboardController, GlobalSettingsController,
   IpFilterController,
   ModerationController,
   SpamController,
@@ -15,7 +15,7 @@ import {
   AuthService,
   BanService,
   BoardService,
-  DashboardService,
+  DashboardService, GlobalSettingsService,
   IpFilterService,
   ModerationService,
   SpamService,
@@ -25,12 +25,19 @@ import { NestjsFormDataModule } from 'nestjs-form-data';
 import { PrismaService } from '@persistence/lib';
 import { nestjsFormDataConfig } from '@config/nestjs-form-data.config';
 import { CaptchaModule } from '@captcha/captcha.module';
+import { PostingModule } from '@posting/posting.module';
 
 /**
  * Module for administration / moderation panel
  */
 @Module({
-  imports: [NestjsFormDataModule.config(nestjsFormDataConfig), LibraryModule, PersistenceModule, CaptchaModule],
+  imports: [
+    NestjsFormDataModule.config(nestjsFormDataConfig),
+    LibraryModule,
+    PersistenceModule,
+    CaptchaModule,
+    PostingModule
+  ],
   providers: [
     PrismaService,
     AuthService,
@@ -40,7 +47,8 @@ import { CaptchaModule } from '@captcha/captcha.module';
     ModerationService,
     SpamService,
     IpFilterService,
-    BanService
+    BanService,
+    GlobalSettingsService
   ],
   controllers: [
     AuthController,
@@ -50,7 +58,8 @@ import { CaptchaModule } from '@captcha/captcha.module';
     ModerationController,
     SpamController,
     IpFilterController,
-    BanController
+    BanController,
+    GlobalSettingsController
   ]
 })
 export class AdminModule {}

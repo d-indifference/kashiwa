@@ -4,21 +4,30 @@ include _inc/thread/_form
 include _inc/thread/_user_delete
 include _inc/thread/_footer
 include _inc/thread/_head
+include _inc/thread/_styles
+include _inc/thread/_top_bar
 
 html(lang='en')
     +Head(_CONTENT.board.name)
     body.replypage
         div.adminbar
+            +Styles
+            +TopBar
             | [
             a(href='/kashiwa') Management
             | ]
             | [
             a(href='/') Main Page
             | ]
-        div.logo= _CONTENT.board.name
+        div.logo
+            div.banner
+                img(src=getRandomBanner() alt='banner')
+            | #{_CONTENT.board.name} - #{SITE_SETTINGS().siteName}
+        div.sublogo
+            | #{SITE_SETTINGS().siteSlogan}
         hr
         | [
-        a(href=`/${_CONTENT.board.url}`) Go back
+        a(href=`/${_CONTENT.board.url}/kashiwa.html`) Go back
         | ]
         div.theader Reply
 

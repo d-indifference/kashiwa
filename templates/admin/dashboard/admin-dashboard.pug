@@ -3,10 +3,10 @@ include ../../_inc/admin/_admin-bar
 include ../../_inc/admin/_admin-links
 
 html(lang='en')
-    +Head('Dashboard - Kashiwa Image Board')
+    +Head('Dashboard')
     body
         +AdminBar(session.payload.role)
-        div.logo Management - Kashiwa Image Board
+        div.logo Management - #{SITE_SETTINGS().siteName}
         hr
         + AdminLinks(session.payload.role)
         div.theader

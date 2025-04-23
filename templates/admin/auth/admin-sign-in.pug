@@ -1,7 +1,7 @@
 include ../../_inc/thread/_head
 
 html(lang='en')
-    +Head('Management - Kashiwa Image Board')
+    +Head('Management')
     body
         div.adminbar
             | [
@@ -10,7 +10,7 @@ html(lang='en')
             | [
             a(href='/') Main Page
             | ]
-        div.logo Kashiwa Image Board
+        div.logo #{SITE_SETTINGS().siteName}
         hr
         | [
         a(href=`/`) Go back

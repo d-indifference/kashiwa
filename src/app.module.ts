@@ -5,8 +5,10 @@ import { ConfigModule } from '@nestjs/config';
 import applicationConfig from '@config/configuration.config';
 import { AdminModule } from '@admin/admin.module';
 import { PostingModule } from '@posting/posting.module';
+import { AppController } from './app.controller';
 
 @Module({
+  controllers: [AppController],
   imports: [
     ConfigModule.forRoot({
       load: [applicationConfig],
@@ -21,7 +23,6 @@ import { PostingModule } from '@posting/posting.module';
     AdminModule,
     PostingModule
   ],
-  controllers: [],
   providers: []
 })
 export class AppModule {}

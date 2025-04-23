@@ -4,18 +4,26 @@ include _inc/thread/_form
 include _inc/thread/_user_delete
 include _inc/thread/_footer
 include _inc/thread/_head
+include _inc/thread/_styles
+include _inc/thread/_top_bar
 
 html(lang='en')
     +Head(board.name)
     body
         div.adminbar
+            +Styles
+            +TopBar
             | [
             a(href='/kashiwa') Management
             | ]
             | [
             a(href='/') Main Page
             | ]
-        div.logo= board.name
+        div.logo
+            div.banner
+                img(src=getRandomBanner() alt='banner')
+            | #{board.name} - #{SITE_SETTINGS().siteName}
+        div.sublogo= SITE_SETTINGS().siteSlogan
         hr
 
         div.postarea
@@ -48,8 +56,12 @@ html(lang='en')
                 tr
                     td
                         if threads.previous !== null
-                          form(method='get' action=`/${board.url}/${threads.previous}`)
-                            input(type='submit' value='Previous')
+                          if (threads.previous === 0)
+                              form(method='get' action=`/${board.url}/kashiwa.html`)
+                                  input(type='submit' value='Previous')
+                          else
+                              form(method='get' action=`/${board.url}/${threads.previous}.html`)
+                                  input(type='submit' value='Previous')
                         else
                             span Previous
                     td
@@ -58,13 +70,18 @@ html(lang='en')
                           if i === threads.current
                             | [#{ threads.current }]
                           else
-                            ='['
-                            a(href=`/${board.url}/${i}`) #{i}
-                            =']'
+                           if i === 0
+                               ='['
+                               a(href=`/${board.url}/kashiwa.html`) #{i}
+                               =']'
+                           else
+                               ='['
+                               a(href=`/${board.url}/${i}.html`) #{i}
+                               =']'
                           - i++;
                     td
                         if threads.next !== null
-                            form(method='get' action=`/${board.url}/${threads.next}`)
+                            form(method='get' action=`/${board.url}/${threads.next}.html`)
                                 input(type='submit' value='Next')
                         else
                             span Next

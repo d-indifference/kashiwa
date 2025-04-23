@@ -90,3 +90,20 @@ function setDelPass(cookieName) {
   var del_form = document.getElementById('delform');
   del_form.password.value = getCookie(cookieName);
 }
+
+function setStyle(cookieName) {
+  if (!getCookie(cookieName)) {
+    setCookie(cookieName, 'Futaba', 365);
+  }
+
+  var currentStyle = getCookie(cookieName);
+
+  $('link[rel][title]').each(function () {
+    this.disabled = this.title !== currentStyle;
+  });
+}
+
+function changeStyle(styleTitle, cookieName) {
+  setCookie(cookieName, styleTitle, 365);
+  setStyle(cookieName);
+}
