@@ -1,0 +1,202 @@
+html, body {
+  background: #eeeeee;
+  color: #333333;
+  font-family: "Trebuchet MS", Trebuchet, tahoma, serif;
+}
+
+a {
+  color: #ff6600;
+}
+
+a:hover {
+  color: #0066ff;
+}
+
+.adminbar {
+  text-align: right;
+  clear: both;
+  float: right;
+}
+
+.adminbar a {
+  font-weight: bold;
+}
+
+.logo {
+  clear: both;
+  text-align: center;
+  font-size: 2em;
+  font-weight: bold;
+  color: #ff6600;
+  width: 100%;
+}
+
+.sublogo {
+  clear: both;
+  text-align: center;
+  font-size: 1em;
+  color: #ff6600;
+  width: 100%;
+  padding: 2px 0 12px 0;
+}
+
+.banner {
+  margin-top: 10px;
+}
+
+.theader {
+  background: #dddddd;
+  text-align: center;
+  padding: 2px;
+  color: #2266aa;
+  clear: both;
+  font-weight: bold;
+  margin-bottom: .5em;
+  border: solid 1px #cccccc;
+  -moz-border-radius: 5px;
+}
+
+.postarea {}
+
+.postblock {
+  background: transparent;
+  color: #002244;
+  font-weight: bold;
+}
+
+.rules {}
+
+.rules table {
+  margin: 5px 0 5px 0;
+}
+
+.footer {
+  text-align: center;
+  font-size: 12px;
+  font-family: serif;
+  clear: both;
+  padding-top: 10px;
+}
+
+.row1 {
+  background: #dddddd;
+  color: #002244;
+}
+
+.row2 {
+  background: #cccccc;
+  color: #002244;
+}
+
+.unkfunc {
+  background: inherit;
+  color: #789922;
+}
+
+.reflink {
+  font-size: .8em;
+  font-weight: bold;
+}
+
+.filesize {
+  text-decoration: none;
+  color: #666666;
+  font-size: .8em;
+}
+
+.filetitle {
+  background: inherit;
+  font-size: 1.2em;
+  color: #002244;
+  font-weight: bold;
+}
+
+.postername {
+  color: #004a99;
+  font-weight: bold;
+}
+
+.postertrip {
+  color: #ff3300;
+  display: none;
+}
+
+.omittedposts {
+  color: #666666;
+}
+
+.reply {
+  background: #dddddd;
+  border: solid 1px #cccccc;
+  padding: 0;
+  margin: 0;
+  -moz-border-radius: 5px;
+}
+
+blockquote {
+  margin: .5em .5em .5em 1em;
+}
+
+.reply blockquote {
+  margin: .5em;
+}
+
+.doubledash {
+  vertical-align: top;
+  clear: both;
+  float: left;
+}
+
+.replytitle {
+  font-size: 1.2em;
+  color: #002244;
+  font-weight: bold;
+}
+
+.commentpostername {
+  color: #004a99;
+  font-weight:800;
+}
+
+.thumbnailmsg {
+  font-size: .8em;
+  color: #666666;
+}
+
+hr {
+  border-style: solid none none none;
+  border-width: 1px;
+  border-color: #bbbbbb;
+}
+
+table {
+  border-style: none;
+}
+
+table td {
+  border-style: none;
+}
+
+.nothumb {
+  background-color: #ffffff;
+  border-style: dotted;
+  margin: .3em .5em;
+}
+
+.abbrev {
+  color: #666666;
+}
+
+.highlight {
+  background: #eedacb;
+  color: #333333;
+  border: 2px dashed #ee6600;
+}
+
+.sage {
+  color: #ff0000;
+}
+
+.adminPost {
+  color: darkviolet;
+}

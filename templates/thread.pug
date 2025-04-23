@@ -4,11 +4,13 @@ include _inc/thread/_form
 include _inc/thread/_user_delete
 include _inc/thread/_footer
 include _inc/thread/_head
+include _inc/thread/_styles
 
 html(lang='en')
     +Head(_CONTENT.board.name)
     body.replypage
         div.adminbar
+            +Styles
             | [
             a(href='/kashiwa') Management
             | ]

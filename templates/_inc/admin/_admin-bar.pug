@@ -1,5 +1,8 @@
+include ../thread/_styles
+
 mixin AdminBar(role)
     div.adminbar
+        +Styles
         b [#{ role }]
         =' '
         | [
