@@ -15,7 +15,9 @@ RUN npm run prisma:generate
 
 RUN npm run build
 
-USER node
+RUN mkdir -p /app/volumes/application.kashiwa
+
+RUN chown -R node:node /app/volumes/application.kashiwa
 
 CMD ["npm", "run", "start:docker"]
 

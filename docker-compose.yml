@@ -9,6 +9,7 @@ services:
       - '${POSTGRES_PORT}:${POSTGRES_PORT}'
     volumes:
       - ./volumes/db.kashiwa:/var/lib/postgresql/data
+      - ./.postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     restart: unless-stopped
     networks:
       - kashiwa-network
