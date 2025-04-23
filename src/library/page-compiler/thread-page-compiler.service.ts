@@ -10,7 +10,7 @@ import { FilesystemOperator } from '@library/filesystem';
  * Service for thread page saving on disk
  */
 @Injectable()
-export class PageCompilerService {
+export class ThreadPageCompilerService {
   private readonly template = 'thread.pug';
 
   /**

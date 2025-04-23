@@ -4,10 +4,11 @@ import { PersistenceModule } from '@persistence/persistence.module';
 import { NestjsFormDataModule } from 'nestjs-form-data';
 import { nestjsFormDataConfig } from '@config/nestjs-form-data.config';
 import { BoardController, DeletionController, PostingController } from '@posting/controllers';
-import { AttachedFileService, BoardService, DeletionService, PostingService } from '@posting/services';
+import { AttachedFileService, DeletionService, PostingService } from '@posting/services';
 import { WakabaMarkdownService } from '@posting/lib';
 import { RestrictionModule } from '@restriction/restriction.module';
 import { CaptchaModule } from '@captcha/captcha.module';
+import { PageCachingProvider } from '@posting/providers';
 
 /**
  * Module for thread posting
@@ -20,7 +21,8 @@ import { CaptchaModule } from '@captcha/captcha.module';
     RestrictionModule,
     CaptchaModule
   ],
-  providers: [BoardService, PostingService, WakabaMarkdownService, AttachedFileService, DeletionService],
-  controllers: [BoardController, PostingController, DeletionController]
+  providers: [PostingService, WakabaMarkdownService, AttachedFileService, DeletionService, PageCachingProvider],
+  controllers: [PostingController, DeletionController, BoardController],
+  exports: [PageCachingProvider]
 })
 export class PostingModule {}

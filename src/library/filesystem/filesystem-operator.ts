@@ -78,6 +78,25 @@ export class FilesystemOperator {
   }
 
   /**
+   * Removes all files by their extension in application volume. If the path does not exist, silently does nothing.
+   * @param pth Path fragments in the app volume
+   * @param ext File extension without '.'
+   */
+  public static async removeAllFilesByExt(pth: string[], ext: string): Promise<void> {
+    const filePath = path.join(Constants.Paths.APP_VOLUME, ...pth);
+
+    const files = await fsExtra.readdir(filePath);
+
+    for (const file of files) {
+      const fullPath = path.join(filePath, file);
+
+      if (file.endsWith(`.${ext}`)) {
+        await fsExtra.remove(fullPath);
+      }
+    }
+  }
+
+  /**
    * Returns the size of the folder.
    * @param pth Path fragments in app volume
    */
