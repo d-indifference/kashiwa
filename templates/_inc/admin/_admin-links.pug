@@ -5,6 +5,9 @@ mixin AdminLinks(role)
         | ]
         if role === 'ADMINISTRATOR'
             | [
+            a(href='/kashiwa/global-settings') Site settings
+            | ]
+            | [
             a(href='/kashiwa/staff') Staff panel
             | ]
             | [

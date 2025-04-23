@@ -6,7 +6,8 @@ mixin Head(title)
         link(rel='stylesheet' type='text/css' href='/css/futaba.css' title='Futaba')
         link(rel='alternate stylesheet' type='text/css' href='/css/photon.css' title='Photon' disabled=true)
         link(rel='alternate stylesheet' type='text/css' href='/css/burichan.css' title='Burichan' disabled=true)
-        title= title
+        title
+            | #{title} - #{SITE_SETTINGS().siteName}
         script(src='/js/jquery-1.4.min.js')
         script(src='/js/kashiwa.js')
 

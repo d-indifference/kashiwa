@@ -4,7 +4,7 @@ import {
   AuthController,
   BanController,
   BoardController,
-  DashboardController,
+  DashboardController, GlobalSettingsController,
   IpFilterController,
   ModerationController,
   SpamController,
@@ -15,7 +15,7 @@ import {
   AuthService,
   BanService,
   BoardService,
-  DashboardService,
+  DashboardService, GlobalSettingsService,
   IpFilterService,
   ModerationService,
   SpamService,
@@ -47,7 +47,8 @@ import { PostingModule } from '@posting/posting.module';
     ModerationService,
     SpamService,
     IpFilterService,
-    BanService
+    BanService,
+    GlobalSettingsService
   ],
   controllers: [
     AuthController,
@@ -57,7 +58,8 @@ import { PostingModule } from '@posting/posting.module';
     ModerationController,
     SpamController,
     IpFilterController,
-    BanController
+    BanController,
+    GlobalSettingsController
   ]
 })
 export class AdminModule {}

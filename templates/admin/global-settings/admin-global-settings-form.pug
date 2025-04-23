@@ -1,0 +1,47 @@
+include ../../_inc/thread/_head
+include ../../_inc/admin/_admin-bar
+include ../../_inc/admin/_admin-links
+
+html(lang='en')
+    +Head('Site settings')
+    body
+        +AdminBar(session.payload.role)
+        div.logo Site settings - #{SITE_SETTINGS().siteName}
+        hr
+        + AdminLinks(session.payload.role)
+        div.theader
+            | Edit site settings
+
+        div(align='center')
+            form(method='post' action='/kashiwa/global-settings')
+                div.postarea
+                    table
+                        tr
+                            td.postblock Site name
+                            td
+                                input(type='text' name='siteName' size=36 value=content.siteName)
+                        tr
+                            td.postblock Site slogan
+                            td
+                                input(type='text' name='siteSlogan' size=45 value=content.siteSlogan)
+                        tr
+                            td.postblock Main Page
+                            td
+                               textarea(name='mainPage' rows=30 cols=60)
+                                | #{content.mainPage}
+                        tr
+                            td.postblock Board list
+                            td
+                                textarea(name='boardList' rows=30 cols=60)
+                                    | #{content.boardList}
+                        tr
+                            td.postblock FAQ page
+                            td
+                                textarea(name='faqPage' rows=30 cols=60)
+                                    | #{content.faqPage}
+                        tr
+                            td.postblock Rules page
+                            td
+                                textarea(name='rulesPage' rows=30 cols=60)
+                                    | #{content.rulesPage}
+                input(type='submit' value='Save settings')

@@ -34,6 +34,12 @@ export class ThreadPageCompilerService {
   private compileTemplate(content: IPage): string {
     const compiledFunction = pug.compileFile(path.join(Constants.Paths.TEMPLATES, this.template));
 
-    return compiledFunction({ fileSize, formatDateTime, applicationVersion, _CONTENT: content });
+    return compiledFunction({
+      fileSize,
+      formatDateTime,
+      applicationVersion,
+      _CONTENT: content,
+      SITE_SETTINGS: () => global.GLOBAL_SETTINGS
+    });
   }
 }

@@ -43,6 +43,6 @@ export class BoardPageCompilerService {
   private compileTemplate(boardPage: BoardPage): string {
     const compiledFunction = pug.compileFile(path.join(Constants.Paths.TEMPLATES, this.template));
 
-    return compiledFunction(boardPage);
+    return compiledFunction({ ...boardPage, SITE_SETTINGS: () => global.GLOBAL_SETTINGS });
   }
 }

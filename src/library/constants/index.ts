@@ -19,10 +19,13 @@ export class Constants {
     /** full path to settings directory */
     public static SETTINGS = path.join(process.cwd(), 'volumes', 'application.kashiwa', '_settings');
 
+    /** full path to .presets directory */
     public static PRESETS = path.join(process.cwd(), '.presets');
 
+    /** full path to `spam` file */
     public static FILE_SPAM = path.join(process.cwd(), 'volumes', 'application.kashiwa', '_settings', 'spam');
 
+    /** full path to `black_list` file */
     public static FILE_BLACK_LIST = path.join(
       process.cwd(),
       'volumes',
@@ -51,7 +54,7 @@ export class Constants {
   public static DEFAULT_THUMBNAIL_SIDE = 200;
 
   /** Potential reserved board URLs */
-  public static RESERVED_BOARD_URLS = ['img', 'css', 'js', 'icons', 'kashiwa'];
+  public static RESERVED_BOARD_URLS = ['img', 'css', 'js', 'icons', 'kashiwa', 'front', 'frame', 'faq', 'rules'];
 
   /** Default string file size format */
   public static FILE_SIZE_FORMAT: 'si' | 'iec' | 'jedec' = 'jedec';
@@ -84,5 +87,9 @@ export class Constants {
   /** Milliseconds for removing cookies */
   public static COOKIES_ERASING_VALUE = -9999;
 
+  /** Simple string datetime format */
   public static SIMPLE_DATE_FORMAT = 'dd MMM yyyy HH:mm';
+
+  /** `global-settings` file name */
+  public static FILE_GLOBAL_SETTINGS = 'global-settings';
 }

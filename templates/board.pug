@@ -5,19 +5,23 @@ include _inc/thread/_user_delete
 include _inc/thread/_footer
 include _inc/thread/_head
 include _inc/thread/_styles
+include _inc/thread/_top_bar
 
 html(lang='en')
     +Head(board.name)
     body
         div.adminbar
             +Styles
+            +TopBar
             | [
             a(href='/kashiwa') Management
             | ]
             | [
             a(href='/') Main Page
             | ]
-        div.logo= board.name
+        div.logo
+            | #{board.name} - #{SITE_SETTINGS().siteName}
+        div.sublogo= SITE_SETTINGS().siteSlogan
         hr
 
         div.postarea
