@@ -13,6 +13,39 @@ services:
     networks:
       - kashiwa-network
 
+  application:
+    container_name: application.kashiwa
+    hostname: application.kashiwa
+    image: kashiwa:0.0.0
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    ports:
+      - "13000:3000"
+    volumes:
+      - ./volumes/application.kashiwa:/app/volumes/application.kashiwa
+    restart: unless-stopped
+    networks:
+      - kashiwa-network
+
+  nginx:
+    container_name: nginx.kashiwa
+    hostname: nginx.kashiwa
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    depends_on:
+      - application
+    ports:
+      - "80:80"
+    restart: unless-stopped
+    networks:
+      - kashiwa-network
+
 networks:
   kashiwa-network:
     name: 'net.kashiwa'
