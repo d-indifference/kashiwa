@@ -44,6 +44,20 @@ And now you're awesome! Enjoy using the application!
 
 Now you can go to [localhost/kashiwa/auth/sign-up](http://localhost/kashiwa/auth/sign-up) and create your first admin profile.
 
+## Localization
+
+### How I can translate the site to my language?
+
+You now have an easier way to create your own localization for the Torichan engine.
+
+An example file with all the localizable strings can be found at: `kashiwa/src/locale/locale-en.ts`
+
+You can create another file with your own strings in your language based on the file `locale-en.ts` and connect it by importing it in the file `kashiwa/src/locale/locale.ts`
+
+Alternatively, you can simply rewrite the existing strings in the `locale-en.ts` file in the language you want to translate the site into.
+
+If desired, you can submit pull requests with your completed localizations.
+
 ## License
 <a href="https://github.com/d-indifference/kashiwa/blob/master/LICENSE">GPLV2 License</a>
 
