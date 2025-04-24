@@ -48,7 +48,7 @@ Now you can go to [localhost/kashiwa/auth/sign-up](http://localhost/kashiwa/auth
 
 ### How I can translate the site to my language?
 
-You now have an easier way to create your own localization for the Torichan engine.
+You now have an easier way to create your own localization for the Kashiwa engine.
 
 An example file with all the localizable strings can be found at: `kashiwa/src/locale/locale-en.ts`
 
