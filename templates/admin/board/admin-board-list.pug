@@ -2,22 +2,22 @@ include ../../_inc/thread/_head
 include ../../_inc/admin/_admin-bar
 include ../../_inc/admin/_admin-links
 
-html(lang='en')
-    +Head('Staff Panel')
+html(lang=LOCALE.HTML_LANG)
+    +Head(LOCALE.BOARDS)
     body
         +AdminBar(session.payload.role)
-        div.logo Boards - #{SITE_SETTINGS().siteName}
+        div.logo #{LOCALE.BOARDS} - #{SITE_SETTINGS().siteName}
         hr
         + AdminLinks(session.payload.role)
         div.theader
-            | Board list
+            = LOCALE.BOARD_LIST
 
         table(align='center' style='white-space: nowrap')
             thead
                 tr.row1
-                    th URL
-                    th Name
-                    th Last post index
+                    th= LOCALE.URL
+                    th= LOCALE.NAME
+                    th= LOCALE.LAST_POST_INDEX
                     th
             tbody
               each board, index in content.content
@@ -29,7 +29,7 @@ html(lang='en')
                           td #{board.postCount}
                           td
                               | [
-                              a(href=`/kashiwa/board/edit/${board.id}`) Edit
+                              a(href=`/kashiwa/board/edit/${board.id}`)= LOCALE.EDIT
                               | ]
                   else
                       tr.row2
@@ -39,16 +39,16 @@ html(lang='en')
                           td #{board.postCount}
                           td
                               | [
-                              a(href=`/kashiwa/board/edit/${board.id}`) Edit
+                              a(href=`/kashiwa/board/edit/${board.id}`)= LOCALE.EDIT
                               | ]
 
         div(align='center')
             if content.previous !== null
-                a(href=`/kashiwa/board?page=${content.previous}` title='Previous') ←
+                a(href=`/kashiwa/board?page=${content.previous}` title=LOCALE.PREVIOUS) ←
             if content.next !== null
-                a(href=`/kashiwa/board?page=${content.next}` title='Next') →
+                a(href=`/kashiwa/board?page=${content.next}` title=LOCALE.NEXT) →
 
             br
             ='['
-            a(href='/kashiwa/board/new') Add new
+            a(href='/kashiwa/board/new')= LOCALE.ADD_NEW
             =']'

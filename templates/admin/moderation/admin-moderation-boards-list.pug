@@ -2,21 +2,21 @@ include ../../_inc/thread/_head
 include ../../_inc/admin/_admin-bar
 include ../../_inc/admin/_admin-links
 
-html(lang='en')
-    +Head('Moderation')
+html(lang=LOCALE.HTML_LANG)
+    +Head(LOCALE.MODERATION)
     body
         +AdminBar(session.payload.role)
-        div.logo Moderation - #{SITE_SETTINGS().siteName}
+        div.logo #{LOCALE.MODERATION} - #{SITE_SETTINGS().siteName}
         hr
         + AdminLinks(session.payload.role)
         div.theader
-            | Choose a board for moderation
+            = LOCALE.CHOOSE_A_BOARD
 
         table(align='center' style='white-space: nowrap')
             thead
                 tr.row1
-                    th URL
-                    th Name
+                    th= LOCALE.URL
+                    th= LOCALE.NAME
                     th
             tbody
               each board, index in content.content
@@ -27,7 +27,7 @@ html(lang='en')
                           td #{board.name}
                           td
                               | [
-                              a(href=`/kashiwa/moderation/${board.id}?limit=30`) Go to moderation
+                              a(href=`/kashiwa/moderation/${board.id}?limit=30`)= LOCALE.GO_TO_MODERATION
                               | ]
                   else
                       tr.row2
@@ -36,11 +36,11 @@ html(lang='en')
                           td #{board.name}
                           td
                               | [
-                              a(href=`/kashiwa/moderation/${board.id}?limit=30`) Go to moderation
+                              a(href=`/kashiwa/moderation/${board.id}?limit=30`)= LOCALE.GO_TO_MODERATION
                               | ]
 
         div(align='center')
             if content.previous !== null
-                a(href=`/kashiwa/moderation?page=${content.previous}` title='Previous') ←
+                a(href=`/kashiwa/moderation?page=${content.previous}` title=LOCALE.PREVIOUS) ←
             if content.next !== null
-                a(href=`/kashiwa/moderation?page=${content.next}` title='Next') →
+                a(href=`/kashiwa/moderation?page=${content.next}` title=LOCALE.NEXT) →

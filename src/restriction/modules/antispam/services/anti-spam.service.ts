@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { LOCALE } from '@locale/locale';
 
 /** Base template for a posting form  */
 interface PostingForm {
@@ -38,7 +39,7 @@ export class AntiSpamService {
 
     if (input) {
       if (regex.test(input)) {
-        throw new BadRequestException(`Your input contains spam: ${pattern}`);
+        throw new BadRequestException((LOCALE['INPUT_CONTAINS_SPAM'] as CallableFunction)(pattern));
       }
     }
   }

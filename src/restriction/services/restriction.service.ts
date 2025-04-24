@@ -22,6 +22,7 @@ import { DateTime } from 'luxon';
 import { AntiSpamService } from '@restriction/modules/antispam/services';
 import { BanService } from '@restriction/services/ban.service';
 import { CaptchaSolvingPredicateProvider } from '@captcha/providers';
+import { LOCALE } from '@locale/locale';
 
 /**
  * Type for describing of Exception class
@@ -67,7 +68,7 @@ export class RestrictionService {
     isAdmin: boolean
   ): Promise<void> {
     if (board.boardSettings === undefined) {
-      throw new InternalServerErrorException('You can not create a post on board without any settings!');
+      throw new InternalServerErrorException(LOCALE['YOU_CANNOT_CREATE_WITHOUT_BOARD_SETTINGS']);
     } else {
       const settings: BoardSettingsDto = board.boardSettings;
       await this.applyRestrictions(restrictionType, ip, settings, form, isAdmin);
@@ -89,38 +90,38 @@ export class RestrictionService {
         async () => {
           return await this.captchaSolvingPredicateProvider.isCaptchaSolved(isAdmin, form.nya, form.captcha);
         },
-        'Captcha is invalid',
+        LOCALE['CAPTCHA_IS_INVALID'] as string,
         ForbiddenException
       );
     }
 
-    this.checkRestriction(() => allowPosting(settings), 'This board is closed for posting.', ForbiddenException);
+    this.checkRestriction(() => allowPosting(settings), LOCALE['BOARD_IS_CLOSED'] as string, ForbiddenException);
     await this.banService.checkBan(ip, isAdmin);
-    this.checkRestriction(() => strictAnonymity(settings, form), 'Please stay anonymous on this board.');
+    this.checkRestriction(() => strictAnonymity(settings, form), LOCALE['PLEASE_STAY_ANONYMOUS'] as string);
     this.checkRestriction(
       () => maxStringFieldSize(settings, form),
-      `'Name', 'Subject' & 'Email cannot be longer than ${settings.maxStringFieldSize} symbols.'`
+      (LOCALE['FAILED_MAX_STRING_SIZE'] as CallableFunction)(settings.maxStringFieldSize)
     );
     this.checkRestriction(
       () => maxCommentSize(settings, form),
-      `'Comment', cannot be longer than ${settings.maxCommentSize} symbols.'`
+      (LOCALE['FAILED_COMMENT_SIZE'] as CallableFunction)(settings.maxCommentSize)
     );
     this.antiSpamService.checkSpam(form, isAdmin);
-    this.checkRestriction(() => forbiddenFiles(restrictionType, settings, form), 'File attachment is forbidden here.');
-    this.checkRestriction(() => requiredFiles(restrictionType, settings, form), 'Please attach any file.');
-    this.checkRestriction(() => allowedFileTypes(settings, form), 'Disallowed file type.');
+    this.checkRestriction(() => forbiddenFiles(restrictionType, settings, form), LOCALE['FORBIDDEN_FILES'] as string);
+    this.checkRestriction(() => requiredFiles(restrictionType, settings, form), LOCALE['PLEASE_ATTACH_FILE'] as string);
+    this.checkRestriction(() => allowedFileTypes(settings, form), LOCALE['DISALLOWED_FILE_TYPE'] as string);
 
     if (!isAdmin) {
       if (restrictionType === RestrictionType.THREAD) {
         await this.checkRestrictionAsync(async () => {
           return await this.delayForThread(ip, settings.delayAfterThread);
-        }, 'You are trying to create threads too frequent!');
+        }, LOCALE['TOO_FREQUENT_POSTING_THREADS'] as string);
       }
 
       if (restrictionType === RestrictionType.REPLY) {
         await this.checkRestrictionAsync(async () => {
           return await this.delayForReply(ip, settings.delayAfterReply);
-        }, 'You are trying to create comments too frequent!');
+        }, LOCALE['TOO_FREQUENT_POSTING'] as string);
       }
     }
   }

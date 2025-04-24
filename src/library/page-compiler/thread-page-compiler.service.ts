@@ -5,6 +5,7 @@ import { Constants } from '@library/constants';
 import { applicationVersion, fileSize, formatDateTime, getRandomBanner } from '@library/page-compiler/helpers';
 import { IPage } from '@library/page-compiler/interfaces/page.interface';
 import { FilesystemOperator } from '@library/filesystem';
+import { LOCALE } from '@locale/locale';
 
 /**
  * Service for thread page saving on disk
@@ -40,7 +41,8 @@ export class ThreadPageCompilerService {
       applicationVersion,
       _CONTENT: content,
       SITE_SETTINGS: () => global.GLOBAL_SETTINGS,
-      getRandomBanner
+      getRandomBanner,
+      LOCALE
     });
   }
 }

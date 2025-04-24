@@ -7,17 +7,17 @@ include _inc/thread/_head
 include _inc/thread/_styles
 include _inc/thread/_top_bar
 
-html(lang='en')
+html(lang=LOCALE.HTML_LANG)
     +Head(board.name)
     body
         div.adminbar
             +Styles
             +TopBar
             | [
-            a(href='/kashiwa') Management
+            a(href='/kashiwa')= LOCALE.MANAGEMENT
             | ]
             | [
-            a(href='/') Main Page
+            a(href='/')= LOCALE.MAIN_PAGE
             | ]
         div.logo
             div.banner
@@ -37,10 +37,10 @@ html(lang='en')
               if thread.omittedPosts > 0
                   if thread.omittedFiles > 0
                       span.omittedposts
-                          | There are #{thread.omittedPosts} posts and #{thread.omittedFiles} files are omitted. Click "Reply" to view them
+                          | #{LOCALE.OMITTED_POSTS_FILES(thread.omittedPosts, thread.omittedFiles)}
                   else
                       span.omittedposts
-                          | There are #{thread.omittedPosts} posts are omitted. Click "Reply" to view them
+                          | #{LOCALE.OMITTED_POSTS(thread.omittedPosts)}
 
               each reply in thread.thread.children
                 +Reply(board, thread.thread, reply, false)
@@ -58,12 +58,12 @@ html(lang='en')
                         if threads.previous !== null
                           if (threads.previous === 0)
                               form(method='get' action=`/${board.url}/kashiwa.html`)
-                                  input(type='submit' value='Previous')
+                                  input(type='submit' value=LOCALE.PREVIOUS)
                           else
                               form(method='get' action=`/${board.url}/${threads.previous}.html`)
-                                  input(type='submit' value='Previous')
+                                  input(type='submit' value=LOCALE.PREVIOUS)
                         else
-                            span Previous
+                            span= LOCALE.PREVIOUS
                     td
                         - let i = 0;
                         while i < threads.total
@@ -82,9 +82,9 @@ html(lang='en')
                     td
                         if threads.next !== null
                             form(method='get' action=`/${board.url}/${threads.next}.html`)
-                                input(type='submit' value='Next')
+                                input(type='submit' value=LOCALE.NEXT)
                         else
-                            span Next
+                            span= LOCALE.NEXT
 
         br(clear='all')
 

@@ -11,6 +11,7 @@ import * as os from 'node:os';
 import { Request } from 'express';
 import { exec } from 'child_process';
 import { BoardPersistenceService, CommentPersistenceService } from '@persistence/services';
+import { LOCALE } from '@locale/locale';
 
 /**
  * Service for site dashboard page
@@ -104,8 +105,8 @@ export class DashboardService {
     return new Promise(resolve => {
       exec('convert --version', (error, stdout, stderr) => {
         if (error) {
-          const message = `Failed to get ImageMagick version: ${stderr || error.message}`;
-          Logger.log(message, 'DashboardService');
+          const message = `${LOCALE['FAILED_IMAGEMAGICK_VERSION'] as string}: ${stderr || error.message}`;
+          Logger.error(message, 'DashboardService');
           throw new InternalServerErrorException(message);
         }
         const versionLine = stdout.split('\n')[0];

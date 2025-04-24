@@ -5,97 +5,97 @@ mixin AdminBoardUpdateForm
     table
         tbody
             tr
-                td.postblock URL
+                td.postblock= LOCALE.URL
                 td
                     input(type='text' name='url' size=28 value=content.url)
             tr
-                td.postblock Name
+                td.postblock= LOCALE.NAME
                 td
                     input(type='text' name='name' size=28 value=content.name)
             tr
-                td.postblock Allow posting
+                td.postblock= LOCALE.ALLOW_POSTING
                 td
                     input(type='checkbox' name='allowPosting' checked=content.allowPosting)
             tr
                 td.postblock
-                    abbr(title='Disable Name & Email fields') Strict anonymity
+                    abbr(title=LOCALE.STRICT_ANONYMITY_ABBR)= LOCALE.STRICT_ANONYMITY
                 td
                     input(type='checkbox' name='strictAnonymity' checked=content.strictAnonymity)
             tr
-                td.postblock Thread file attachment policy
+                td.postblock= LOCALE.THREAD_FILE_POLICY
                 td
                     +HlpFileAttachmentPolicy('threadFileAttachmentMode', content.threadFileAttachmentMode)
             tr
-                td.postblock Reply file attachment policy
+                td.postblock= LOCALE.REPLY_FILE_POLICY
                 td
                     +HlpFileAttachmentPolicy('replyFileAttachmentMode', content.replyFileAttachmentMode)
             tr
-                td.postblock Delay after thread creation
+                td.postblock= LOCALE.DELAY_AFTER_THREAD
                 td
                     input(type='number' min=1 name='delayAfterThread' value=content.delayAfterThread)
-                    =' seconds'
+                    = LOCALE.SECONDS
             tr
-                td.postblock Delay after reply creation
+                td.postblock= LOCALE.DELAY_AFTER_REPLY
                 td
                     input(type='number' min=1 name='delayAfterReply' value=content.delayAfterReply)
-                    =' seconds'
+                    = LOCALE.SECONDS
             tr
-                td.postblock Minimal file size
+                td.postblock= LOCALE.MIN_FILE_SIZE
                 td
                     input(type='number' min=1 name='minFileSize' value=content.minFileSize)
-                    =' bytes'
+                    = LOCALE.BYTES
             tr
-                td.postblock Maximal file size
+                td.postblock= LOCALE.MAX_FILE_SIZE
                 td
                     input(type='number' min=1  name='maxFileSize' value=content.maxFileSize)
-                    =' bytes'
+                    = LOCALE.BYTES
             tr
                 td.postblock
-                    abbr(title='If it is set to "no", only replies and citations will be allowed') Allow markdown
+                    abbr(title=LOCALE.ALLOW_MARKDOWN_ABBR)= LOCALE.ALLOW_MARKDOWN
                 td
                     input(type='checkbox' name='allowMarkdown' checked=content.allowMarkdown)
             tr
-                td.postblock Allow tripcodes
+                td.postblock= LOCALE.ALLOW_TRIPCODES
                 td
                     input(type='checkbox' name='allowTripcodes' checked=content.allowTripcodes)
             tr
-                td.postblock Max thread on board
+                td.postblock= LOCALE.MAX_THREADS_ON_BOARD
                 td
                     input(type='number' min=1 name='maxThreadsOnBoard' value=content.maxThreadsOnBoard)
             tr
-                td.postblock Bump limit
+                td.postblock= LOCALE.BUMP_LIMIT
                 td
                     input(type='number' min=1 name='bumpLimit' value=content.bumpLimit)
             tr
                 td.postblock
-                    abbr(title='For Name, Email, Subject') Max string field size
+                    abbr(title=LOCALE.MAX_STRING_FIELD_SIZE_ABBR)= LOCALE.MAX_STRING_FIELD_SIZE
                 td
                     input(type='number' min=1 name='maxStringFieldSize' value=content.maxStringFieldSize)
             tr
-                td.postblock Max comment size
+                td.postblock= LOCALE.MAX_COMMENT_SIZE
                 td
                     input(type='number' min=1 name='maxCommentSize' value=content.maxCommentSize)
             tr
-                td.postblock Default poster name
+                td.postblock= LOCALE.DEFAULT_POSTER_NAME
                 td
                     input(type='text' name='defaultPosterName' value=content.defaultPosterName)
             tr
-                td.postblock Default moderator name
+                td.postblock= LOCALE.DEFAULT_MODERATOR_NAME
                 td
                     input(type='text' name='defaultModeratorName' value=content.defaultModeratorName)
             tr
-                td.postblock Enable captcha
+                td.postblock= LOCALE.ENABLE_CAPTCHA
                 td
                     input(type='checkbox' name='enableCaptcha' checked=content.enableCaptcha)
             tr
-                td.postblock Is captcha case sensitive
+                td.postblock= LOCALE.IS_CAPTCHA_CASE_SENSITIVE
                 td
                     input(type='checkbox' name='isCaptchaCaseSensitive' checked=content.isCaptchaCaseSensitive)
             tr
-                td.postblock Allowed file types
+                td.postblock= LOCALE.ALLOWED_FILE_TYPES
                 td
                     +HlpAllowedFileTypes(content.getSupportedFileTypes(), content.allowedFileTypes)
             tr
-                td.postblock Rules
+                td.postblock= LOCALE.RULES
                 td
                     textarea(name='rules' rows=6 cols=60) #{content.rules}

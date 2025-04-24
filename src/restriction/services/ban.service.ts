@@ -1,6 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { BanPersistenceService } from '@persistence/services';
 import { BanDto } from '@persistence/dto/ban';
+import { LOCALE } from '@locale/locale';
 
 /**
  * Service for ban restrictions
@@ -25,6 +26,6 @@ export class BanService {
   }
 
   private makeBanMessage(dto: BanDto): string {
-    return `You have been banned until ${dto.till.toDateString()}.<br>The reason for the ban is: ${dto.reason}`;
+    return (LOCALE['YOU_HAVE_BEEN_BANNED'] as CallableFunction)(dto.till.toLocaleDateString(), dto.reason);
   }
 }

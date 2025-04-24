@@ -5,6 +5,7 @@ import { Response, Request } from 'express';
 import { UserCreateDto } from '@persistence/dto/user';
 import { UserRole } from '@prisma/client';
 import { ISession } from '@admin/interfaces';
+import { LOCALE } from '@locale/locale';
 
 /**
  * Authentication service for admin panel
@@ -24,7 +25,7 @@ export class AuthService {
       res.render('admin/auth/admin-sign-up');
     } else {
       res.status(HttpStatus.FORBIDDEN).render('error', {
-        message: 'You don`t need to sign up a new account<br>[<a href="/kashiwa">To management panel</a>]'
+        message: LOCALE['YOU_DONT_NEED_TO_SIGN_UP']
       });
     }
   }
@@ -38,9 +39,7 @@ export class AuthService {
     if (!session.payload) {
       res.render('admin/auth/admin-sign-in');
     } else {
-      res
-        .status(HttpStatus.FORBIDDEN)
-        .render('error', { message: 'You are already signed in<br>[<a href="/kashiwa">To management panel</a>]' });
+      res.status(HttpStatus.FORBIDDEN).render('error', { message: LOCALE['ALREADY_SIGNED_IN'] });
     }
   }
 

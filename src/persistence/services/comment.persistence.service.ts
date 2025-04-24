@@ -10,6 +10,7 @@ import { AttachedFilePersistenceService } from '@persistence/services/attached-f
 import { FilesystemOperator } from '@library/filesystem';
 import { Constants } from '@library/constants';
 import { CommentModerationDto } from '@persistence/dto/comment/moderation';
+import { LOCALE } from '@locale/locale';
 
 /**
  * Database queries for `Comment` model
@@ -77,7 +78,7 @@ export class CommentPersistenceService {
     });
 
     if (!openingPost) {
-      throw new NotFoundException();
+      throw new NotFoundException((LOCALE['THREAD_NOT_FOUND'] as CallableFunction)(url, num.toString()));
     }
 
     const replies = await this.prisma.comment.findMany({

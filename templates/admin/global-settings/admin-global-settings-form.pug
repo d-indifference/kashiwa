@@ -2,46 +2,46 @@ include ../../_inc/thread/_head
 include ../../_inc/admin/_admin-bar
 include ../../_inc/admin/_admin-links
 
-html(lang='en')
-    +Head('Site settings')
+html(lang=LOCALE.HTML_LANG)
+    +Head(LOCALE.SITE_SETTINGS)
     body
         +AdminBar(session.payload.role)
-        div.logo Site settings - #{SITE_SETTINGS().siteName}
+        div.logo #{LOCALE.SITE_SETTINGS} - #{SITE_SETTINGS().siteName}
         hr
         + AdminLinks(session.payload.role)
         div.theader
-            | Edit site settings
+            = LOCALE.EDIT_SITE_SETTINGS
 
         div(align='center')
             form(method='post' action='/kashiwa/global-settings')
                 div.postarea
                     table
                         tr
-                            td.postblock Site name
+                            td.postblock= LOCALE.SITE_NAME
                             td
                                 input(type='text' name='siteName' size=36 value=content.siteName)
                         tr
-                            td.postblock Site slogan
+                            td.postblock= LOCALE.SITE_SLOGAN
                             td
                                 input(type='text' name='siteSlogan' size=45 value=content.siteSlogan)
                         tr
-                            td.postblock Main Page
+                            td.postblock= LOCALE.MAIN_PAGE
                             td
                                textarea(name='mainPage' rows=30 cols=60)
                                 | #{content.mainPage}
                         tr
-                            td.postblock Board list
+                            td.postblock= LOCALE.BOARD_LIST
                             td
                                 textarea(name='boardList' rows=30 cols=60)
                                     | #{content.boardList}
                         tr
-                            td.postblock FAQ page
+                            td.postblock= LOCALE.FAQ_PAGE
                             td
                                 textarea(name='faqPage' rows=30 cols=60)
                                     | #{content.faqPage}
                         tr
-                            td.postblock Rules page
+                            td.postblock= LOCALE.RULES_PAGE
                             td
                                 textarea(name='rulesPage' rows=30 cols=60)
                                     | #{content.rulesPage}
-                input(type='submit' value='Save settings')
+                input(type='submit' value=LOCALE.SAVE_SETTINGS)

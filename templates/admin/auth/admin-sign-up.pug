@@ -1,36 +1,36 @@
 include ../../_inc/thread/_head
 
-html(lang='en')
-    +Head('Management')
+html(lang=LOCALE.HTML_LANG)
+    +Head(LOCALE.MANAGEMENT)
     body
         div.adminbar
             | [
-            a(href='/kashiwa') Management
+            a(href='/kashiwa')= LOCALE.MANAGEMENT
             | ]
             | [
-            a(href='/') Main Page
+            a(href='/')= LOCALE.MAIN_PAGE
             | ]
         div.logo #{SITE_SETTINGS().siteName}
         hr
         | [
-        a(href=`/`) Go back
+        a(href=`/`)= LOCALE.GO_BACK
         | ]
-        div.theader Sign up
+        div.theader= LOCALE.SIGN_UP
         div.postarea
             form(action='/kashiwa/auth/sign-up' method='post')
                 table
                     tbody
                         tr
-                            td.postblock Username
+                            td.postblock= LOCALE.USERNAME
                             td
                                 input(type='text' name='username' size=28)
                         tr
-                            td.postblock Email
+                            td.postblock= LOCALE.FORM_EMAIL
                             td
                                 input(type='email' name='email' size=28)
                         tr
-                            td.postblock Password
+                            td.postblock= LOCALE.FORM_PASSWORD
                             td
                                 input(type='password' name='password' size=28)
                 div(align='center')
-                    input(type='submit' value='Sign up' size=28)
+                    input(type='submit' value=LOCALE.SIGN_UP size=28)

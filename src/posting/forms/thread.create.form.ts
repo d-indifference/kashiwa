@@ -2,6 +2,7 @@ import { IsFile, MaxFileSize, MemoryStoredFile } from 'nestjs-form-data';
 import { IsNotEmpty, IsOptional, IsString, Length, MinLength } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { normalizeFormEmptyString } from '@admin/transforms';
+import { LOCALE, V_LOCALE, vStr } from '@locale/locale';
 
 /**
  * Form for thread creation
@@ -11,8 +12,8 @@ export class ThreadCreateForm {
    * `Name` field
    */
   @IsOptional()
-  @IsString()
-  @Length(0, 256)
+  @IsString({ message: V_LOCALE['V_STRING'](vStr(LOCALE['FORM_NAME'])) })
+  @Length(0, 256, { message: V_LOCALE['V_LENGTH'](vStr(LOCALE['FORM_NAME']), vStr(0), vStr(256)) })
   @Transform(normalizeFormEmptyString)
   name?: string;
 
@@ -29,17 +30,17 @@ export class ThreadCreateForm {
    * `Subject` field
    */
   @IsOptional()
-  @IsString()
-  @Length(0, 256)
+  @IsString({ message: V_LOCALE['V_STRING'](vStr(LOCALE['FORM_SUBJECT'])) })
+  @Length(0, 256, { message: V_LOCALE['V_LENGTH'](vStr(LOCALE['FORM_SUBJECT']), vStr(0), vStr(256)) })
   @Transform(normalizeFormEmptyString)
   subject?: string;
 
   /**
    * `Comment` field
    */
-  @IsString()
-  @IsNotEmpty()
-  @MinLength(3)
+  @IsString({ message: V_LOCALE['V_STRING'](vStr(LOCALE['FORM_COMMENT'])) })
+  @IsNotEmpty({ message: V_LOCALE['V_NOT_EMPTY'](vStr(LOCALE['FORM_COMMENT'])) })
+  @MinLength(3, { message: V_LOCALE['V_MIN_LENGTH'](vStr(LOCALE['FORM_COMMENT']), vStr(3)) })
   comment: string;
 
   /**
@@ -47,16 +48,16 @@ export class ThreadCreateForm {
    */
   @Transform(normalizeFormEmptyString)
   @IsOptional()
-  @IsString()
-  @Length(8, 8)
+  @IsString({ message: V_LOCALE['V_STRING'](vStr(LOCALE['FORM_PASSWORD'])) })
+  @Length(8, 8, { message: V_LOCALE['V_LENGTH'](vStr(LOCALE['FORM_PASSWORD']), vStr(8), vStr(8)) })
   password: string = '';
 
   /**
    * `File` field
    */
   @IsOptional()
-  @IsFile()
-  @MaxFileSize(20e6 - 1)
+  @IsFile({ message: V_LOCALE['V_FILE'](vStr(LOCALE['FORM_FILE'])) })
+  @MaxFileSize(20e6 - 1, { message: V_LOCALE['V_MAX_FILE_SIZE'](vStr(LOCALE['FORM_FILE'])) })
   @Transform(normalizeFormEmptyString)
   file?: MemoryStoredFile;
 
@@ -64,15 +65,15 @@ export class ThreadCreateForm {
    * `Captcha` field with answer
    */
   @IsOptional()
-  @IsString()
-  @IsNotEmpty()
+  @IsString({ message: V_LOCALE['V_STRING'](vStr(LOCALE['FORM_CAPTCHA'])) })
+  @IsNotEmpty({ message: V_LOCALE['V_NOT_EMPTY'](vStr(LOCALE['FORM_CAPTCHA'])) })
   captcha?: string;
 
   /**
    * Hidden encrypted captcha answer
    */
   @IsOptional()
-  @IsString()
-  @IsNotEmpty()
+  @IsString({ message: LOCALE['CAPTCHA_ANSWER_ERROR'] as string })
+  @IsNotEmpty({ message: LOCALE['CAPTCHA_ANSWER_ERROR'] as string })
   nya?: string;
 }

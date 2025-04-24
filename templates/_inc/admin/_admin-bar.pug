@@ -6,13 +6,15 @@ mixin AdminBar(role)
         b [#{ role }]
         =' '
         | [
-        a(href='/') Go to site
+        a(href='/')
+            |#{LOCALE.GO_TO_SITE}
         | ]
         | [
-        a(href='/kashiwa/staff/my') Edit profile
+        a(href='/kashiwa/staff/my')
+            |#{LOCALE.EDIT_PROFILE}
         | ]
         =' '
         form(action='/kashiwa/auth/sign-out' method='post' style='display: inline;')
-            input(type='submit' value='Sign out')
+            input(type='submit' value=LOCALE.SIGN_OUT)
         style
             | .admin-info-panel {} .admin-info-panel a {text-decoration: underline;}

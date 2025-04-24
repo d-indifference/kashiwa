@@ -18,6 +18,7 @@ import {
 import { IpFilterGuard, loadBlackList } from '@library/guards';
 import { loadGlobalSettings } from '@library/functions';
 import { getRandomBanner } from '@library/page-compiler';
+import { LOCALE } from '@locale/locale';
 
 const bootstrap = async (): Promise<void> => {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -45,6 +46,7 @@ const bootstrap = async (): Promise<void> => {
   await loadGlobalSettings();
 
   app.setLocal('SITE_SETTINGS', () => global.GLOBAL_SETTINGS);
+  app.setLocal('LOCALE', LOCALE);
   app.setLocal('getRandomBanner', getRandomBanner);
 
   app.useGlobalGuards(new IpFilterGuard());

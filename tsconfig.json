@@ -22,6 +22,7 @@
       "@captcha/*": ["src/captcha/*"],
       "@config/*": ["src/config/*"],
       "@library/*": ["src/library/*"],
+      "@locale/*": ["src/locale/*"],
       "@persistence/*": ["src/persistence/*"],
       "@posting/*": ["src/posting/*"],
       "@restriction/*": ["src/restriction/*"]

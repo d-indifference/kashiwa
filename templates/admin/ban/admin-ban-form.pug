@@ -2,41 +2,40 @@ include ../../_inc/thread/_head
 include ../../_inc/admin/_admin-bar
 include ../../_inc/admin/_admin-links
 
-html(lang='en')
-    +Head('New ban')
+html(lang=LOCALE.HTML_LANG)
+    +Head(LOCALE.NEW_BAN)
     body
         +AdminBar(session.payload.role)
         div.logo New ban - #{SITE_SETTINGS().siteName}
         hr
         + AdminLinks(session.payload.role)
         div.theader
-            | Create new ban
+            = LOCALE.CREATE_NEW_BAN
 
         div(align='center')
             ='['
-            a(href='/kashiwa/ban') Go back
+            a(href='/kashiwa/ban')= LOCALE.GO_BACK
             =']'
             form(method='post' action='/kashiwa/ban/new')
                 div.postarea
                     table
                         tbody
                             tr
-                                td.postblock IP
+                                td.postblock= LOCALE.IP
                                 td
                                     input(type='text' name='ip' value=content.ip)
                             tr
-                                td.postblock Duration
+                                td.postblock= LOCALE.DURATION
                                 td
                                     input(type='number' name='timeValue' value=3 min=1 max=128)
                                     select(name='timeUnit')
-                                        option(value='hours') Hours
-                                        option(value='days' selected=true) Days
-                                        option(value='months') Months
-                                        option(value='years') Years
+                                        option(value='hours')= LOCALE.HOURS
+                                        option(value='days' selected=true)= LOCALE.DAYS
+                                        option(value='months')= LOCALE.MONTHS
+                                        option(value='years')= LOCALE.YEARS
                             tr
-                                td.postblock Reason
+                                td.postblock= LOCALE.REASON
                                 td
-                                    textarea(name='reason' rows=6 cols=60)
-                                        | Violation of board rules
+                                    textarea(name='reason' rows=6 cols=60)= LOCALE.BAN_REASON_DEFAULT
 
-                input(type='submit' value='Create new Ban')
+                input(type='submit' value=LOCALE.CREATE_NEW_BAN)

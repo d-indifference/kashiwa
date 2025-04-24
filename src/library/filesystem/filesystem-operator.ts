@@ -8,6 +8,7 @@ import * as mime from 'mime-types';
 import * as crypto from 'node:crypto';
 import { Constants } from '@library/constants';
 import { IFile } from '@library/filesystem/file.interface';
+import { LOCALE } from '@locale/locale';
 
 /**
  * Operator for application volume filesystem.
@@ -119,7 +120,7 @@ export class FilesystemOperator {
 
       return [readStream, mimeType === 'false' ? 'application/octet-stream' : mimeType];
     } catch {
-      throw new NotFoundException('File was not found');
+      throw new NotFoundException(LOCALE['FILE_WAS_NOT_FOUND']);
     }
   }
 

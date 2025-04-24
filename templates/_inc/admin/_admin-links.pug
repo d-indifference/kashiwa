@@ -1,28 +1,28 @@
 mixin AdminLinks(role)
     div(align='center')
         | [
-        a(href='/kashiwa') Dashboard
+        a(href='/kashiwa')= LOCALE.DASHBOARD
         | ]
         if role === 'ADMINISTRATOR'
             | [
-            a(href='/kashiwa/global-settings') Site settings
+            a(href='/kashiwa/global-settings')= LOCALE.SITE_SETTINGS
             | ]
             | [
-            a(href='/kashiwa/staff') Staff panel
+            a(href='/kashiwa/staff')= LOCALE.STAFF_PANEL
             | ]
             | [
-            a(href='/kashiwa/board') Boards
+            a(href='/kashiwa/board')= LOCALE.BOARDS
             | ]
         | [
-        a(href='/kashiwa/moderation') Moderation
+        a(href='/kashiwa/moderation')= LOCALE.MODERATION
         | ]
         | [
-        a(href='/kashiwa/ban') Banned posters
+        a(href='/kashiwa/ban')= LOCALE.BANNED_POSTERS
         | ]
         if role === 'ADMINISTRATOR'
             | [
-            a(href='/kashiwa/spam') Spam list
+            a(href='/kashiwa/spam')= LOCALE.SPAM_LIST
             | ]
             | [
-            a(href='/kashiwa/ip-filter') IP Filter
+            a(href='/kashiwa/ip-filter')= LOCALE.IP_FILTER
             | ]

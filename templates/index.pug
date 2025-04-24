@@ -2,17 +2,17 @@ include _inc/thread/_head
 include _inc/thread/_styles
 include _inc/thread/_top_bar
 
-html(lang='en')
-    +Head('Home')
+html(lang=LOCALE.HTML_LANG)
+    +Head(LOCALE.HOME)
     body
         div.adminbar
             +Styles
             +TopBar
             | [
-            a(href='/kashiwa') Management
+            a(href='/kashiwa')= LOCALE.MANAGEMENT
             | ]
             | [
-            a(href='/') Main Page
+            a(href='/')= LOCALE.MAIN_PAGE
             | ]
         div.logo
             | #{SITE_SETTINGS().siteName}

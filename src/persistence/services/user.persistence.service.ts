@@ -5,6 +5,7 @@ import { UserMapper } from '@persistence/mappers';
 import * as bcrypt from 'bcrypt';
 import { User } from '@prisma/client';
 import { Page, PageRequest } from '@persistence/lib/page';
+import { LOCALE } from '@locale/locale';
 
 /**
  * Database queries for `User` model
@@ -36,7 +37,7 @@ export class UserPersistenceService {
     const user = await this.prisma.user.findFirst({ where: { id } });
 
     if (!user) {
-      throw new NotFoundException(`User with ID: ${id} was not found`);
+      throw new NotFoundException((LOCALE['USER_WITH_ID_NOT_FOUND'] as CallableFunction)(id));
     }
 
     return this.userMapper.toDto(user);
@@ -117,14 +118,14 @@ export class UserPersistenceService {
 
     if (!user) {
       this.logger.warn(`[UNAUTHORIZED],  username: "${username}"`);
-      throw new UnauthorizedException('Wrong message or password');
+      throw new UnauthorizedException(LOCALE['WRONG_USERNAME_OR_PASSWORD']);
     }
 
     const isPasswordsMatch = await bcrypt.compare(password, user.passwordHash);
 
     if (!isPasswordsMatch) {
       this.logger.warn(`[UNAUTHORIZED],  username: "${username}"`);
-      throw new UnauthorizedException('Wrong message or password');
+      throw new UnauthorizedException(LOCALE['WRONG_USERNAME_OR_PASSWORD']);
     }
 
     return user;
@@ -137,8 +138,8 @@ export class UserPersistenceService {
     const entity = await this.prisma.user.findFirst({ where: { username: dto.username } });
 
     if (entity) {
-      this.logger.warn(`User with username: ${dto.username} is already exists`);
-      throw new BadRequestException(`User with username: ${dto.username} is already exists`);
+      this.logger.warn((LOCALE['USER_ALREADY_EXISTS'] as CallableFunction)(dto.username));
+      throw new BadRequestException((LOCALE['USER_ALREADY_EXISTS'] as CallableFunction)(dto.username));
     }
   }
 
@@ -149,15 +150,15 @@ export class UserPersistenceService {
     const user = await this.prisma.user.findFirst({ where: { id: dto.id } });
 
     if (!user) {
-      throw new NotFoundException(`User with ID: ${dto.id} was not found`);
+      throw new NotFoundException((LOCALE['USER_WITH_ID_NOT_FOUND'] as CallableFunction)(dto.id));
     }
 
     const userByUsername = await this.prisma.user.findFirst({ where: { username: dto.username } });
 
     if (userByUsername) {
       if (userByUsername.id !== user.id) {
-        this.logger.warn(`User with username: ${dto.username} is already exists`);
-        throw new BadRequestException(`User with username: ${dto.username} is already exists`);
+        this.logger.warn((LOCALE['USER_ALREADY_EXISTS'] as CallableFunction)(dto.username));
+        throw new BadRequestException((LOCALE['USER_ALREADY_EXISTS'] as CallableFunction)(dto.username));
       }
     }
   }
