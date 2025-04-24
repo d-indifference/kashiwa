@@ -2,22 +2,21 @@ include ../../_inc/thread/_head
 include ../../_inc/admin/_admin-bar
 include ../../_inc/admin/_admin-links
 
-html(lang='en')
-    +Head('Staff Panel')
+html(lang=LOCALE.HTML_LANG)
+    +Head(LOCALE.STAFF_PANEL)
     body
         +AdminBar(session.payload.role)
-        div.logo Staff Panel - #{SITE_SETTINGS().siteName}
+        div.logo #{LOCALE.STAFF_PANEL} - #{SITE_SETTINGS().siteName}
         hr
         + AdminLinks(session.payload.role)
-        div.theader
-            | Staff list
+        div.theader= LOCALE.STAFF_LIST
 
         table(align='center' style='white-space: nowrap')
             thead
                 tr.row1
-                    th Username
-                    th Email
-                    th Role
+                    th= LOCALE.USERNAME
+                    th= LOCALE.FORM_EMAIL
+                    th= LOCALE.ROLE
                     th
             tbody
                 each user, index in content.content
@@ -30,7 +29,7 @@ html(lang='en')
                             b #{user.role}
                         td
                             | [
-                            a(href=`/kashiwa/staff/edit/${user.id}`) Edit
+                            a(href=`/kashiwa/staff/edit/${user.id}`)= LOCALE.EDIT
                             | ]
                   else
                       tr.row2
@@ -41,16 +40,16 @@ html(lang='en')
                               b #{user.role}
                           td
                               | [
-                              a(href=`/kashiwa/staff/edit/${user.id}`) Edit
+                              a(href=`/kashiwa/staff/edit/${user.id}`)= LOCALE.EDIT
                               | ]
 
         div(align='center')
             if content.previous !== null
-              a(href=`/kashiwa/staff?page=${content.previous}` title='Previous') ←
+              a(href=`/kashiwa/staff?page=${content.previous}` title=LOCALE.PREVIOUS) ←
             if content.next !== null
-                a(href=`/kashiwa/staff?page=${content.next}` title='Next') →
+                a(href=`/kashiwa/staff?page=${content.next}` title=LOCALE.NEXT) →
 
             br
             ='['
-            a(href='/kashiwa/staff/new') Add new
+            a(href='/kashiwa/staff/new')= LOCALE.ADD_NEW
             =']'

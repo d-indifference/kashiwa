@@ -17,6 +17,9 @@ import { Transform } from 'class-transformer';
 import { normalizeBooleanCheckbox, normalizeNumber, normalizeStringArray } from '@admin/transforms';
 import { FileAttachmentMode } from '@prisma/client';
 import { Constants } from '@library/constants';
+import { LOCALE, V_LOCALE, vStr } from '@locale/locale';
+
+const fileAttachmentModes = [FileAttachmentMode.STRICT, FileAttachmentMode.FORBIDDEN, FileAttachmentMode.OPTIONAL];
 
 /**
  * Form object for creation of new board
@@ -25,26 +28,26 @@ export class BoardUpdateForm {
   /**
    * Update candidate object ID (strictly required)
    */
-  @IsString()
-  @IsNotEmpty()
-  @IsUUID('4')
+  @IsString({ message: V_LOCALE['V_STRING'](vStr(LOCALE['ID'])) })
+  @IsNotEmpty({ message: V_LOCALE['V_NOT_EMPTY'](vStr(LOCALE['ID'])) })
+  @IsUUID('4', { message: V_LOCALE['V_UUIDV4'](vStr(LOCALE['ID'])) })
   id: string;
 
   /**
    * Board URL path
    */
   @IsOptional()
-  @IsString()
-  @Length(1, 64)
-  @Matches(/^[a-z]+$/)
+  @IsString({ message: V_LOCALE['V_STRING'](vStr(LOCALE['URL'])) })
+  @Length(1, 64, { message: V_LOCALE['V_LENGTH'](vStr(LOCALE['URL']), vStr(1), vStr(64)) })
+  @Matches(/^[a-z]+$/, { message: V_LOCALE['V_BOARD_MATCHES'](vStr(LOCALE['URL'])) })
   url: string;
 
   /**
    * Board Name
    */
   @IsOptional()
-  @IsString()
-  @Length(1, 256)
+  @IsString({ message: V_LOCALE['V_STRING'](vStr(LOCALE['NAME'])) })
+  @Length(2, 256, { message: V_LOCALE['V_NOT_EMPTY'](vStr(LOCALE['NAME']), vStr(2), vStr(256)) })
   name: string;
 
   /**
@@ -52,7 +55,7 @@ export class BoardUpdateForm {
    */
   @IsOptional()
   @Transform(normalizeBooleanCheckbox)
-  @IsBoolean()
+  @IsBoolean({ message: V_LOCALE['V_BOOLEAN'](vStr(LOCALE['ALLOW_POSTING'])) })
   allowPosting: boolean = false;
 
   /**
@@ -60,7 +63,7 @@ export class BoardUpdateForm {
    */
   @IsOptional()
   @Transform(normalizeBooleanCheckbox)
-  @IsBoolean()
+  @IsBoolean({ message: V_LOCALE['V_BOOLEAN'](vStr(LOCALE['STRICT_ANONYMITY'])) })
   strictAnonymity: boolean = false;
 
   /**
@@ -70,8 +73,10 @@ export class BoardUpdateForm {
    * `FORBIDDEN` - Files are strictly prohibited
    */
   @IsOptional()
-  @IsString()
-  @IsIn([FileAttachmentMode.STRICT, FileAttachmentMode.FORBIDDEN, FileAttachmentMode.OPTIONAL])
+  @IsString({ message: V_LOCALE['V_STRING'](vStr(LOCALE['THREAD_FILE_POLICY'])) })
+  @IsIn(fileAttachmentModes, {
+    message: V_LOCALE['V_IN'](vStr(LOCALE['THREAD_FILE_POLICY']), fileAttachmentModes)
+  })
   threadFileAttachmentMode: FileAttachmentMode;
 
   /**
@@ -81,8 +86,10 @@ export class BoardUpdateForm {
    * `FORBIDDEN` - Files are strictly prohibited
    */
   @IsOptional()
-  @IsString()
-  @IsIn([FileAttachmentMode.STRICT, FileAttachmentMode.FORBIDDEN, FileAttachmentMode.OPTIONAL])
+  @IsString({ message: V_LOCALE['V_STRING'](vStr(LOCALE['REPLY_FILE_POLICY'])) })
+  @IsIn(fileAttachmentModes, {
+    message: V_LOCALE['V_IN'](vStr(LOCALE['REPLY_FILE_POLICY']), fileAttachmentModes)
+  })
   replyFileAttachmentMode: FileAttachmentMode;
 
   /**
@@ -90,8 +97,8 @@ export class BoardUpdateForm {
    */
   @IsOptional()
   @Transform(normalizeNumber)
-  @IsNumber()
-  @IsPositive()
+  @IsNumber(undefined, { message: V_LOCALE['V_NUMBER'](vStr(LOCALE['DELAY_AFTER_THREAD'])) })
+  @IsPositive({ message: V_LOCALE['V_POSITIVE'](vStr(LOCALE['DELAY_AFTER_THREAD'])) })
   delayAfterThread: number;
 
   /**
@@ -99,8 +106,8 @@ export class BoardUpdateForm {
    */
   @IsOptional()
   @Transform(normalizeNumber)
-  @IsNumber()
-  @IsPositive()
+  @IsNumber(undefined, { message: V_LOCALE['V_NUMBER'](vStr(LOCALE['DELAY_AFTER_REPLY'])) })
+  @IsPositive({ message: V_LOCALE['V_POSITIVE'](vStr(LOCALE['DELAY_AFTER_REPLY'])) })
   delayAfterReply: number;
 
   /**
@@ -108,8 +115,8 @@ export class BoardUpdateForm {
    */
   @IsOptional()
   @Transform(normalizeNumber)
-  @IsNumber()
-  @IsPositive()
+  @IsNumber(undefined, { message: V_LOCALE['V_NUMBER'](vStr(LOCALE['MAX_FILE_SIZE'])) })
+  @IsPositive({ message: V_LOCALE['V_POSITIVE'](vStr(LOCALE['MIN_FILE_SIZE'])) })
   minFileSize: number;
 
   /**
@@ -117,8 +124,8 @@ export class BoardUpdateForm {
    */
   @IsOptional()
   @Transform(normalizeNumber)
-  @IsNumber()
-  @IsPositive()
+  @IsNumber(undefined, { message: V_LOCALE['V_NUMBER'](vStr(LOCALE['MAX_FILE_SIZE'])) })
+  @IsPositive({ message: V_LOCALE['V_POSITIVE'](vStr(LOCALE['MAX_FILE_SIZE'])) })
   maxFileSize: number;
 
   /**
@@ -128,7 +135,7 @@ export class BoardUpdateForm {
    */
   @IsOptional()
   @Transform(normalizeBooleanCheckbox)
-  @IsBoolean()
+  @IsBoolean({ message: V_LOCALE['V_BOOLEAN'](vStr(LOCALE['ALLOW_MARKDOWN'])) })
   allowMarkdown: boolean = false;
 
   /**
@@ -136,7 +143,7 @@ export class BoardUpdateForm {
    */
   @IsOptional()
   @Transform(normalizeBooleanCheckbox)
-  @IsBoolean()
+  @IsBoolean({ message: V_LOCALE['V_BOOLEAN'](vStr(LOCALE['ALLOW_TRIPCODES'])) })
   allowTripcodes: boolean = false;
 
   /**
@@ -144,8 +151,8 @@ export class BoardUpdateForm {
    */
   @IsOptional()
   @Transform(normalizeNumber)
-  @IsNumber()
-  @IsPositive()
+  @IsNumber(undefined, { message: V_LOCALE['V_NUMBER'](vStr(LOCALE['MAX_THREADS_ON_BOARD'])) })
+  @IsPositive({ message: V_LOCALE['V_POSITIVE'](vStr(LOCALE['MAX_THREADS_ON_BOARD'])) })
   maxThreadsOnBoard: number;
 
   /**
@@ -153,8 +160,8 @@ export class BoardUpdateForm {
    */
   @IsOptional()
   @Transform(normalizeNumber)
-  @IsNumber()
-  @IsPositive()
+  @IsNumber(undefined, { message: V_LOCALE['V_NUMBER'](vStr(LOCALE['BUMP_LIMIT'])) })
+  @IsPositive({ message: V_LOCALE['V_POSITIVE'](vStr(LOCALE['BUMP_LIMIT'])) })
   bumpLimit: number;
 
   /**
@@ -162,9 +169,9 @@ export class BoardUpdateForm {
    */
   @IsOptional()
   @Transform(normalizeNumber)
-  @IsNumber()
-  @Min(0)
-  @Max(256)
+  @IsNumber(undefined, { message: V_LOCALE['V_NUMBER'](vStr(LOCALE['MAX_STRING_FIELD_SIZE'])) })
+  @Min(0, { message: V_LOCALE['V_MIN'](vStr(LOCALE['MAX_STRING_FIELD_SIZE']), vStr(0)) })
+  @Max(256, { message: V_LOCALE['V_MAX'](vStr(LOCALE['MAX_STRING_FIELD_SIZE']), vStr(256)) })
   maxStringFieldSize: number;
 
   /**
@@ -172,24 +179,24 @@ export class BoardUpdateForm {
    */
   @IsOptional()
   @Transform(normalizeNumber)
-  @IsNumber()
-  @IsPositive()
+  @IsNumber(undefined, { message: V_LOCALE['V_NUMBER'](vStr(LOCALE['MAX_COMMENT_SIZE'])) })
+  @IsPositive({ message: V_LOCALE['V_POSITIVE'](vStr(LOCALE['MAX_COMMENT_SIZE'])) })
   maxCommentSize: number;
 
   /**
    * Default poster name
    */
   @IsOptional()
-  @IsString()
-  @Length(1, 256)
+  @IsString({ message: V_LOCALE['V_STRING'](vStr(LOCALE['DEFAULT_POSTER_NAME'])) })
+  @Length(1, 256, { message: V_LOCALE['V_LENGTH'](vStr(LOCALE['DEFAULT_POSTER_NAME']), vStr(1), vStr(256)) })
   defaultPosterName: string;
 
   /**
    * Default moderator name
    */
   @IsOptional()
-  @IsString()
-  @Length(1, 256)
+  @IsString({ message: V_LOCALE['V_STRING'](vStr(LOCALE['DEFAULT_MODERATOR_NAME'])) })
+  @Length(1, 256, { message: V_LOCALE['V_LENGTH'](vStr(LOCALE['DEFAULT_MODERATOR_NAME']), vStr(1), vStr(256)) })
   defaultModeratorName: string;
 
   /**
@@ -197,7 +204,7 @@ export class BoardUpdateForm {
    */
   @IsOptional()
   @Transform(normalizeBooleanCheckbox)
-  @IsBoolean()
+  @IsBoolean({ message: V_LOCALE['V_BOOLEAN'](vStr(LOCALE['ENABLE_CAPTCHA'])) })
   enableCaptcha: boolean = false;
 
   /**
@@ -205,7 +212,7 @@ export class BoardUpdateForm {
    */
   @IsOptional()
   @Transform(normalizeBooleanCheckbox)
-  @IsBoolean()
+  @IsBoolean({ message: V_LOCALE['V_BOOLEAN'](vStr(LOCALE['IS_CAPTCHA_CASE_SENSITIVE'])) })
   isCaptchaCaseSensitive: boolean = false;
 
   /**
@@ -213,14 +220,17 @@ export class BoardUpdateForm {
    */
   @IsOptional()
   @Transform(normalizeStringArray)
-  @IsArray()
-  @IsIn(Constants.SUPPORTED_FILE_TYPES, { each: true })
+  @IsArray({ message: V_LOCALE['V_ARRAY'](vStr(LOCALE['ALLOWED_FILE_TYPES'])) })
+  @IsIn(Constants.SUPPORTED_FILE_TYPES, {
+    each: true,
+    message: V_LOCALE['V_IN'](vStr(LOCALE['ALLOWED_FILE_TYPES']), Constants.SUPPORTED_FILE_TYPES)
+  })
   allowedFileTypes: string[];
 
   /**
    * HTML fragment with board rules
    */
   @IsOptional()
-  @IsString()
+  @IsString({ message: V_LOCALE['V_STRING'](vStr(LOCALE['RULES'])) })
   rules: string;
 }

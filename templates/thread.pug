@@ -7,17 +7,17 @@ include _inc/thread/_head
 include _inc/thread/_styles
 include _inc/thread/_top_bar
 
-html(lang='en')
+html(lang=LOCALE.HTML_LANG)
     +Head(_CONTENT.board.name)
     body.replypage
         div.adminbar
             +Styles
             +TopBar
             | [
-            a(href='/kashiwa') Management
+            a(href='/kashiwa')= LOCALE.MANAGEMENT
             | ]
             | [
-            a(href='/') Main Page
+            a(href='/')= LOCALE.MAIN_PAGE
             | ]
         div.logo
             div.banner
@@ -27,7 +27,7 @@ html(lang='en')
             | #{SITE_SETTINGS().siteSlogan}
         hr
         | [
-        a(href=`/${_CONTENT.board.url}/kashiwa.html`) Go back
+        a(href=`/${_CONTENT.board.url}/kashiwa.html`)= LOCALE.GO_BACK
         | ]
         div.theader Reply
 

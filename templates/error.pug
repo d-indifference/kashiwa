@@ -1,11 +1,11 @@
 include _inc/thread/_head
 
-html(lang='en')
-    +Head('Error')
+html(lang=LOCALE.HTML_LANG)
+    +Head(LOCALE.ERROR)
     body
-        h1(align='center') Error
+        h1(align='center')= LOCALE.ERROR
         div(align='center')
             p
                 b !{message}
             p
-                a(href='/') To main page
+                a(href='/')= LOCALE.TO_MAIN_PAGE

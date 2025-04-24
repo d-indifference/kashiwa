@@ -2,6 +2,7 @@ import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@
 import { Reflector } from '@nestjs/core';
 import { UserPersistenceService } from '@persistence/services';
 import { ISession } from '@admin/interfaces';
+import { LOCALE } from '@locale/locale';
 
 /**
  * Guard that validates the existence of a user session and checks user roles against required roles
@@ -31,7 +32,7 @@ export class SessionGuard implements CanActivate {
         const userRole = user.role;
 
         if (!userRole || !requiredRoles.includes(userRole)) {
-          throw new ForbiddenException('You don`t have permissions to access this URL');
+          throw new ForbiddenException(LOCALE['NO_PERMISSION_TO_ACCESS']);
         } else {
           session.payload.role = userRole;
           return true;
@@ -47,8 +48,6 @@ export class SessionGuard implements CanActivate {
   }
 
   private throwForbiddenWithSignInLink() {
-    throw new ForbiddenException(
-      'You need to be authorized to access this page.<br>[<a href="/kashiwa/auth/sign-in">Authorize</a>]'
-    );
+    throw new ForbiddenException(LOCALE['YOU_NEED_TO_BE_AUTHORIZED']);
   }
 }

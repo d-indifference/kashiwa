@@ -9,9 +9,9 @@ mixin Reply(_board, _opening_post, _post, is_thread)
                     input(type='checkbox' name='delete' value=_post.num.toString())
                     =' '
                     if _post.hasSage
-                      span.sage ⇩
+                      span.sage= LOCALE.POST_SAGE_SYMBOL
                     if _post.isAdmin
-                      span.adminPost(title='Post by moderator or administrator') ↯
+                      span.adminPost(title=LOCALE.POST_BY_ADMIN)= LOCALE.POST_ADMIN_SYMBOL
                     =' '
                     span.replytitle #{_post.subject}
                     =' '
@@ -39,8 +39,7 @@ mixin Reply(_board, _opening_post, _post, is_thread)
                 if _post.attachedFile
                   if _post.attachedFile.name === 'NO_THUMB'
                     br
-                    div.nothumb
-                      | No file
+                    div.nothumb= LOCALE.POST_NO_FILE
                   else
                     br
                     span.filesize
@@ -59,7 +58,7 @@ mixin Reply(_board, _opening_post, _post, is_thread)
                       =' '
                       if _post.attachedFile.isImage
                         if _post.attachedFile.width > 200 && _post.attachedFile.height > 200
-                            span.thumbnailmsg A reduced copy is shown, the original can be viewed by clicking on it.
+                            span.thumbnailmsg= LOCALE.POST_THUMBNAIL_MSG
                       br
                       a(target='_blank' href=`/${_board.url}/src/${_post.attachedFile.name}`)
                           if _post.attachedFile.isImage

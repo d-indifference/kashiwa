@@ -1,7 +1,6 @@
 import { ArgumentsHost, BadRequestException, Catch, ExceptionFilter, HttpStatus, Logger } from '@nestjs/common';
 import { Response } from 'express';
 import { HttpArgumentsHost } from '@nestjs/common/interfaces';
-import * as _ from 'lodash';
 
 @Catch(BadRequestException)
 export class BadRequestExceptionFilter implements ExceptionFilter {
@@ -18,10 +17,8 @@ export class BadRequestExceptionFilter implements ExceptionFilter {
 
     let exceptionMessage = '';
 
-    if (_.has(exceptionMessage, 'map')) {
-      exceptionMessage = (failedFields as string[])
-        .map(message => `<p>${message[0].toUpperCase() + message.slice(1)}</p>`)
-        .join('\n');
+    if (Array.isArray(failedFields)) {
+      exceptionMessage += `<p>${(failedFields as string[]).join('')}</p>`;
     } else {
       exceptionMessage = `<p>${failedFields as string}</p>`;
     }

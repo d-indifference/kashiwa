@@ -2,18 +2,18 @@ include ../../_inc/thread/_head
 include ../../_inc/admin/_admin-bar
 include ../../_inc/admin/_admin-links
 
-html(lang='en')
-    +Head('IP Filter')
+html(lang=LOCALE.HTML_LANG)
+    +Head(LOCALE.IP_FILTER)
     body
         +AdminBar(session.payload.role)
-        div.logo IP Filter - #{SITE_SETTINGS().siteName}
+        div.logo #{LOCALE.IP_FILTER} - #{SITE_SETTINGS().siteName}
         hr
         + AdminLinks(session.payload.role)
         div.theader
-            | Edit IP blacklist
+            = LOCALE.EDIT_IP_BLACKLIST
 
         div(align='center')
             form(method='post' action='/kashiwa/ip-filter')
                 textarea(rows=45 cols=60 name='blackList') #{blackList}
                 br
-                input(type='submit' value='Update')
+                input(type='submit' value=LOCALE.UPDATE)

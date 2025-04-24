@@ -3,59 +3,59 @@ mixin Form(_board, isThread, captcha)
         tbody
             if !_board.boardSettings.strictAnonymity
                 tr
-                    td.postblock Name
+                    td.postblock= LOCALE.FORM_NAME
                     td
                         input(type='text' name='name' size=28)
                 tr
-                    td.postblock Email
+                    td.postblock= LOCALE.FORM_EMAIL
                     td
                         input(type='text' name='email' size=28)
             tr
-                td.postblock Subject
+                td.postblock= LOCALE.FORM_SUBJECT
                 td
                     input(type='text' name='subject' size=35)
-                    input(type='submit' value='Submit')
+                    input(type='submit' value=LOCALE.FORM_SUBMIIT)
             tr
-                td.postblock Comment
+                td.postblock= LOCALE.FORM_COMMENT
                 td
                     textarea(name='comment' rows=6 cols=60)
             if !isThread
               if _board.boardSettings.threadFileAttachmentMode !== 'FORBIDDEN'
                   tr
-                      td.postblock File
+                      td.postblock= LOCALE.FORM_FILE
                       td
                           input(type='file' name='file' size=35 accept=_board.boardSettings.allowedFileTypes.join(','))
             if isThread
                 if _board.boardSettings.replyFileAttachmentMode !== 'FORBIDDEN'
                     tr
-                        td.postblock File
+                        td.postblock= LOCALE.FORM_FILE
                         td
                             input(type='file' name='file' size=35 accept=_board.boardSettings.allowedFileTypes.join(','))
             if _board.boardSettings.enableCaptcha
               tr
-                td.postblock Captcha
+                td.postblock= LOCALE.FORM_CAPTCHA
                 td
                     | !{captcha.image}
                     br
                     input(type='text' size=15 name='captcha')
                     input(type='hidden' name='nya' value=captcha.cryptoAnswer)
             tr
-                td.postblock Password
+                td.postblock= LOCALE.FORM_PASSWORD
                 td
                     input(type='password' name='password' size=8)
-                    |  (to delete posts and files)
+                    |  (#{LOCALE.FORM_PASSWORD_EXPLANATION})
             if isThread
-              td.postblock Options
+              td.postblock= LOCALE.OPTIONS
               td
                 label
                     input(type='checkbox' name='sage')
-                    |  Don't hit the thread
+                    = LOCALE.FORM_DONT_HIT
             tr
                 td(colspan=2)
                     div.rules
                         ul
-                            li Allowed file types are: #{_board.boardSettings.allowedFileTypes.map(t => t.split('/')[1]).join(', ').toUpperCase()}
-                            li Max file size is #{fileSize(_board.boardSettings.maxFileSize)}
-                            li Images with dimensions larger than 200x200 px will be downscaled
+                            li #{LOCALE.FORM_RULES_ALLOWED_FILE_TYPES} #{_board.boardSettings.allowedFileTypes.map(t => t.split('/')[1]).join(', ').toUpperCase()}
+                            li #{LOCALE.FORM_RULES_MAX_FILE_SIZE} #{fileSize(_board.boardSettings.maxFileSize)}
+                            li #{LOCALE.FORM_RULES_THUMB}
                         | !{_board.boardSettings.rules}
     hr

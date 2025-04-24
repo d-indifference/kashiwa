@@ -2,29 +2,29 @@ include ../../_inc/thread/_head
 include ../../_inc/admin/_admin-bar
 include ../../_inc/admin/_admin-links
 
-html(lang='en')
-    +Head('Bans')
+html(lang=LOCALE.HTML_LANG)
+    +Head(LOCALE.BANS)
     body
         +AdminBar(session.payload.role)
         div.logo Bans - #{SITE_SETTINGS().siteName}
         hr
         + AdminLinks(session.payload.role)
         div.theader
-            | Banned IPs list
+            = LOCALE.BANNED_IP_LIST
 
         div(align='center')
             ='['
-            a(href='/kashiwa/ban/new') Add new ban
+            a(href='/kashiwa/ban/new')= LOCALE.ADD_NEW_BAN
             =']'
 
         table(align='center' style='white-space: nowrap')
             thead
                 tr.row1
-                    th Created at
-                    th IP
-                    th Till
-                    th Reason
-                    th Who banned?
+                    th= LOCALE.CREATED_AT
+                    th= LOCALE.IP
+                    th= LOCALE.TILL
+                    th= LOCALE.REASON
+                    th= LOCALE.WHO_BANNED
                     th
             tbody
               each ban, index in content.content
@@ -41,7 +41,7 @@ html(lang='en')
                                 | -
                           td
                             form(method='post' action=`/kashiwa/ban/delete/${ban.id}`)
-                                input(type='submit' value='Delete this ban')
+                                input(type='submit' value=LOCALE.DELETE_BAN)
                   else
                       tr.row2
                           td #{simpleFormatDateTime(ban.createdAt)}
@@ -55,14 +55,14 @@ html(lang='en')
                                 | -
                           td
                               form(method='post' action=`/kashiwa/ban/delete/${ban.id}`)
-                                  input(type='submit' value='Delete this ban')
+                                  input(type='submit' value=LOCALE.DELETE_BAN)
 
         div(align='center')
             ='['
-            a(href='/kashiwa/ban/new') Add new ban
+            a(href='/kashiwa/ban/new')= LOCALE.ADD_NEW_BAN
             =']'
 
             if content.previous !== null
-                a(href=`/kashiwa/ban?page=${content.previous}` title='Previous') ←
+                a(href=`/kashiwa/ban?page=${content.previous}` title=LOCALE.PREVIOUS) ←
             if content.next !== null
-                a(href=`/kashiwa/ban?page=${content.next}` title='Next') →
+                a(href=`/kashiwa/ban?page=${content.next}` title=LOCALE.NEXT) →

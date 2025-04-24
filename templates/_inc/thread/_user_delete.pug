@@ -2,12 +2,12 @@ mixin UserDelete()
     table.userdelete
         tr
             td
-                | Delete post [
+                | #{LOCALE.USER_DELETE_DELETE_POST} [
                 label
                     input(type='checkbox' name='fileOnly')
-                    | Only file
+                    = LOCALE.USER_DELETE_ONLY_FILE
                 | ]
                 br
-                | Password
+                = LOCALE.FORM_PASSWORD
                 input(type='password' name='password' size='8')
-                input(type='submit' value='Delete')
+                input(type='submit' value=LOCALE.DELETE)

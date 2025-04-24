@@ -7,6 +7,7 @@ import { Board } from '@prisma/client';
 import { Constants } from '@library/constants';
 import { FilesystemOperator } from '@library/filesystem';
 import { AttachedFilePersistenceService } from '@persistence/services/attached-file.persistence.service';
+import { LOCALE } from '@locale/locale';
 
 /**
  * Database queries for `Board` model
@@ -39,7 +40,7 @@ export class BoardPersistenceService {
     const board = await this.prisma.board.findFirst({ where: { id }, include: { boardSettings: true } });
 
     if (!board) {
-      throw new NotFoundException(`Board with id: ${id} was not found`);
+      throw new NotFoundException((LOCALE['BOARD_WITH_ID_NOT_FOUND'] as CallableFunction)(id));
     }
 
     return board;
@@ -73,11 +74,11 @@ export class BoardPersistenceService {
     const board = await this.prisma.board.findFirst({ where: { url }, include: { boardSettings: true } });
 
     if (!board) {
-      throw new NotFoundException(`Board with url: ${url} was not found`);
+      throw new NotFoundException((LOCALE['BOARD_BY_URL_NOT_FOUND'] as CallableFunction)(url));
     }
 
     if (!board.boardSettings) {
-      throw new NotFoundException(`Board settings for board with url: ${url} was not found`);
+      throw new NotFoundException((LOCALE['BOARD_SETTINGS_BY_URL_NOT_FOUND'] as CallableFunction)(url));
     }
 
     return this.boardMapper.toDto(board, board.boardSettings);
@@ -98,7 +99,7 @@ export class BoardPersistenceService {
     const response = await this.prisma.board.findFirst({ select: { postCount: true }, where: { url } });
 
     if (response === null) {
-      throw new NotFoundException(`Board with url: ${url} was not found`);
+      throw new NotFoundException((LOCALE['BOARD_BY_URL_NOT_FOUND'] as CallableFunction)(url));
     }
 
     return response.postCount;
@@ -182,15 +183,13 @@ export class BoardPersistenceService {
    */
   private async checkOnCreate(dto: BoardCreateDto): Promise<void> {
     if (Constants.RESERVED_BOARD_URLS.includes(dto.url)) {
-      throw new BadRequestException(
-        `URL: '/${dto.url}' is reserved by system. You cannot create a board with this URL.`
-      );
+      throw new BadRequestException((LOCALE['URL_IS_RESERVED'] as CallableFunction)(dto.url));
     }
 
     const boardByUrl = await this.prisma.board.findFirst({ where: { url: dto.url } });
 
     if (boardByUrl) {
-      throw new BadRequestException(`Board with URL: '/${dto.url}' is already exists`);
+      throw new BadRequestException((LOCALE['BOARD_ALREADY_EXISTS'] as CallableFunction)(dto.url));
     }
   }
 
@@ -202,16 +201,14 @@ export class BoardPersistenceService {
 
     if (dto.url) {
       if (Constants.RESERVED_BOARD_URLS.includes(dto.url)) {
-        throw new BadRequestException(
-          `URL: '/${dto.url}' is reserved by system. You cannot create a board with this URL.`
-        );
+        throw new BadRequestException((LOCALE['URL_IS_RESERVED'] as CallableFunction)(dto.url));
       }
 
       const boardByUrl = await this.prisma.board.findFirst({ where: { url: dto.url } });
 
       if (boardByUrl) {
         if (boardByUrl.id !== dto.id) {
-          throw new BadRequestException(`Board with URL: '/${dto.url}' is already exists`);
+          throw new BadRequestException((LOCALE['BOARD_ALREADY_EXISTS'] as CallableFunction)(dto.url));
         }
       }
     }
@@ -224,7 +221,7 @@ export class BoardPersistenceService {
     const board = await this.prisma.board.findFirst({ where: { url } });
 
     if (!board) {
-      throw new NotFoundException(`Board with url: ${url} was not found`);
+      throw new NotFoundException((LOCALE['BOARD_BY_URL_NOT_FOUND'] as CallableFunction)(url));
     }
 
     return board;

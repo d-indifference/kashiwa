@@ -4,21 +4,21 @@ include ../../_inc/admin/_admin-links
 include ../../_inc/admin/_admin-board-create-form
 include ../../_inc/admin/_admin_board-update-form
 
-html(lang='en')
-    +Head('Boards')
+html(lang=LOCALE.HTML_LANG)
+    +Head(LOCALE.BOARDS)
     body
         +AdminBar(session.payload.role)
-        div.logo Boards - #{SITE_SETTINGS().siteName}
+        div.logo #{LOCALE.BOARDS} - #{SITE_SETTINGS().siteName}
         hr
         + AdminLinks(session.payload.role)
         div.theader
             if formType === 'CREATE'
-                | New board
+                = LOCALE.NEW_BOARD
             if formType === 'UPDATE'
-                | Edit board
+                = LOCALE.EDIT_BOARD
         div(align='center')
             ='['
-            a(href='/kashiwa/board') Go back
+            a(href='/kashiwa/board')= LOCALE.GO_BACK
             =']'
 
         if formType === 'CREATE'
@@ -26,7 +26,7 @@ html(lang='en')
                 div.postarea
                     +AdminBoardCreateForm
                     div(align='center')
-                        input(type='submit' value='Create' size=28)
+                        input(type='submit' value=LOCALE.CREATE size=28)
 
         if formType === 'UPDATE'
             form(method='post' action=`/kashiwa/board/edit`)
@@ -34,17 +34,17 @@ html(lang='en')
                 div.postarea
                     +AdminBoardUpdateForm
                     div(align='center')
-                        input(type='submit' value='Update' size=28)
+                        input(type='submit' value=LOCALE.UPDATE size=28)
 
             div(align='center')
                 form(method='post' action=`/kashiwa/board/reload/${content.id}`)
-                    input(type='Submit' value='Reload board cache')
+                    input(type='Submit' value=LOCALE.RELOAD_BOARD_CACHE)
 
             hr
             div(align='center')
                 form(method='post' action=`/kashiwa/board/clear/${content.id}`)
-                    input(type='Submit' value='Clear board cache')
+                    input(type='Submit' value=LOCALE.CLEAR_BOARD_CACHE)
 
             div(align='center')
                 form(method='post' action=`/kashiwa/board/delete/${content.id}`)
-                    input(type='Submit' value='Delete this board')
+                    input(type='Submit' value=LOCALE.DELETE_THIS_BOARD)

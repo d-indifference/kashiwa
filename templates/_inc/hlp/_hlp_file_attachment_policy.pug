@@ -1,16 +1,16 @@
 mixin HlpFileAttachmentPolicy(_name, _option)
     select(name=_name)
         if _option === 'STRICT'
-            option(value='STRICT' selected=true) File is strictly required
+            option(value='STRICT' selected=true)= LOCALE.FILE_POLICY_STRICT
         else
-            option(value='STRICT') File is strictly required
+            option(value='STRICT')= LOCALE.FILE_POLICY_STRICT
 
         if _option === 'OPTIONAL'
-            option(value='OPTIONAL' selected=true) File attachment is optional
+            option(value='OPTIONAL' selected=true)= LOCALE.FILE_POLICY_OPTIONAL
         else
-            option(value='OPTIONAL') File attachment is optional
+            option(value='OPTIONAL')= LOCALE.FILE_POLICY_OPTIONAL
 
         if _option === 'FORBIDDEN'
-            option(value='FORBIDDEN' selected=true) Files are strictly prohibited
+            option(value='FORBIDDEN' selected=true)= LOCALE.FILE_POLICY_FORBIDDEN
         else
-            option(value='FORBIDDEN') Files are strictly prohibited
+            option(value='FORBIDDEN')= LOCALE.FILE_POLICY_FORBIDDEN

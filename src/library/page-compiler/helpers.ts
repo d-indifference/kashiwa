@@ -4,6 +4,7 @@ import { Constants } from '@library/constants';
 import * as process from 'node:process';
 import * as fs from 'fs';
 import * as path from 'node:path';
+import { LOCALE } from '@locale/locale';
 
 /**
  * Converts number of bytes to pretty string format on Pug thread template
@@ -15,14 +16,15 @@ export const fileSize = (size: number): string => filesize(size, { standard: Con
  * Converts JS-date to default datetime format of application on Pug thread template
  * @param dateTime JS `Date` object
  */
-export const formatDateTime = (dateTime: Date) => DateTime.fromJSDate(dateTime).toFormat(Constants.DATE_DISPLAY_FORMAT);
+export const formatDateTime = (dateTime: Date) =>
+  DateTime.fromJSDate(dateTime).toFormat(Constants.DATE_DISPLAY_FORMAT, { locale: LOCALE.LUXON_LOCALE as string });
 
 /**
  * Converts JS-date to simple datetime format of application on Pug thread template
  * @param dateTime JS `Date` object
  */
 export const simpleFormatDateTime = (dateTime: Date) =>
-  DateTime.fromJSDate(dateTime).toFormat(Constants.SIMPLE_DATE_FORMAT);
+  DateTime.fromJSDate(dateTime).toFormat(Constants.SIMPLE_DATE_FORMAT, { locale: LOCALE.LUXON_LOCALE as string });
 
 /**
  * Get NPM project version to Pug thread template
@@ -55,13 +57,13 @@ export const truncateText = (text: string, url: string, openingPost: bigint, num
   });
 
   if (allLessThanNLines && firstNParagraphs.length === truncatedParagraphs) {
-    return `${firstNParagraphs.map(p => `<p>${p}</p>`).join('')}<div class="abbrev">Comment is too long. <a href="/${url}/${Constants.RES_DIR}/${openingPost.toString()}${Constants.HTML_SUFFIX}#${num}">Full text</a>.</div>`;
+    return `${firstNParagraphs.map(p => `<p>${p}</p>`).join('')}<div class="abbrev">${LOCALE['COMMENT_TOO_LONG'] as string} <a href="/${url}/${Constants.RES_DIR}/${openingPost.toString()}${Constants.HTML_SUFFIX}#${num}">${LOCALE['FULL_TEXT'] as string}</a>.</div>`;
   }
 
   for (const paragraph of paragraphs) {
     const lines = paragraph.split('<br>');
     if (lines.length >= 15) {
-      const truncatedParagraph = `${lines.slice(0, truncatedLines).join('<br>')}<div class="abbrev">Comment is too long. <a href="/${url}/${Constants.RES_DIR}/${openingPost.toString()}${Constants.HTML_SUFFIX}#${num}">Full text</a>.</div>`;
+      const truncatedParagraph = `${lines.slice(0, truncatedLines).join('<br>')}<div class="abbrev">${LOCALE['COMMENT_TOO_LONG'] as string} <a href="/${url}/${Constants.RES_DIR}/${openingPost.toString()}${Constants.HTML_SUFFIX}#${num}">${LOCALE['FULL_TEXT'] as string}</a>.</div>`;
       return `<p>${truncatedParagraph}</p>`;
     }
   }

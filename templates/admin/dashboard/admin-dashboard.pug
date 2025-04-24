@@ -2,39 +2,39 @@ include ../../_inc/thread/_head
 include ../../_inc/admin/_admin-bar
 include ../../_inc/admin/_admin-links
 
-html(lang='en')
-    +Head('Dashboard')
+html(lang=LOCALE.HTML_LANG)
+    +Head(LOCALE.DASHBOARD)
     body
         +AdminBar(session.payload.role)
-        div.logo Management - #{SITE_SETTINGS().siteName}
+        div.logo #{LOCALE.MANAGEMENT} - #{SITE_SETTINGS().siteName}
         hr
         + AdminLinks(session.payload.role)
         div.theader
             if session.payload.role !== 'ADMINISTRATOR'
-               | Moderation panel
+                = LOCALE.MODERATION_PANEL
             else
-                | Dashboard
+                = LOCALE.DASHBOARD
 
         if session.payload.role !== 'ADMINISTRATOR'
-          p Welcome to Kashiwa Image board moderation panel.
+          p= LOCALE.MODERATOR_WELCOME
         else
             div.admin-info-panel
                 table(style='margin: 0 auto')
                     tr
                         td
-                            p Currently, there are #{totalComments} comments on #{totalBoards} boards.
+                            p= LOCALE.CURRENTLY_POSTS(totalComments, totalBoards)
 
                             if session.payload.role === 'ADMINISTRATOR'
-                                p Disk space used: #{fileSize(diskSpaceUsed)}
+                                p #{LOCALE.DISK_SPACE_USED} #{fileSize(diskSpaceUsed)}
 
-                                h3 Technical info
+                                h3= LOCALE.TECHNICAL_INFO
                                 ul
                                     li
-                                        | uptime (seconds) -
+                                        | #{LOCALE.TECHNICAL_INFO} -
                                         =' '
                                         b #{uptime}
 
-                                h5 CPU Details (#{cpus.length})
+                                h5=`${LOCALE.CPU_DETAILS} (${cpus.length})`
                                 div#cpu_section
                                     hr
                                     each cpu, index in cpus
@@ -60,44 +60,41 @@ html(lang='en')
                                               b #{cpu.times.irq}
                                     hr
 
-                                p Memory Usage
+                                p= LOCALE.MEMORY_USAGE
                                 ul
                                     li
-                                        | Total -&nbsp;
+                                        | #{LOCALE.TOTAL_MEMORY} -&nbsp;
                                         b #{fileSize(memory.total)}
                                     li
-                                        | Free -&nbsp;
+                                        | #{LOCALE.FREE_MEMORY} -&nbsp;
                                         b #{fileSize(memory.free)}
                                     li
-                                        | In usage -&nbsp;
+                                        | #{LOCALE.IN_USAGE_MEMORY} -&nbsp;
                                         b #{fileSize(memory.inUsage)}
 
                                 p
-                                    | Debug port:
+                                    | #{LOCALE.DEBUG_PORT}:
                                     =' '
                                     b #{debugPort}
                                     =' '
-                                    | (see
-                                    =' '
-                                    a(href='https://nodejs.org/en/learn/getting-started/debugging') Node.js debugging guide
-                                    | )
+                                    | !{LOCALE.NODE_JS_DEBUGGING_GUIDE}
 
                                 p
-                                    ='Application port: '
+                                    =LOCALE.APP_PORT
                                     b #{port}
 
                                 p
-                                    abbr(title='Docker container ID') Host name:
+                                    abbr(title=LOCALE.HOST_NAME_ABBR)= LOCALE.HOST_NAME
                                     =' '
                                     b #{host}
 
                                 h3 Node.js
                                 p
                                     a(href='https://nodejs.org/' target='_blank') Node.js
-                                    =' version - '
+                                    = LOCALE.VERSION
                                     b v#{processVersions.node}
 
-                                h5 Node.js details
+                                h5= LOCALE.NODE_JS_DETAILS
                                 ol
                                     each proc in Object.keys(processVersions)
                                       li
@@ -108,16 +105,16 @@ html(lang='en')
                                 h3 PostgreSQL
                                 p
                                     a(href='https://www.postgresql.org/' target='_blank') PostgreSQL
-                                    =' version: '
+                                    = LOCALE.VERSION
                                     b #{postgresVersion}
 
                                 h3 ImageMagick
                                 p
                                     a(href='https://imagemagick.org/index.php' target='_blank') ImageMagick
-                                    =' version: '
+                                    = LOCALE.VERSION
                                     b #{imageMagickVersion}
 
-                                h3 Dependencies
+                                h3= LOCALE.DEPENDENCIES
                                 ul
                                     each dependency in Object.keys(dependencies)
                                       li
@@ -125,7 +122,7 @@ html(lang='en')
                                         =': '
                                         b #{dependencies[dependency]}
 
-                                h3 Dev dependencies
+                                h3= LOCALE.DEV_DEPENDENCIES
                                 ul
                                   each dependency in Object.keys(devDependencies)
                                       li

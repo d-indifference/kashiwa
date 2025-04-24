@@ -1,6 +1,7 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { UserPersistenceService } from '@persistence/services';
 import { ISession } from '@admin/interfaces';
+import { LOCALE } from '@locale/locale';
 
 /**
  * Guard that prevents signed-in users from accessing specific routes (e.g., sign-in page)
@@ -18,7 +19,7 @@ export class SignInGuard implements CanActivate {
       const user = await this.userService.findByIdStrict(session.payload.id);
 
       if (user) {
-        throw new ForbiddenException('You are already registered<br>[<a href="/kashiwa">To management panel</a>]');
+        throw new ForbiddenException(LOCALE['ALREADY_REGISTERED']);
       }
 
       return true;

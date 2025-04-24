@@ -4,6 +4,7 @@ import * as path from 'node:path';
 import { Constants } from '@library/constants';
 import * as fsExtra from 'fs-extra';
 import { FilesystemOperator } from '@library/filesystem';
+import { LOCALE } from '@locale/locale';
 
 /**
  * Loads blacklist to `global`
@@ -31,7 +32,7 @@ export class IpFilterGuard implements CanActivate {
     const clientIp = getClientIp(request);
 
     if (!clientIp) {
-      throw new ForbiddenException('Unable to determine client IP address');
+      throw new ForbiddenException(LOCALE['UNABLE_TO_DETERMINATE_IP']);
     }
 
     for (const pattern of global.ipBlackList as string[]) {
