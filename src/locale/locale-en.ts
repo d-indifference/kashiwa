@@ -221,7 +221,8 @@ export const locale: Record<string, LocaleArgument> = {
   PLEASE_ATTACH_FILE: 'Please attach any file.',
   DISALLOWED_FILE_TYPE: 'Disallowed file type.',
   TOO_FREQUENT_POSTING: 'You are trying to create comments too frequent!',
-  TOO_FREQUENT_POSTING_THREADS: 'You are trying to create threads too frequent!'
+  TOO_FREQUENT_POSTING_THREADS: 'You are trying to create threads too frequent!',
+  UNEXPECTED_EXCEPTION: 'Unexpected exception occurred'
 };
 
 export const localeValidators: Record<string, (...args: unknown[]) => string> = {

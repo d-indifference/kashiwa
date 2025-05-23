@@ -113,15 +113,18 @@ export class FilesystemOperator {
    */
   public static streamFile(...pth: string[]): [fsExtra.ReadStream, string] {
     const filePath = path.join(Constants.Paths.APP_VOLUME, ...pth);
-    try {
+
+    const fileExists = fsExtra.existsSync(filePath);
+
+    if (fileExists) {
       const readStream = createReadStream(filePath);
 
       const mimeType = `${mime.lookup(filePath)}`;
 
       return [readStream, mimeType === 'false' ? 'application/octet-stream' : mimeType];
-    } catch {
-      throw new NotFoundException(LOCALE['FILE_WAS_NOT_FOUND']);
     }
+
+    throw new NotFoundException(LOCALE['FILE_WAS_NOT_FOUND']);
   }
 
   /**

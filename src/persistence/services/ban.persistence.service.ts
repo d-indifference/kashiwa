@@ -1,21 +1,23 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@persistence/lib';
 import { BanMapper } from '@persistence/mappers';
 import { Page, PageRequest } from '@persistence/lib/page';
 import { BanCreateDto, BanDto } from '@persistence/dto/ban';
 import { Ban, Prisma } from '@prisma/client';
+import { PinoLogger } from 'nestjs-pino';
 
 /**
  * Database queries for `Ban` model
  */
 @Injectable()
 export class BanPersistenceService {
-  private readonly logger: Logger = new Logger(BanPersistenceService.name);
-
   constructor(
     private readonly prisma: PrismaService,
-    private readonly banMapper: BanMapper
-  ) {}
+    private readonly banMapper: BanMapper,
+    private readonly logger: PinoLogger
+  ) {
+    this.logger.setContext(BanPersistenceService.name);
+  }
 
   /**
    * Get page of bans by page request
@@ -64,7 +66,7 @@ export class BanPersistenceService {
    * @param dto DTO with information of ban creation
    */
   public async create(userId: string, dto: BanCreateDto): Promise<BanDto> {
-    this.logger.log(`create: userId: ${userId}, dto: ${JSON.stringify(dto)}`);
+    this.logger.info({ userId, dto }, 'create');
 
     const createInput = this.banMapper.create(userId, dto);
 
@@ -80,7 +82,7 @@ export class BanPersistenceService {
    * @param id Ban ID
    */
   public async remove(id: string): Promise<void> {
-    this.logger.log(`remove: id: ${id}`);
+    this.logger.info({ id }, 'remove');
 
     await this.prisma.ban.delete({ where: { id } });
     await this.deleteOldBans();
