@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '@persistence/lib';
 import { UserCreateDto, UserDto, UserUpdateDto } from '@persistence/dto/user';
 import { UserMapper } from '@persistence/mappers';
@@ -6,18 +6,20 @@ import * as bcrypt from 'bcrypt';
 import { User } from '@prisma/client';
 import { Page, PageRequest } from '@persistence/lib/page';
 import { LOCALE } from '@locale/locale';
+import { PinoLogger } from 'nestjs-pino';
 
 /**
  * Database queries for `User` model
  */
 @Injectable()
 export class UserPersistenceService {
-  private readonly logger: Logger = new Logger(UserPersistenceService.name);
-
   constructor(
     private readonly prisma: PrismaService,
-    private readonly userMapper: UserMapper
-  ) {}
+    private readonly userMapper: UserMapper,
+    private readonly logger: PinoLogger
+  ) {
+    this.logger.setContext(UserPersistenceService.name);
+  }
 
   /**
    * Get page of users by page request
@@ -69,7 +71,7 @@ export class UserPersistenceService {
    * @param dto User's creation input
    */
   public async create(dto: UserCreateDto): Promise<UserDto> {
-    this.logger.log(`create: ${dto.toString()}`);
+    this.logger.info(dto, 'create');
 
     await this.checkUniqueUser(dto);
 
@@ -85,7 +87,7 @@ export class UserPersistenceService {
    * @param dto User's update input
    */
   public async update(dto: UserUpdateDto): Promise<UserDto> {
-    this.logger.log(`update: ${dto.toString()}`);
+    this.logger.info(dto, 'update');
 
     await this.checkUserOnUpdate(dto);
 
@@ -101,7 +103,7 @@ export class UserPersistenceService {
    * @param id User's ID
    */
   public async remove(id: string): Promise<void> {
-    this.logger.log(`remove: { id: "${id}" }`);
+    this.logger.info({ id }, 'remove');
 
     await this.prisma.user.delete({ where: { id } });
   }
@@ -112,19 +114,19 @@ export class UserPersistenceService {
    * @param password Non-hashed password
    */
   public async signIn(username: string, password: string): Promise<UserDto> {
-    this.logger.log(`signIn: { username: "${username}", password: "***" }`);
+    this.logger.info({ username }, 'signIn');
 
     const user = await this.prisma.user.findFirst({ where: { username } });
 
     if (!user) {
-      this.logger.warn(`[UNAUTHORIZED],  username: "${username}"`);
+      this.logger.warn({ username }, '[UNAUTHORIZED]');
       throw new UnauthorizedException(LOCALE['WRONG_USERNAME_OR_PASSWORD']);
     }
 
     const isPasswordsMatch = await bcrypt.compare(password, user.passwordHash);
 
     if (!isPasswordsMatch) {
-      this.logger.warn(`[UNAUTHORIZED],  username: "${username}"`);
+      this.logger.warn({ username }, '[UNAUTHORIZED]');
       throw new UnauthorizedException(LOCALE['WRONG_USERNAME_OR_PASSWORD']);
     }
 

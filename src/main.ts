@@ -3,26 +3,21 @@ import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { Constants } from '@library/constants';
 import { ConfigService } from '@nestjs/config';
-import { Logger } from '@nestjs/common';
 import { FilesystemOperator } from '@library/filesystem';
 import * as cookieParser from 'cookie-parser';
 import * as session from 'express-session';
 import { sessionConfig } from '@config/session.config';
-import {
-  BadRequestExceptionFilter,
-  ForbiddenExceptionFilter,
-  InternalServerErrorExceptionFilter,
-  NotFoundExceptionFilter,
-  UnauthorizedExceptionFilter
-} from '@library/filters';
 import { IpFilterGuard, loadBlackList } from '@library/guards';
 import { loadGlobalSettings } from '@library/functions';
 import { getRandomBanner } from '@library/page-compiler';
 import { LOCALE } from '@locale/locale';
+import { PinoLogger, Logger } from 'nestjs-pino';
+import { Logger as NestLogger } from '@nestjs/common';
+import { ExceptionFilter } from '@library/filters';
+import { loggerConfig } from '@config/logger.config';
 
 const bootstrap = async (): Promise<void> => {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
-
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
   const config = app.get(ConfigService);
 
   const port = config.getOrThrow<number>('http.port');
@@ -36,11 +31,9 @@ const bootstrap = async (): Promise<void> => {
 
   await FilesystemOperator.mkdir(Constants.SETTINGS_DIR);
 
-  app.useGlobalFilters(new NotFoundExceptionFilter());
-  app.useGlobalFilters(new InternalServerErrorExceptionFilter());
-  app.useGlobalFilters(new BadRequestExceptionFilter());
-  app.useGlobalFilters(new UnauthorizedExceptionFilter());
-  app.useGlobalFilters(new ForbiddenExceptionFilter());
+  const logger = app.get(Logger);
+
+  app.useGlobalFilters(new ExceptionFilter(new PinoLogger(loggerConfig())));
 
   await loadBlackList();
   await loadGlobalSettings();
@@ -52,9 +45,11 @@ const bootstrap = async (): Promise<void> => {
   app.useGlobalGuards(new IpFilterGuard());
   app.getHttpAdapter().getInstance().set('trust proxy', true);
 
+  app.useLogger(logger);
+
   await app.listen(port);
 
-  Logger.log(`Application is successfully running on port: ${port}`);
+  NestLogger.log(`Application is successfully running on port: ${port}`);
 };
 
 bootstrap().then();

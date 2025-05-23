@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@persistence/lib';
 import { BoardMapper } from '@persistence/mappers';
 import { Page, PageRequest } from '@persistence/lib/page';
@@ -8,19 +8,21 @@ import { Constants } from '@library/constants';
 import { FilesystemOperator } from '@library/filesystem';
 import { AttachedFilePersistenceService } from '@persistence/services/attached-file.persistence.service';
 import { LOCALE } from '@locale/locale';
+import { PinoLogger } from 'nestjs-pino';
 
 /**
  * Database queries for `Board` model
  */
 @Injectable()
 export class BoardPersistenceService {
-  private readonly logger: Logger = new Logger(BoardPersistenceService.name);
-
   constructor(
     private readonly prisma: PrismaService,
     private readonly boardMapper: BoardMapper,
-    private readonly attachedFilePersistenceService: AttachedFilePersistenceService
-  ) {}
+    private readonly attachedFilePersistenceService: AttachedFilePersistenceService,
+    private readonly logger: PinoLogger
+  ) {
+    this.logger.setContext(BoardPersistenceService.name);
+  }
 
   /**
    * Get page of boards by page request
@@ -110,7 +112,7 @@ export class BoardPersistenceService {
    * @param dto Board's creation input
    */
   public async create(dto: BoardCreateDto): Promise<BoardDto> {
-    this.logger.log(`create: BoardCreateDto ${JSON.stringify(dto)}`);
+    this.logger.info(dto, 'create');
 
     await this.checkOnCreate(dto);
 
@@ -126,7 +128,7 @@ export class BoardPersistenceService {
    * @param dto Board's update input
    */
   public async update(dto: BoardUpdateDto): Promise<BoardDto> {
-    this.logger.log(`update: BoardUpdateDto ${JSON.stringify(dto)}`);
+    this.logger.info(dto, 'update');
 
     await this.checkOnUpdate(dto);
 
@@ -146,7 +148,7 @@ export class BoardPersistenceService {
    * @param id `Board` ID
    */
   public async nullifyPostCount(id: string): Promise<void> {
-    this.logger.log(`nullifyPostCount: id: ${id}`);
+    this.logger.info({ id }, 'nullifyPostCount');
 
     await this.prisma.board.update({ data: { postCount: 0 }, where: { id } });
   }
@@ -156,7 +158,7 @@ export class BoardPersistenceService {
    * @param url Board URL
    */
   public async incrementPostCount(url: string): Promise<void> {
-    this.logger.log(`incrementPostCount: url: ${url}`);
+    this.logger.info({ url }, 'incrementPostCount');
 
     const board = await this.findByUrlNoMapping(url);
 
@@ -168,7 +170,7 @@ export class BoardPersistenceService {
    * @param id Board's ID
    */
   public async remove(id: string): Promise<void> {
-    this.logger.log(`remove: id: ${id}`);
+    this.logger.info({ id }, 'remove');
 
     const board = await this.findById(id);
 

@@ -1,17 +1,21 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@persistence/lib';
 import { AttachedFile } from '@prisma/client';
 import { FilesystemOperator } from '@library/filesystem';
 import { Constants } from '@library/constants';
+import { PinoLogger } from 'nestjs-pino';
 
 /**
  * Database queries for `Comment` model
  */
 @Injectable()
 export class AttachedFilePersistenceService {
-  private readonly logger: Logger = new Logger(AttachedFilePersistenceService.name);
-
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly logger: PinoLogger
+  ) {
+    this.logger.setContext(AttachedFilePersistenceService.name);
+  }
 
   /**
    * Find file on board by MD5. If file not found, returns `null`.
@@ -36,7 +40,7 @@ export class AttachedFilePersistenceService {
    * @param id `AttachedFile` ID
    */
   public async removeById(id: string): Promise<void> {
-    this.logger.log(`removeById, id: ${id}`);
+    this.logger.info({ id }, 'removeById');
 
     const file = await this.prisma.attachedFile.findFirst({ where: { id } });
 
@@ -49,10 +53,10 @@ export class AttachedFilePersistenceService {
 
   /**
    * User clear file by comment ID
-   * @param commentId Comemnt ID
+   * @param commentId Comment ID
    */
   public async clearFileByCommentId(commentId: string): Promise<void> {
-    this.logger.log(`clearFileByCommentId, commentId: ${commentId}`);
+    this.logger.info({ commentId }, 'clearFileByCommentId');
 
     const comment = await this.prisma.comment.findFirst({
       include: { attachedFile: true, board: true },
@@ -78,7 +82,7 @@ export class AttachedFilePersistenceService {
    * Remove orphaned `AttachedFile` from database and from disk
    */
   public async removeOrphaned(): Promise<void> {
-    this.logger.log('removeOrphaned');
+    this.logger.info('removeOrphaned');
 
     const orphanedFiles = await this.prisma.attachedFile.findMany({ where: { comments: { none: {} } } });
 

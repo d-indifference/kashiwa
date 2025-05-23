@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@persistence/lib';
 import { CommentMapper } from '@persistence/mappers';
 import { CommentDto } from '@persistence/dto/comment/common';
@@ -11,20 +11,22 @@ import { FilesystemOperator } from '@library/filesystem';
 import { Constants } from '@library/constants';
 import { CommentModerationDto } from '@persistence/dto/comment/moderation';
 import { LOCALE } from '@locale/locale';
+import { PinoLogger } from 'nestjs-pino';
 
 /**
  * Database queries for `Comment` model
  */
 @Injectable()
 export class CommentPersistenceService {
-  private readonly logger: Logger = new Logger(CommentPersistenceService.name);
-
   constructor(
     private readonly prisma: PrismaService,
     private readonly boardPersistenceService: BoardPersistenceService,
     private readonly commentMapper: CommentMapper,
-    private readonly attachedFilePersistenceService: AttachedFilePersistenceService
-  ) {}
+    private readonly attachedFilePersistenceService: AttachedFilePersistenceService,
+    private readonly logger: PinoLogger
+  ) {
+    this.logger.setContext(CommentPersistenceService.name);
+  }
 
   /**
    * Find all comments and paginate them for thread preview page
@@ -218,7 +220,7 @@ export class CommentPersistenceService {
    * @param input Comment creation input
    */
   public async createComment(url: string, input: Prisma.CommentCreateInput): Promise<CommentDto> {
-    this.logger.log(`createComment: url: ${url}, Comment: ${this.stringifyCommentInput(input)}`);
+    this.logger.info({ url, input }, 'createComment');
 
     await this.boardPersistenceService.incrementPostCount(url);
 
@@ -238,7 +240,7 @@ export class CommentPersistenceService {
    * @param num Thread number
    */
   public async updateThreadLastHit(url: string, num: bigint): Promise<void> {
-    this.logger.log(`updateThreadLastHit: url: ${url}, num: ${num.toString()}`);
+    this.logger.info({ url, num }, 'updateThreadLastHit');
 
     const board = await this.boardPersistenceService.findByUrl(url);
 
@@ -254,7 +256,7 @@ export class CommentPersistenceService {
    * @param id Comment ID
    */
   public async removeCommentById(id: string): Promise<void> {
-    this.logger.log(`removeCommentById: id: ${id}`);
+    this.logger.info({ id }, 'removeCommentById');
 
     const comment = await this.prisma.comment.findFirst({
       where: { id },
@@ -279,7 +281,7 @@ export class CommentPersistenceService {
    * @param ip Poster's IP
    */
   public async removeAllCommentsByIp(boardId: string, ip: string): Promise<void> {
-    this.logger.log(`removeAllCommentsByIp: ip: ${ip}`);
+    this.logger.info({ ip }, 'removeAllCommentsByIp');
 
     const comments = await this.prisma.comment.findMany({ select: { id: true }, where: { ip, boardId } });
 
@@ -293,35 +295,10 @@ export class CommentPersistenceService {
    * @param url Board URL
    */
   public async removeOrphanReplies(url: string): Promise<void> {
-    this.logger.log(`removeOrphanReplies: url: ${url}`);
+    this.logger.info({ url }, 'removeOrphanReplies');
     const board = await this.boardPersistenceService.findByUrl(url);
 
     await this.prisma.comment.deleteMany({ where: { boardId: board.id, parentId: null, lastHit: null } });
     await this.attachedFilePersistenceService.removeOrphaned();
-  }
-
-  /**
-   * Stringify comment creation input
-   */
-  private stringifyCommentInput(input: Prisma.CommentCreateInput): string {
-    const pairs: string[] = [];
-
-    for (const key of Object.keys(input)) {
-      if (typeof input[key] === 'bigint') {
-        pairs.push(`${key}: ${input[key].toString()}`);
-      }
-
-      if (typeof input[key] === 'object') {
-        if (input[key] === null || input[key] === undefined) {
-          pairs.push(`${key}: null`);
-        } else {
-          pairs.push(`${key}: ${this.stringifyCommentInput(input[key])}`);
-        }
-      }
-
-      pairs.push(`${key}: "${input[key]}"}`);
-    }
-
-    return `{${pairs.join(',')}}`;
   }
 }
