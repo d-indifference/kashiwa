@@ -35,9 +35,9 @@ After saving the source code, do the following:
    but we strongly recommend you to change default values by paths `secure.user.salt-rounds` and `secure.session.secret`.
 5. Next run the following commands:
     ```sh
-    $ docker-compose build
+    $ docker compose build
 
-    $ docker-compose up
+    $ docker compose up
     ```
 Then go to [localhost](http://localhost).
 And now you're awesome! Enjoy using the application!
