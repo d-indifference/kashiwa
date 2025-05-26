@@ -37,6 +37,8 @@ export class DashboardService {
     const { dependencies, devDependencies } = await this.getDependencies();
     const port = this.getPort(req);
     const imageMagickVersion = await this.getImageMagickVersion();
+    const pgDumpVersion = await this.getPgDumpVersion();
+    const zipVersion = await this.getZipVersion();
 
     return new DashboardPage(
       session,
@@ -54,7 +56,9 @@ export class DashboardService {
       os.hostname(),
       process.versions,
       postgresVersion,
+      pgDumpVersion,
       imageMagickVersion,
+      zipVersion,
       dependencies,
       devDependencies
     );
@@ -112,6 +116,34 @@ export class DashboardService {
         const versionLine = stdout.split('\n')[0];
         const versionNumber = versionLine.split(': ')[1].replace('https://imagemagick.org', '');
         resolve(versionNumber);
+      });
+    });
+  }
+
+  private getPgDumpVersion(): Promise<string> {
+    return new Promise(resolve => {
+      exec('pg_dump --version', (error, stdout, stderr) => {
+        if (error) {
+          const message = `${LOCALE['FAILED_PG_DUMP_VERSION'] as string}: ${stderr || error.message}`;
+          Logger.error(message, 'DashboardService');
+          throw new InternalServerErrorException(message);
+        }
+        resolve(stdout);
+      });
+    });
+  }
+
+  private getZipVersion(): Promise<string> {
+    return new Promise(resolve => {
+      exec('zip --version', (error, stdout, stderr) => {
+        if (error) {
+          const message = `${LOCALE['FAILED_ZIP_VERSION'] as string}: ${stderr || error.message}`;
+          Logger.error(message, 'DashboardService');
+          throw new InternalServerErrorException(message);
+        }
+
+        const match = stdout.match(/This is Zip\s+([\d.]+)/i);
+        resolve(match ? match[1] : 'unknown version');
       });
     });
   }

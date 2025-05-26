@@ -53,6 +53,7 @@ export const locale: Record<string, LocaleArgument> = {
   BANNED_POSTERS: 'Banned posters',
   SPAM_LIST: 'Spam list',
   IP_FILTER: 'IP Filter',
+  SITE_DUMP: 'Database & cache dump',
   // _form.pug,
   FORM_NAME: 'Name',
   FORM_EMAIL: 'Email',
@@ -192,6 +193,8 @@ export const locale: Record<string, LocaleArgument> = {
     'You don&apos;t need to sign up a new account<br>[<a href="/kashiwa">To management panel</a>]',
   ALREADY_SIGNED_IN: 'You are already signed in<br>[<a href="/kashiwa">To management panel</a>]',
   FAILED_IMAGEMAGICK_VERSION: 'Failed to get ImageMagick version',
+  FAILED_PG_DUMP_VERSION: 'Failed to get PgDump version',
+  FAILED_ZIP_VERSION: 'Failed to get Zip version',
   FILE_WAS_NOT_FOUND: 'File was not found',
   UNABLE_TO_DETERMINATE_IP: 'Unable to determine client IP address',
   COMMENT_TOO_LONG: 'Comment is too long.',
@@ -222,7 +225,14 @@ export const locale: Record<string, LocaleArgument> = {
   DISALLOWED_FILE_TYPE: 'Disallowed file type.',
   TOO_FREQUENT_POSTING: 'You are trying to create comments too frequent!',
   TOO_FREQUENT_POSTING_THREADS: 'You are trying to create threads too frequent!',
-  UNEXPECTED_EXCEPTION: 'Unexpected exception occurred'
+  UNEXPECTED_EXCEPTION: 'Unexpected exception occurred',
+  // admin-dump-form.pug
+  DATABASE_TABLES: 'Database tables',
+  ADDITIONAL: 'Additional',
+  BOARDS_CACHE: 'Boards cache',
+  MAKE_DUMP: 'Make dump',
+  DUMP_CREATED: 'You can find your site dumped archive at: ',
+  DB_CONNECTION_IS_NOT_SPEC: 'Database connection is not specified'
 };
 
 export const localeValidators: Record<string, (...args: unknown[]) => string> = {

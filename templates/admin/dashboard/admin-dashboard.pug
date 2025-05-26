@@ -108,11 +108,25 @@ html(lang=LOCALE.HTML_LANG)
                                     = LOCALE.VERSION
                                     b #{postgresVersion}
 
+
+                                h3 PgDump
+                                p
+                                    a(href='https://www.postgresql.org/docs/current/app-pgdump.html' target='_blank') PgDump
+                                    = LOCALE.VERSION
+                                    b #{pgDumpVersion}
+
                                 h3 ImageMagick
                                 p
                                     a(href='https://imagemagick.org/index.php' target='_blank') ImageMagick
                                     = LOCALE.VERSION
                                     b #{imageMagickVersion}
+
+                                h3 Zip
+                                p
+                                    a(href='https://manpages.ubuntu.com/manpages/noble/man1/zip.1.html' target='_blank') Zip
+                                    = LOCALE.VERSION
+                                    b #{zipVersion}
+
 
                                 h3= LOCALE.DEPENDENCIES
                                 ul

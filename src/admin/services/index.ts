@@ -7,3 +7,4 @@ export * from './spam.service';
 export * from './ip-filter.service';
 export * from './ban.service';
 export * from './global-settings.service';
+export * from './dump.service';

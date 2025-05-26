@@ -92,4 +92,7 @@ export class Constants {
 
   /** `global-settings` file name */
   public static FILE_GLOBAL_SETTINGS = 'global-settings';
+
+  /** `dump-target'` file name */
+  public static FILE_DUMP_TARGET = 'dump-target';
 }

@@ -45,7 +45,7 @@ mixin Form(_board, isThread, captcha)
                     input(type='password' name='password' size=8)
                     |  (#{LOCALE.FORM_PASSWORD_EXPLANATION})
             if isThread
-              td.postblock= LOCALE.OPTIONS
+              td.postblock= LOCALE.FORM_OPTIONS
               td
                 label
                     input(type='checkbox' name='sage')
