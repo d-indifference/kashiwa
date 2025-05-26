@@ -32,7 +32,11 @@ export class DashboardPage extends SessionPage {
 
   postgresVersion: string;
 
+  pgDumpVersion: string;
+
   imageMagickVersion: string;
+
+  zipVersion: string;
 
   dependencies: Record<string, string>;
 
@@ -54,7 +58,9 @@ export class DashboardPage extends SessionPage {
     host: string,
     processVersions: Record<string, string | undefined>,
     postgresVersion: string,
+    pgDumpVersion: string,
     imageMagickVersion: string,
+    zipVersion: string,
     dependencies: Record<string, string>,
     devDependencies: Record<string, string>
   ) {
@@ -70,7 +76,9 @@ export class DashboardPage extends SessionPage {
     this.host = host;
     this.processVersions = processVersions;
     this.postgresVersion = postgresVersion;
+    this.pgDumpVersion = pgDumpVersion;
     this.imageMagickVersion = imageMagickVersion;
+    this.zipVersion = zipVersion;
     this.dependencies = dependencies;
     this.devDependencies = devDependencies;
   }
