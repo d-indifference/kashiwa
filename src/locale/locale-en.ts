@@ -148,6 +148,7 @@ export const locale: Record<string, LocaleArgument> = {
   SITE_SLOGAN: 'Site slogan',
   FAQ_PAGE: 'FAQ page',
   RULES_PAGE: 'Rules page',
+  MENU_FRAME: 'Menu frame',
   SAVE_SETTINGS: 'Save settings',
   // IP Filter
   EDIT_IP_BLACKLIST: 'Edit IP blacklist',
@@ -232,7 +233,8 @@ export const locale: Record<string, LocaleArgument> = {
   BOARDS_CACHE: 'Boards cache',
   MAKE_DUMP: 'Make dump',
   DUMP_CREATED: 'You can find your site dumped archive at: ',
-  DB_CONNECTION_IS_NOT_SPEC: 'Database connection is not specified'
+  DB_CONNECTION_IS_NOT_SPEC: 'Database connection is not specified',
+  ENGINE_VERSION: 'Kashiwa engine version'
 };
 
 export const localeValidators: Record<string, (...args: unknown[]) => string> = {

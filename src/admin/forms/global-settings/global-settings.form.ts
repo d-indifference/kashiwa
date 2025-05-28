@@ -50,4 +50,8 @@ export class GlobalSettingsForm {
   @KIsString('RULES_PAGE')
   @KIsNotEmpty('RULES_PAGE')
   rulesPage: string;
+
+  @KIsString('MENU_FRAME')
+  @KIsNotEmpty('MENU_FRAME')
+  menuFrame: string;
 }

@@ -41,6 +41,7 @@ export class DashboardService {
     const zipVersion = await this.getZipVersion();
 
     return new DashboardPage(
+      process.env.npm_package_version ?? 'unknown version',
       session,
       totalBoards,
       totalComments,

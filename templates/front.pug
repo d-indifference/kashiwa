@@ -3,7 +3,7 @@ include _inc/thread/_styles
 include _inc/thread/_top_bar
 
 html(lang=LOCALE.HTML_LANG)
-    +Head(LOCALE.RULES)
+    +Head(LOCALE.HOME)
     body
         div.adminbar
             +Styles
@@ -20,4 +20,4 @@ html(lang=LOCALE.HTML_LANG)
         hr
 
         div
-            | !{SITE_SETTINGS().rulesPage}
+            | !{SITE_SETTINGS().mainPage}

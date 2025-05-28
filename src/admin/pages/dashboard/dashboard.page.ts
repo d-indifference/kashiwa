@@ -6,6 +6,8 @@ import * as os from 'node:os';
  * Admin dashboard panel page
  */
 export class DashboardPage extends SessionPage {
+  engineVersion: string;
+
   totalBoards: number;
 
   totalComments: number;
@@ -43,6 +45,7 @@ export class DashboardPage extends SessionPage {
   devDependencies: Record<string, string>;
 
   constructor(
+    engineVersion: string,
     session: ISession,
     totalBoards: number,
     totalComments: number,
@@ -65,6 +68,7 @@ export class DashboardPage extends SessionPage {
     devDependencies: Record<string, string>
   ) {
     super(session);
+    this.engineVersion = engineVersion;
     this.totalBoards = totalBoards;
     this.totalComments = totalComments;
     this.diskSpaceUsed = diskSpaceUsed;

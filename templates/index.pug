@@ -1,23 +1,13 @@
-include _inc/thread/_head
-include _inc/thread/_styles
-include _inc/thread/_top_bar
-
-html(lang=LOCALE.HTML_LANG)
-    +Head(LOCALE.HOME)
-    body
-        div.adminbar
-            +Styles
-            +TopBar
-            | [
-            a(href='/kashiwa')= LOCALE.MANAGEMENT
-            | ]
-            | [
-            a(href='/')= LOCALE.MAIN_PAGE
-            | ]
-        div.logo
+html(xmlns='http://www.w3.org/1999/xhtml' xml:lang=LOCALE.HTML_LANG)
+    head
+        meta(http-equiv='Content-Type' content='text/html;charset=utf-8')
+        link(rel='shortcut icon' type='image/x-icon' href='/favicon.ico')
+        title
             | #{SITE_SETTINGS().siteName}
-        div.sublogo= SITE_SETTINGS().siteSlogan
-        hr
 
-        div
-            | !{SITE_SETTINGS().mainPage}
+    frameset(cols='16%,*')
+        frame(src='/menu' name='menu' scrolling='auto' frameborder='1')
+        frame(src='/front' name='main')
+
+    noframes
+        | 'Your browser doesn`t support frames'

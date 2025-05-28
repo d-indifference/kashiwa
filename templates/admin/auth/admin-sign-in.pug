@@ -8,12 +8,12 @@ html(lang=LOCALE.HTML_LANG)
             a(href='/kashiwa')= LOCALE.MANAGEMENT
             | ]
             | [
-            a(href='/')= LOCALE.MAIN_PAGE
+            a(href='/front')= LOCALE.MAIN_PAGE
             | ]
         div.logo #{SITE_SETTINGS().siteName}
         hr
         | [
-        a(href=`/`)= LOCALE.GO_BACK
+        a(href=`/front`)= LOCALE.GO_BACK
         | ]
         div.theader= LOCALE.SIGN_IN
         div.postarea

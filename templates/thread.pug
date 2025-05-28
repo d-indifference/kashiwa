@@ -17,7 +17,7 @@ html(lang=LOCALE.HTML_LANG)
             a(href='/kashiwa')= LOCALE.MANAGEMENT
             | ]
             | [
-            a(href='/')= LOCALE.MAIN_PAGE
+            a(href='/front')= LOCALE.MAIN_PAGE
             | ]
         div.logo
             div.banner
@@ -47,5 +47,15 @@ html(lang=LOCALE.HTML_LANG)
         script.
             setDelPass(passwordCookie)
         br(clear='all')
+
+        div.adminbar
+            +Styles
+            +TopBar
+            | [
+            a(href='/kashiwa')= LOCALE.MANAGEMENT
+            | ]
+            | [
+            a(href='/front')= LOCALE.MAIN_PAGE
+            | ]
 
         +Footer
