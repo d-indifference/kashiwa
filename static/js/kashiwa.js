@@ -91,6 +91,15 @@ function setDelPass(cookieName) {
   del_form.password.value = getCookie(cookieName);
 }
 
+function getFrameByName(name) {
+  var frames = window.parent.frames;
+  for (var i = 0; i < frames.length; i++) {
+    if (name === frames[i].name) {
+      return(frames[i]);
+    }
+  }
+}
+
 function setStyle(cookieName) {
   if (!getCookie(cookieName)) {
     setCookie(cookieName, 'Futaba', 365);
@@ -101,6 +110,10 @@ function setStyle(cookieName) {
   $('link[rel][title]').each(function () {
     this.disabled = this.title !== currentStyle;
   });
+
+  var menuFrame = getFrameByName('menu');
+
+  menuFrame.setStyle(cookieName);
 }
 
 function changeStyle(styleTitle, cookieName) {

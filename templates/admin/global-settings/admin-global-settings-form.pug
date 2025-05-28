@@ -44,4 +44,9 @@ html(lang=LOCALE.HTML_LANG)
                             td
                                 textarea(name='rulesPage' rows=30 cols=60)
                                     | #{content.rulesPage}
+                        tr
+                            td.postblock= LOCALE.MENU_FRAME
+                            td
+                                textarea(name='menuFrame' rows=30 cols=60)
+                                    | #{content.menuFrame}
                 input(type='submit' value=LOCALE.SAVE_SETTINGS)

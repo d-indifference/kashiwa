@@ -22,6 +22,10 @@ html(lang=LOCALE.HTML_LANG)
                 table(style='margin: 0 auto')
                     tr
                         td
+                            h3
+                                | #{LOCALE.ENGINE_VERSION}:
+                                =' '
+                                a(href='https://github.com/d-indifference/kashiwa' target='_blank') #{engineVersion}
                             p= LOCALE.CURRENTLY_POSTS(totalComments, totalBoards)
 
                             if session.payload.role === 'ADMINISTRATOR'
