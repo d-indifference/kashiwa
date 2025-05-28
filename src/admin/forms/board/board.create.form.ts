@@ -1,21 +1,20 @@
 import { FileAttachmentMode } from '@prisma/client';
-import {
-  IsArray,
-  IsBoolean,
-  IsIn,
-  IsNotEmpty,
-  IsNumber,
-  IsPositive,
-  IsString,
-  Length,
-  Matches,
-  Max,
-  Min
-} from 'class-validator';
 import { Transform } from 'class-transformer';
 import { normalizeBooleanCheckbox, normalizeNumber, normalizeStringArray } from '@admin/transforms';
 import { Constants } from '@library/constants';
-import { LOCALE, V_LOCALE, vStr } from '@locale/locale';
+import {
+  KCustomBoardMatches,
+  KIsArray,
+  KIsBoolean,
+  KIsIn,
+  KIsNotEmpty,
+  KIsNumber,
+  KIsPositive,
+  KIsString,
+  KLength,
+  KMax,
+  KMin
+} from '@library/validators';
 
 const fileAttachmentModes = [FileAttachmentMode.STRICT, FileAttachmentMode.FORBIDDEN, FileAttachmentMode.OPTIONAL];
 
@@ -26,34 +25,34 @@ export class BoardCreateForm {
   /**
    * Board URL path
    */
-  @IsString({ message: V_LOCALE['V_STRING'](vStr(LOCALE['URL'])) })
-  @IsNotEmpty({ message: V_LOCALE['V_NOT_EMPTY'](vStr(LOCALE['URL'])) })
-  @Length(1, 64, { message: V_LOCALE['V_LENGTH'](vStr(LOCALE['URL']), vStr(1), vStr(64)) })
-  @Matches(/^[a-z]+$/, { message: V_LOCALE['V_BOARD_MATCHES'](vStr(LOCALE['URL'])) })
+  @KIsString('URL')
+  @KIsNotEmpty('URL')
+  @KLength('URL', 1, 64)
+  @KCustomBoardMatches('URL')
   url: string;
 
   /**
    * Board Name
    */
-  @IsString({ message: V_LOCALE['V_STRING'](vStr(LOCALE['NAME'])) })
-  @IsNotEmpty({ message: V_LOCALE['V_NOT_EMPTY'](vStr(LOCALE['NAME'])) })
-  @Length(2, 256, { message: V_LOCALE['V_NOT_EMPTY'](vStr(LOCALE['NAME']), vStr(2), vStr(256)) })
+  @KIsString('NAME')
+  @KIsNotEmpty('NAME')
+  @KLength('NAME', 2, 256)
   name: string;
 
   /**
    * Is posting enabled?
    */
   @Transform(normalizeBooleanCheckbox)
-  @IsBoolean({ message: V_LOCALE['V_BOOLEAN'](vStr(LOCALE['ALLOW_POSTING'])) })
-  @IsNotEmpty({ message: V_LOCALE['V_NOT_EMPTY'](vStr(LOCALE['ALLOW_POSTING'])) })
+  @KIsBoolean('ALLOW_POSTING')
+  @KIsNotEmpty('ALLOW_POSTING')
   allowPosting: boolean = false;
 
   /**
    * Disable Name & Email fields
    */
   @Transform(normalizeBooleanCheckbox)
-  @IsBoolean({ message: V_LOCALE['V_BOOLEAN'](vStr(LOCALE['STRICT_ANONYMITY'])) })
-  @IsNotEmpty({ message: V_LOCALE['V_NOT_EMPTY'](vStr(LOCALE['STRICT_ANONYMITY'])) })
+  @KIsBoolean('STRICT_ANONYMITY')
+  @KIsNotEmpty('STRICT_ANONYMITY')
   strictAnonymity: boolean = false;
 
   /**
@@ -62,11 +61,9 @@ export class BoardCreateForm {
    * `OPTIONAL` - File attachment is optional
    * `FORBIDDEN` - Files are strictly prohibited
    */
-  @IsString({ message: V_LOCALE['V_STRING'](vStr(LOCALE['THREAD_FILE_POLICY'])) })
-  @IsNotEmpty({ message: V_LOCALE['V_NOT_EMPTY'](vStr(LOCALE['THREAD_FILE_POLICY'])) })
-  @IsIn(fileAttachmentModes, {
-    message: V_LOCALE['V_IN'](vStr(LOCALE['THREAD_FILE_POLICY']), fileAttachmentModes)
-  })
+  @KIsString('THREAD_FILE_POLICY')
+  @KIsNotEmpty('THREAD_FILE_POLICY')
+  @KIsIn('THREAD_FILE_POLICY', fileAttachmentModes)
   threadFileAttachmentMode: FileAttachmentMode;
 
   /**
@@ -75,47 +72,45 @@ export class BoardCreateForm {
    * `OPTIONAL` - File attachment is optional <br>
    * `FORBIDDEN` - Files are strictly prohibited
    */
-  @IsString({ message: V_LOCALE['V_STRING'](vStr(LOCALE['REPLY_FILE_POLICY'])) })
-  @IsNotEmpty({ message: V_LOCALE['V_NOT_EMPTY'](vStr(LOCALE['REPLY_FILE_POLICY'])) })
-  @IsIn(fileAttachmentModes, {
-    message: V_LOCALE['V_IN'](vStr(LOCALE['REPLY_FILE_POLICY']), fileAttachmentModes)
-  })
+  @KIsString('REPLY_FILE_POLICY')
+  @KIsNotEmpty('REPLY_FILE_POLICY')
+  @KIsIn('REPLY_FILE_POLICY', fileAttachmentModes)
   replyFileAttachmentMode: FileAttachmentMode;
 
   /**
    * Delay between threads creations (seconds)
    */
   @Transform(normalizeNumber)
-  @IsNumber(undefined, { message: V_LOCALE['V_NUMBER'](vStr(LOCALE['DELAY_AFTER_THREAD'])) })
-  @IsNotEmpty({ message: V_LOCALE['V_NOT_EMPTY'](vStr(LOCALE['DELAY_AFTER_THREAD'])) })
-  @IsPositive({ message: V_LOCALE['V_POSITIVE'](vStr(LOCALE['DELAY_AFTER_THREAD'])) })
+  @KIsNumber('DELAY_AFTER_THREAD')
+  @KIsNotEmpty('DELAY_AFTER_THREAD')
+  @KIsPositive('DELAY_AFTER_THREAD')
   delayAfterThread: number;
 
   /**
    * Delay between replies creations (seconds)
    */
   @Transform(normalizeNumber)
-  @IsNumber(undefined, { message: V_LOCALE['V_NUMBER'](vStr(LOCALE['DELAY_AFTER_REPLY'])) })
-  @IsNotEmpty({ message: V_LOCALE['V_NOT_EMPTY'](vStr(LOCALE['DELAY_AFTER_REPLY'])) })
-  @IsPositive({ message: V_LOCALE['V_POSITIVE'](vStr(LOCALE['DELAY_AFTER_REPLY'])) })
+  @KIsNumber('DELAY_AFTER_REPLY')
+  @KIsNotEmpty('DELAY_AFTER_REPLY')
+  @KIsPositive('DELAY_AFTER_REPLY')
   delayAfterReply: number;
 
   /**
    * Minimal uploaded file size (bytes)
    */
   @Transform(normalizeNumber)
-  @IsNumber(undefined, { message: V_LOCALE['V_NUMBER'](vStr(LOCALE['MIN_FILE_SIZE'])) })
-  @IsNotEmpty({ message: V_LOCALE['V_NOT_EMPTY'](vStr(LOCALE['MIN_FILE_SIZE'])) })
-  @IsPositive({ message: V_LOCALE['V_POSITIVE'](vStr(LOCALE['MIN_FILE_SIZE'])) })
+  @KIsNumber('MIN_FILE_SIZE')
+  @KIsNotEmpty('MIN_FILE_SIZE')
+  @KIsPositive('MIN_FILE_SIZE')
   minFileSize: number;
 
   /**
    * Maximal uploaded file size (bytes)
    */
   @Transform(normalizeNumber)
-  @IsNumber(undefined, { message: V_LOCALE['V_NUMBER'](vStr(LOCALE['MAX_FILE_SIZE'])) })
-  @IsNotEmpty({ message: V_LOCALE['V_NOT_EMPTY'](vStr(LOCALE['MAX_FILE_SIZE'])) })
-  @IsPositive({ message: V_LOCALE['V_POSITIVE'](vStr(LOCALE['MAX_FILE_SIZE'])) })
+  @KIsNumber('MAX_FILE_SIZE')
+  @KIsNotEmpty('MAX_FILE_SIZE')
+  @KIsPositive('MAX_FILE_SIZE')
   maxFileSize: number;
 
   /**
@@ -124,102 +119,99 @@ export class BoardCreateForm {
    * `false` - only replies (`>>123`), citations (`> test`) and links will be formated. <br>
    */
   @Transform(normalizeBooleanCheckbox)
-  @IsBoolean({ message: V_LOCALE['V_BOOLEAN'](vStr(LOCALE['ALLOW_MARKDOWN'])) })
-  @IsNotEmpty({ message: V_LOCALE['V_NOT_EMPTY'](vStr(LOCALE['ALLOW_MARKDOWN'])) })
+  @KIsBoolean('ALLOW_MARKDOWN')
+  @KIsNotEmpty('ALLOW_MARKDOWN')
   allowMarkdown: boolean = false;
 
   /**
    * Allow tripcode parsing
    */
   @Transform(normalizeBooleanCheckbox)
-  @IsBoolean({ message: V_LOCALE['V_BOOLEAN'](vStr(LOCALE['ALLOW_TRIPCODES'])) })
-  @IsNotEmpty({ message: V_LOCALE['V_NOT_EMPTY'](vStr(LOCALE['ALLOW_TRIPCODES'])) })
+  @KIsBoolean('ALLOW_TRIPCODES')
+  @KIsNotEmpty('ALLOW_TRIPCODES')
   allowTripcodes: boolean = false;
 
   /**
    * Maximum number of threads that can be on the board at the same time
    */
   @Transform(normalizeNumber)
-  @IsNumber(undefined, { message: V_LOCALE['V_NUMBER'](vStr(LOCALE['MAX_THREADS_ON_BOARD'])) })
-  @IsNotEmpty({ message: V_LOCALE['V_NOT_EMPTY'](vStr(LOCALE['MAX_THREADS_ON_BOARD'])) })
-  @IsPositive({ message: V_LOCALE['V_POSITIVE'](vStr(LOCALE['MAX_THREADS_ON_BOARD'])) })
+  @KIsNumber('MAX_THREADS_ON_BOARD')
+  @KIsNotEmpty('MAX_THREADS_ON_BOARD')
+  @KIsPositive('MAX_THREADS_ON_BOARD')
   maxThreadsOnBoard: number;
 
   /**
    * Number of posts after which the thread will not rise
    */
   @Transform(normalizeNumber)
-  @IsNumber(undefined, { message: V_LOCALE['V_NUMBER'](vStr(LOCALE['BUMP_LIMIT'])) })
-  @IsNotEmpty({ message: V_LOCALE['V_NOT_EMPTY'](vStr(LOCALE['BUMP_LIMIT'])) })
-  @IsPositive({ message: V_LOCALE['V_POSITIVE'](vStr(LOCALE['BUMP_LIMIT'])) })
+  @KIsNumber('BUMP_LIMIT')
+  @KIsNotEmpty('BUMP_LIMIT')
+  @KIsPositive('BUMP_LIMIT')
   bumpLimit: number;
 
   /**
    * Maximal size of Name, Email and subject fields
    */
   @Transform(normalizeNumber)
-  @IsNumber(undefined, { message: V_LOCALE['V_NUMBER'](vStr(LOCALE['MAX_STRING_FIELD_SIZE'])) })
-  @IsNotEmpty({ message: V_LOCALE['V_NOT_EMPTY'](vStr(LOCALE['MAX_STRING_FIELD_SIZE'])) })
-  @Min(0, { message: V_LOCALE['V_MIN'](vStr(LOCALE['MAX_STRING_FIELD_SIZE']), vStr(0)) })
-  @Max(256, { message: V_LOCALE['V_MAX'](vStr(LOCALE['MAX_STRING_FIELD_SIZE']), vStr(256)) })
+  @KIsNumber('MAX_STRING_FIELD_SIZE')
+  @KIsNotEmpty('MAX_STRING_FIELD_SIZE')
+  @KMin('MAX_STRING_FIELD_SIZE', 0)
+  @KMax('MAX_STRING_FIELD_SIZE', 256)
   maxStringFieldSize: number;
 
   /**
    * Maximal size of Comment field
    */
   @Transform(normalizeNumber)
-  @IsNumber(undefined, { message: V_LOCALE['V_NUMBER'](vStr(LOCALE['MAX_COMMENT_SIZE'])) })
-  @IsNotEmpty({ message: V_LOCALE['V_NOT_EMPTY'](vStr(LOCALE['MAX_COMMENT_SIZE'])) })
-  @IsPositive({ message: V_LOCALE['V_POSITIVE'](vStr(LOCALE['MAX_COMMENT_SIZE'])) })
+  @KIsNumber('MAX_COMMENT_SIZE')
+  @KIsNotEmpty('MAX_COMMENT_SIZE')
+  @KIsPositive('MAX_COMMENT_SIZE')
   maxCommentSize: number;
 
   /**
    * Default poster name
    */
-  @IsString({ message: V_LOCALE['V_STRING'](vStr(LOCALE['DEFAULT_POSTER_NAME'])) })
-  @IsNotEmpty({ message: V_LOCALE['V_NOT_EMPTY'](vStr(LOCALE['DEFAULT_POSTER_NAME'])) })
-  @Length(1, 256, { message: V_LOCALE['V_LENGTH'](vStr(LOCALE['DEFAULT_POSTER_NAME']), vStr(1), vStr(256)) })
+  @KIsString('DEFAULT_POSTER_NAME')
+  @KIsNotEmpty('DEFAULT_POSTER_NAME')
+  @KLength('DEFAULT_POSTER_NAME', 1, 256)
   defaultPosterName: string;
 
   /**
    * Default moderator name
    */
-  @IsString({ message: V_LOCALE['V_STRING'](vStr(LOCALE['DEFAULT_MODERATOR_NAME'])) })
-  @IsNotEmpty({ message: V_LOCALE['V_NOT_EMPTY'](vStr(LOCALE['DEFAULT_MODERATOR_NAME'])) })
-  @Length(1, 256, { message: V_LOCALE['V_LENGTH'](vStr(LOCALE['DEFAULT_MODERATOR_NAME']), vStr(1), vStr(256)) })
+  @KIsString('DEFAULT_MODERATOR_NAME')
+  @KIsNotEmpty('DEFAULT_MODERATOR_NAME')
+  @KLength('DEFAULT_MODERATOR_NAME', 1, 256)
   defaultModeratorName: string;
 
   /**
    * Enable captcha
    */
   @Transform(normalizeBooleanCheckbox)
-  @IsBoolean({ message: V_LOCALE['V_BOOLEAN'](vStr(LOCALE['ENABLE_CAPTCHA'])) })
-  @IsNotEmpty({ message: V_LOCALE['V_NOT_EMPTY'](vStr(LOCALE['ENABLE_CAPTCHA'])) })
+  @KIsBoolean('ENABLE_CAPTCHA')
+  @KIsNotEmpty('ENABLE_CAPTCHA')
   enableCaptcha: boolean = false;
 
   /**
    * Set case sensitivity for captcha
    */
   @Transform(normalizeBooleanCheckbox)
-  @IsBoolean({ message: V_LOCALE['V_BOOLEAN'](vStr(LOCALE['IS_CAPTCHA_CASE_SENSITIVE'])) })
-  @IsNotEmpty({ message: V_LOCALE['V_NOT_EMPTY'](vStr(LOCALE['IS_CAPTCHA_CASE_SENSITIVE'])) })
+  @KIsBoolean('IS_CAPTCHA_CASE_SENSITIVE')
+  @KIsNotEmpty('IS_CAPTCHA_CASE_SENSITIVE')
   isCaptchaCaseSensitive: boolean = false;
 
   /**
    * List of supported file types for current board (MIME)
    */
   @Transform(normalizeStringArray)
-  @IsArray({ message: V_LOCALE['V_ARRAY'](vStr(LOCALE['ALLOWED_FILE_TYPES'])) })
-  @IsIn(Constants.SUPPORTED_FILE_TYPES, {
-    each: true,
-    message: V_LOCALE['V_IN'](vStr(LOCALE['ALLOWED_FILE_TYPES']), Constants.SUPPORTED_FILE_TYPES)
-  })
+  @KIsArray('ALLOWED_FILE_TYPES')
+  @KIsIn('ALLOWED_FILE_TYPES', Constants.SUPPORTED_FILE_TYPES, { each: true })
   allowedFileTypes: string[] = [];
 
   /**
    * HTML fragment with board rules
    */
-  @IsString({ message: V_LOCALE['V_STRING'](vStr(LOCALE['RULES'])) })
-  @IsNotEmpty({ message: V_LOCALE['V_NOT_EMPTY'](vStr(LOCALE['RULES'])) })
+  @KIsString('RULES')
+  @KIsNotEmpty('RULES')
   rules: string;
 }

@@ -1,5 +1,5 @@
-import { IsOptional, IsString } from 'class-validator';
-import { LOCALE, V_LOCALE, vStr } from '@locale/locale';
+import { IsOptional } from 'class-validator';
+import { KIsString } from '@library/validators';
 
 /**
  * Form from spam settings
@@ -9,6 +9,6 @@ export class SpamForm {
    * Spam words regexp
    */
   @IsOptional()
-  @IsString({ message: V_LOCALE['V_STRING'](vStr(LOCALE['SPAM_LIST'])) })
+  @KIsString('SPAM_LIST')
   spamList: string;
 }

@@ -1,5 +1,5 @@
-import { IsOptional, IsString } from 'class-validator';
-import { LOCALE, V_LOCALE, vStr } from '@locale/locale';
+import { IsOptional } from 'class-validator';
+import { KIsString } from '@library/validators';
 
 /**
  * Form from IP filter settings
@@ -9,6 +9,6 @@ export class IpFilterForm {
    * IP blacklist regexp
    */
   @IsOptional()
-  @IsString({ message: V_LOCALE['V_STRING'](vStr(LOCALE['BLACK_LIST'])) })
+  @KIsString('BLACK_LIST')
   blackList: string;
 }
