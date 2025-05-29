@@ -110,13 +110,19 @@ function setStyle(cookieName) {
   $('link[rel][title]').each(function () {
     this.disabled = this.title !== currentStyle;
   });
+}
 
-  var menuFrame = getFrameByName('menu');
+function setStyleAtMain(cookieName) {
+  setStyle(cookieName);
+}
 
-  menuFrame.setStyle(cookieName);
+function setStyleAtFrame(menuFrame, cookieName) {
+  var frame = getFrameByName(menuFrame);
+  frame.setStyle(cookieName);
 }
 
 function changeStyle(styleTitle, cookieName) {
   setCookie(cookieName, styleTitle, 365);
-  setStyle(cookieName);
+  setStyleAtMain(cookieName);
+  setStyleAtFrame('menu', cookieName);
 }
