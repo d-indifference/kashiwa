@@ -53,9 +53,18 @@ mixin Form(_board, isThread, captcha)
             tr
                 td(colspan=2)
                     div.rules
-                        ul
-                            li #{LOCALE.FORM_RULES_ALLOWED_FILE_TYPES} #{_board.boardSettings.allowedFileTypes.map(t => t.split('/')[1]).join(', ').toUpperCase()}
-                            li #{LOCALE.FORM_RULES_MAX_FILE_SIZE} #{fileSize(_board.boardSettings.maxFileSize)}
-                            li #{LOCALE.FORM_RULES_THUMB}
+                        if !isThread
+                            if _board.boardSettings.threadFileAttachmentMode !== 'FORBIDDEN'
+                                ul
+                                    li #{LOCALE.FORM_RULES_ALLOWED_FILE_TYPES} #{_board.boardSettings.allowedFileTypes.map(t => t.split('/')[1]).join(', ').toUpperCase()}
+                                    li #{LOCALE.FORM_RULES_MAX_FILE_SIZE} #{fileSize(_board.boardSettings.maxFileSize)}
+                                    li #{LOCALE.FORM_RULES_THUMB}
+
+                        if isThread
+                            if _board.boardSettings.replyFileAttachmentMode !== 'FORBIDDEN'
+                                ul
+                                    li #{LOCALE.FORM_RULES_ALLOWED_FILE_TYPES} #{_board.boardSettings.allowedFileTypes.map(t => t.split('/')[1]).join(', ').toUpperCase()}
+                                    li #{LOCALE.FORM_RULES_MAX_FILE_SIZE} #{fileSize(_board.boardSettings.maxFileSize)}
+                                    li #{LOCALE.FORM_RULES_THUMB}
                         | !{_board.boardSettings.rules}
     hr
