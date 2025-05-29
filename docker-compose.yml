@@ -17,7 +17,7 @@ services:
   application:
     container_name: application.kashiwa
     hostname: application.kashiwa
-    image: kashiwa:0.4.0-alpha
+    image: kashiwa:0.4.1-alpha
     build:
       context: ./
       dockerfile: Dockerfile
