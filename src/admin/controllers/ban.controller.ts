@@ -15,19 +15,21 @@ import {
 import { SessionGuard } from '@admin/guards';
 import { PageRequest } from '@persistence/lib/page';
 import { ISession } from '@admin/interfaces';
-import { FormPage, ListPage } from '@admin/pages';
-import { BanDto } from '@persistence/dto/ban';
 import { BanService } from '@admin/services';
 import { FormDataRequest } from 'nestjs-form-data';
 import { Response } from 'express';
 import { BanCreateForm } from '@admin/forms/ban';
 import { Transform } from 'class-transformer';
 import { emptyFormText } from '@admin/transforms';
-import { simpleFormatDateTime } from '@library/page-compiler';
+import { TablePage } from '@admin/pages';
+import { RenderableSessionFormPage } from '@admin/lib';
 
-class IpQuery {
+class BanCreationPreset {
   @Transform(emptyFormText)
   ip?: string;
+
+  @Transform(emptyFormText)
+  boardUrl?: string;
 }
 
 @Controller('kashiwa/ban')
@@ -36,23 +38,22 @@ export class BanController {
 
   @Get()
   @UseGuards(SessionGuard)
-  @Render('admin/ban/admin-ban-list')
+  @Render('admin/common_table_page')
   public async getBanList(
     @Query(new ValidationPipe({ transform: true })) page: PageRequest,
     @Session() session: ISession
-  ): Promise<ListPage<BanDto> & { simpleFormatDateTime: (dateTime: Date) => string }> {
-    const content = await this.banService.getBanPage(session, page);
-    return { ...content, simpleFormatDateTime };
+  ): Promise<TablePage> {
+    return await this.banService.getBanPage(session, page);
   }
 
   @Get('new')
   @UseGuards(SessionGuard)
-  @Render('admin/ban/admin-ban-form')
+  @Render('admin/common_form_page')
   public getFormPage(
     @Session() session: ISession,
-    @Query(new ValidationPipe({ transform: true })) query: IpQuery
-  ): FormPage<BanCreateForm> {
-    return this.banService.getBanForm(session, query.ip);
+    @Query(new ValidationPipe({ transform: true })) query: BanCreationPreset
+  ): RenderableSessionFormPage {
+    return this.banService.getBanForm(session, query.ip, query.boardUrl);
   }
 
   @Post('new')

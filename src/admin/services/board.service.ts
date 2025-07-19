@@ -1,43 +1,47 @@
+import { ISession } from '@admin/interfaces';
 import { Injectable } from '@nestjs/common';
-import { BoardPersistenceService, CommentPersistenceService } from '@persistence/services';
+import { BoardPersistenceService } from '@persistence/services';
+import { PageRequest } from '@persistence/lib/page';
+import { TablePage } from '@admin/pages';
+import { FormPage, RenderableSessionFormPage, TableConstructor } from '@admin/lib';
+import { BoardCreateDto, BoardShortDto, BoardUpdateDto } from '@persistence/dto/board';
+import { LOCALE } from '@locale/locale';
+import { Constants } from '@library/constants';
+import { BoardSettings } from '@prisma/client';
 import { BoardCreateForm, BoardUpdateForm } from '@admin/forms/board';
 import { Response } from 'express';
-import { BoardCreateDto, BoardDto, BoardShortDto, BoardUpdateDto } from '@persistence/dto/board';
-import { FilesystemOperator } from '@library/filesystem';
-import { Constants } from '@library/constants';
-import { PageRequest } from '@persistence/lib/page';
-import { FormPage, ListPage } from '@admin/pages';
-import { ISession } from '@admin/interfaces';
-import { BoardSettings } from '@prisma/client';
-import { getSupportedFileTypes } from '@admin/lib/helpers';
-import { ThreadMapper } from '@library/mappers';
-import { ThreadPageCompilerService } from '@library/page-compiler';
-import { CaptchaGeneratorProvider } from '@captcha/providers';
-import { PageCachingProvider } from '@posting/providers';
+import { CachingProvider } from '@library/providers';
 
 /**
  * Service for working with boards
  */
 @Injectable()
 export class BoardService {
+  private readonly tableConstructor: TableConstructor<BoardShortDto>;
+
   constructor(
     private readonly boardPersistenceService: BoardPersistenceService,
-    private readonly commentPersistenceService: CommentPersistenceService,
-    private readonly threadMapper: ThreadMapper,
-    private readonly pageCompilerService: ThreadPageCompilerService,
-    private readonly captchaGeneratorProvider: CaptchaGeneratorProvider,
-    private readonly pageCachingProvider: PageCachingProvider
-  ) {}
+    private readonly cachingProvider: CachingProvider
+  ) {
+    this.tableConstructor = new TableConstructor<BoardShortDto>()
+      .mappedValue(LOCALE.URL as string, obj => `/<a href="${obj.url}/kashiwa${Constants.HTML_SUFFIX}">${obj.url}</a>/`)
+      .plainValue(LOCALE.NAME as string, 'name')
+      .plainValue(LOCALE.LAST_POST_INDEX as string, 'postCount')
+      .mappedValue(LOCALE.EDIT as string, obj => `[<a href="/kashiwa/board/edit/${obj.id}">Edit</a>]`);
+  }
 
   /**
    * Get page of boards
    * @param page Page request
    * @param session Session data
    */
-  public async findAll(session: ISession, page: PageRequest): Promise<ListPage<BoardShortDto>> {
+  public async findAll(session: ISession, page: PageRequest): Promise<TablePage> {
     const content = await this.boardPersistenceService.findAll(page);
-
-    return new ListPage(session, content);
+    const table = this.tableConstructor.fromPage(content, '/kashiwa/board');
+    return new TablePage(table, session, {
+      pageTitle: LOCALE.BOARDS as string,
+      pageSubtitle: LOCALE.BOARD_LIST as string
+    });
   }
 
   /**
@@ -45,42 +49,40 @@ export class BoardService {
    * @param session Session data
    * @param id Board's ID
    */
-  public async getForUpdate(
-    session: ISession,
-    id: string
-  ): Promise<FormPage<BoardUpdateForm & { getSupportedFileTypes: () => string[][] }>> {
+  public async getForUpdate(session: ISession, id: string): Promise<RenderableSessionFormPage> {
     const board = await this.boardPersistenceService.findById(id);
     const boardSettings: BoardSettings = board['boardSettings'];
 
-    const form = {
-      id,
-      url: board.url,
-      name: board.name,
-      allowPosting: boardSettings.allowPosting,
-      strictAnonymity: boardSettings.strictAnonymity,
-      threadFileAttachmentMode: boardSettings.threadFileAttachmentMode,
-      replyFileAttachmentMode: boardSettings.replyFileAttachmentMode,
-      delayAfterThread: boardSettings.delayAfterThread,
-      delayAfterReply: boardSettings.delayAfterReply,
-      minFileSize: boardSettings.minFileSize,
-      maxFileSize: boardSettings.maxFileSize,
-      allowMarkdown: boardSettings.allowMarkdown,
-      allowTripcodes: boardSettings.allowTripcodes,
-      maxThreadsOnBoard: boardSettings.maxThreadsOnBoard,
-      bumpLimit: boardSettings.bumpLimit,
-      maxStringFieldSize: boardSettings.maxStringFieldSize,
-      maxCommentSize: boardSettings.maxCommentSize,
-      defaultPosterName: boardSettings.defaultPosterName,
-      defaultModeratorName: boardSettings.defaultModeratorName,
-      enableCaptcha: boardSettings.enableCaptcha,
-      isCaptchaCaseSensitive: boardSettings.isCaptchaCaseSensitive,
-      allowedFileTypes: boardSettings.allowedFileTypes as string[],
-      rules: boardSettings.rules
-    };
+    const form = new BoardUpdateForm();
+    form.id = board.id;
+    form.url = board.url;
+    form.name = board.name;
+    form.allowPosting = boardSettings.allowPosting;
+    form.strictAnonymity = boardSettings.strictAnonymity;
+    form.threadFileAttachmentMode = boardSettings.threadFileAttachmentMode;
+    form.replyFileAttachmentMode = boardSettings.replyFileAttachmentMode;
+    form.delayAfterThread = boardSettings.delayAfterThread;
+    form.delayAfterReply = boardSettings.delayAfterReply;
+    form.minFileSize = boardSettings.minFileSize;
+    form.maxFileSize = boardSettings.maxFileSize;
+    form.allowMarkdown = boardSettings.allowMarkdown;
+    form.allowTripcodes = boardSettings.allowTripcodes;
+    form.maxThreadsOnBoard = boardSettings.maxThreadsOnBoard;
+    form.bumpLimit = boardSettings.bumpLimit;
+    form.maxStringFieldSize = boardSettings.maxStringFieldSize;
+    form.maxCommentSize = boardSettings.maxCommentSize;
+    form.defaultPosterName = boardSettings.defaultPosterName;
+    form.defaultModeratorName = boardSettings.defaultModeratorName;
+    form.enableCaptcha = boardSettings.enableCaptcha;
+    form.isCaptchaCaseSensitive = boardSettings.isCaptchaCaseSensitive;
+    form.allowedFileTypes = boardSettings.allowedFileTypes as string[];
+    form.rules = boardSettings.rules;
 
-    const content = { ...form, getSupportedFileTypes };
-
-    return new FormPage(session, 'UPDATE', content);
+    return FormPage.toSessionTemplateContent(session, form, {
+      pageTitle: LOCALE.BOARDS as string,
+      pageSubtitle: LOCALE.EDIT_BOARD as string,
+      goBack: '/kashiwa/board'
+    });
   }
 
   /**
@@ -115,12 +117,7 @@ export class BoardService {
     );
 
     const newBoard = await this.boardPersistenceService.create(dto);
-
-    await FilesystemOperator.mkdir(dto.url, Constants.RES_DIR);
-    await FilesystemOperator.mkdir(dto.url, Constants.SRC_DIR);
-    await FilesystemOperator.mkdir(dto.url, Constants.THUMB_DIR);
-
-    await this.updateBoardCache(newBoard.id);
+    await this.cachingProvider.createCache(newBoard.url);
 
     res.redirect(`/kashiwa/board/edit/${newBoard.id}`);
   }
@@ -132,7 +129,6 @@ export class BoardService {
    */
   public async update(form: BoardUpdateForm, res: Response): Promise<void> {
     const board = await this.boardPersistenceService.findById(form.id);
-
     const dto = new BoardUpdateDto(
       form.id,
       form.url,
@@ -160,10 +156,7 @@ export class BoardService {
     );
 
     const updatedBoard = await this.boardPersistenceService.update(dto);
-
-    await FilesystemOperator.renameDir([], board.url, updatedBoard.url);
-
-    await this.updateBoardCache(updatedBoard.id);
+    await this.cachingProvider.renameCache(board.url, updatedBoard.url);
 
     res.redirect(`/kashiwa/board/edit/${updatedBoard.id}`);
   }
@@ -177,8 +170,7 @@ export class BoardService {
     const board = await this.boardPersistenceService.findById(id);
 
     await this.boardPersistenceService.remove(id);
-
-    await FilesystemOperator.remove(board.url);
+    await this.cachingProvider.removeCache(board.url);
 
     res.redirect('/kashiwa/board');
   }
@@ -188,9 +180,7 @@ export class BoardService {
    * @param id Board ID
    * @param res `Express.js` response
    */
-  public async reloadBoard(id: string, res: Response): Promise<void> {
-    await this.updateBoardCache(id);
-
+  public reloadBoardCache(id: string, res: Response): void {
     res.redirect(`/kashiwa/board/edit/${id}`);
   }
 
@@ -199,48 +189,11 @@ export class BoardService {
    * @param id Board ID
    * @param res `Express.js` response
    */
-  public async clearBoardCache(id: string, res: Response): Promise<void> {
-    const comments = await this.commentPersistenceService.findAllCommentIds(id);
-
-    for (const commentId of comments) {
-      await this.commentPersistenceService.removeCommentById(commentId);
-    }
-
+  public async clearBoard(id: string, res: Response): Promise<void> {
+    const board = await this.boardPersistenceService.findById(id);
     await this.boardPersistenceService.nullifyPostCount(id);
-    await this.pageCachingProvider.cacheBoardPages(id, true);
+    await this.cachingProvider.clearCache(board.url);
 
     res.redirect(`/kashiwa/board/edit/${id}`);
-  }
-
-  /**
-   * Reloads cached pages of all threads on board
-   * @param id Board ID
-   */
-  public async updateBoardCache(id: string): Promise<void> {
-    const board = await this.boardPersistenceService.findDtoById(id);
-    const threadNums = await this.commentPersistenceService.findAllThreadNums(board.url);
-
-    for (const num of threadNums) {
-      await this.updateThreadCache(board, num);
-    }
-
-    await this.pageCachingProvider.cacheBoardPages(board.url);
-  }
-
-  /**
-   * Reloads cached page of thread
-   */
-  private async updateThreadCache(board: BoardDto, num: bigint): Promise<void> {
-    const parentThread = await this.commentPersistenceService.findThread(board.url, num);
-
-    const pagePayload = this.threadMapper.mapPage(board, parentThread);
-
-    if (board.boardSettings) {
-      if (board.boardSettings.enableCaptcha) {
-        pagePayload.captcha = await this.captchaGeneratorProvider.generate(board.boardSettings.isCaptchaCaseSensitive);
-      }
-    }
-
-    await this.pageCompilerService.saveThreadPage(pagePayload);
   }
 }

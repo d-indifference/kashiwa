@@ -32,10 +32,13 @@ export class BanCreateDto {
    */
   reason: string;
 
-  constructor(ip: string, timeValue: number, timeUnit: TimeUnits, reason: string) {
+  boardId: string | null;
+
+  constructor(ip: string, timeValue: number, timeUnit: TimeUnits, reason: string, boardId: string | null) {
     this.ip = ip;
     this.timeValue = timeValue;
     this.timeUnit = timeUnit;
     this.reason = reason;
+    this.boardId = boardId;
   }
 }

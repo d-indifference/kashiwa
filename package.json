@@ -1,6 +1,6 @@
 {
   "name": "kashiwa",
-  "version": "0.4.2-alpha",
+  "version": "0.5.0-alpha",
   "description": "Yet another imageboard implementation",
   "author": "d-indifference",
   "private": true,

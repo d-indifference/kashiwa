@@ -8,5 +8,8 @@ model Ban {
   userId String? @map("user_id") @db.Uuid
   user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
+  boardId String? @map("board_id") @db.Uuid
+  board   Board?  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+
   @@map("ban")
 }

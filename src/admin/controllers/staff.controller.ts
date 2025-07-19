@@ -12,16 +12,17 @@ import {
   UseGuards,
   ValidationPipe
 } from '@nestjs/common';
-import { ISession } from '@admin/interfaces';
-import { SessionGuard } from '@admin/guards';
+import { StaffService } from '@admin/services';
 import { Roles } from '@admin/decorators';
 import { UserRole } from '@prisma/client';
-import { StaffService } from '@admin/services';
+import { SessionGuard } from '@admin/guards';
 import { PageRequest } from '@persistence/lib/page';
-import { FormPage, ListPage } from '@admin/pages';
-import { UserDto } from '@persistence/dto/user';
+import { ISession } from '@admin/interfaces';
+import { TablePage } from '@admin/pages';
+import { FormPage, RenderableSessionFormPage } from '@admin/lib';
+import { StaffCreateForm, StaffUpdateForm, StaffUpdateMyselfForm } from '@admin/forms/staff';
+import { LOCALE } from '@locale/locale';
 import { FormDataRequest } from 'nestjs-form-data';
-import { StaffCreateForm, StaffUpdateForm } from '@admin/forms/staff';
 import { Response } from 'express';
 
 @Controller('kashiwa/staff')
@@ -31,37 +32,45 @@ export class StaffController {
   @Get()
   @Roles(UserRole.ADMINISTRATOR)
   @UseGuards(SessionGuard)
-  @Render('admin/staff/admin-staff-list')
+  @Render('admin/common_table_page')
   public async getList(
     @Query(new ValidationPipe({ transform: true })) page: PageRequest,
     @Session() session: ISession
-  ): Promise<ListPage<UserDto>> {
+  ): Promise<TablePage> {
     return await this.staffService.getList(page, session);
   }
 
   @Get('my')
   @UseGuards(SessionGuard)
-  @Render('admin/staff/admin-staff-form-profile')
-  public async getMyProfileForm(@Session() session: ISession): Promise<FormPage<StaffUpdateForm>> {
+  @Render('admin/common_form_page')
+  public async getMyProfileForm(@Session() session: ISession): Promise<RenderableSessionFormPage> {
     return await this.staffService.getMyProfileForm(session);
   }
 
   @Get('new')
   @Roles(UserRole.ADMINISTRATOR)
   @UseGuards(SessionGuard)
-  @Render('admin/staff/admin-staff-form')
-  public getCreationForm(@Session() session: ISession): FormPage<UserDto> {
-    return new FormPage(session, 'CREATE');
+  @Render('admin/common_form_page')
+  public getCreationForm(@Session() session: ISession): RenderableSessionFormPage {
+    const form = new StaffCreateForm();
+    form.username = 'karlik';
+    form.email = 'karlik@karlik.com';
+    form.role = UserRole.MODERATOR;
+    return FormPage.toSessionTemplateContent(session, form, {
+      pageTitle: LOCALE.STAFF_PANEL as string,
+      pageSubtitle: LOCALE.NEW_STAFF_MEMBER as string,
+      goBack: '/kashiwa/staff'
+    });
   }
 
   @Get('edit/:id')
   @Roles(UserRole.ADMINISTRATOR)
   @UseGuards(SessionGuard)
-  @Render('admin/staff/admin-staff-form')
+  @Render('admin/common_form_page')
   public async getUpdateForm(
     @Session() session: ISession,
     @Param('id', ParseUUIDPipe) id: string
-  ): Promise<FormPage<StaffUpdateForm>> {
+  ): Promise<RenderableSessionFormPage> {
     return await this.staffService.getForUpdate(session, id);
   }
 
@@ -80,10 +89,11 @@ export class StaffController {
   @UseGuards(SessionGuard)
   @FormDataRequest()
   public async updateMyProfile(
-    @Body(new ValidationPipe({ transform: true })) form: StaffUpdateForm,
+    @Body(new ValidationPipe({ transform: true })) form: StaffUpdateMyselfForm,
+    @Session() session: ISession,
     @Res() res: Response
   ): Promise<void> {
-    return await this.staffService.update(form, res, '/kashiwa');
+    return await this.staffService.update(form, res, '/kashiwa', session);
   }
 
   @Post('edit')
@@ -92,9 +102,10 @@ export class StaffController {
   @FormDataRequest()
   public async updateUser(
     @Body(new ValidationPipe({ transform: true })) form: StaffUpdateForm,
+    @Session() session: ISession,
     @Res() res: Response
   ): Promise<void> {
-    await this.staffService.update(form, res, `/kashiwa/staff/edit/${form.id}`);
+    await this.staffService.update(form, res, `/kashiwa/staff/edit/${form.id}`, session);
   }
 
   @Post('delete/:id')

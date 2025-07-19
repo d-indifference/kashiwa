@@ -29,7 +29,7 @@ export class BanPersistenceService {
       Prisma.BanWhereInput,
       Prisma.BanOrderByWithAggregationInput,
       Prisma.BanInclude
-    >(this.prisma, 'ban', page, {}, { createdAt: 'desc' }, { user: true });
+    >(this.prisma, 'ban', page, {}, { createdAt: 'desc' }, { user: true, board: true });
 
     return entities.map(entity => this.banMapper.toDto(entity, entity['user']));
   }
@@ -70,7 +70,7 @@ export class BanPersistenceService {
 
     const createInput = this.banMapper.create(userId, dto);
 
-    const newBan = await this.prisma.ban.create({ data: createInput, include: { user: true } });
+    const newBan = await this.prisma.ban.create({ data: createInput, include: { user: true, board: true } });
 
     await this.deleteOldBans();
 

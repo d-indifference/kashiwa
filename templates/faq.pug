@@ -1,23 +1,13 @@
-include _inc/thread/_head
-include _inc/thread/_styles
-include _inc/thread/_top_bar
+extends ./layouts/common_layout
+include components/admin_bar
 
-html(lang=LOCALE.HTML_LANG)
-    +Head(LOCALE.FAQ)
-    body
-        div.adminbar
-            +Styles
-            +TopBar
-            | [
-            a(href='/kashiwa')= LOCALE.MANAGEMENT
-            | ]
-            | [
-            a(href='/front')= LOCALE.MAIN_PAGE
-            | ]
-        div.logo
-            | #{SITE_SETTINGS().siteName}
-        div.sublogo= SITE_SETTINGS().siteSlogan
-        hr
+block content
+    +AdminBar()
 
-        div
-            | !{SITE_SETTINGS().faqPage}
+    div.logo
+        | #{SITE_SETTINGS().siteName}
+    div.sublogo= SITE_SETTINGS().siteSlogan
+    hr
+
+    div
+        | !{SITE_SETTINGS().faqPage}

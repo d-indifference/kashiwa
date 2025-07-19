@@ -9,6 +9,7 @@ import {
   CommentPersistenceService,
   BanPersistenceService
 } from '@persistence/services';
+import { CachingProvider } from '@library/providers';
 
 /**
  * Module for Prisma queries
@@ -25,7 +26,8 @@ import {
     CommentPersistenceService,
     AttachedFilePersistenceService,
     BanMapper,
-    BanPersistenceService
+    BanPersistenceService,
+    CachingProvider
   ],
   exports: [
     UserPersistenceService,

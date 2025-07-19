@@ -5,8 +5,6 @@ import { Page, PageRequest } from '@persistence/lib/page';
 import { BoardCreateDto, BoardDto, BoardShortDto, BoardUpdateDto } from '@persistence/dto/board';
 import { Board } from '@prisma/client';
 import { Constants } from '@library/constants';
-import { FilesystemOperator } from '@library/filesystem';
-import { AttachedFilePersistenceService } from '@persistence/services/attached-file.persistence.service';
 import { LOCALE } from '@locale/locale';
 import { PinoLogger } from 'nestjs-pino';
 
@@ -18,7 +16,6 @@ export class BoardPersistenceService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly boardMapper: BoardMapper,
-    private readonly attachedFilePersistenceService: AttachedFilePersistenceService,
     private readonly logger: PinoLogger
   ) {
     this.logger.setContext(BoardPersistenceService.name);
@@ -172,11 +169,10 @@ export class BoardPersistenceService {
   public async remove(id: string): Promise<void> {
     this.logger.info({ id }, 'remove');
 
-    const board = await this.findById(id);
+    await this.findById(id);
 
     await this.prisma.comment.deleteMany({ where: { boardId: id } });
-    await FilesystemOperator.remove(board.url);
-    await this.attachedFilePersistenceService.removeOrphaned();
+    // await this.attachedFilePersistenceService.removeOrphaned();
     await this.prisma.board.delete({ where: { id }, include: { boardSettings: true } });
   }
 

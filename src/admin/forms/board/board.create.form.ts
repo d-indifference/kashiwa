@@ -15,16 +15,35 @@ import {
   KMax,
   KMin
 } from '@library/validators';
+import {
+  Form,
+  FormCheckbox,
+  FormCheckboxList,
+  FormCheckboxListOptionOptions,
+  FormInput,
+  FormMethods,
+  FormSelect,
+  FormTextarea
+} from '@admin/lib';
+import { LOCALE } from '@locale/locale';
 
 const fileAttachmentModes = [FileAttachmentMode.STRICT, FileAttachmentMode.FORBIDDEN, FileAttachmentMode.OPTIONAL];
+
+const allowedFileTypes: FormCheckboxListOptionOptions[] = Constants.SUPPORTED_FILE_TYPES.map(fileType => ({
+  value: fileType,
+  name: 'allowedFileType',
+  displayName: fileType
+}));
 
 /**
  * Form object for creation of new board
  */
+@Form({ action: '/kashiwa/board/new', method: FormMethods.POST })
 export class BoardCreateForm {
   /**
    * Board URL path
    */
+  @FormInput({ type: 'text', displayName: LOCALE.URL as string, size: 28 })
   @KIsString('URL')
   @KIsNotEmpty('URL')
   @KLength('URL', 1, 64)
@@ -34,6 +53,7 @@ export class BoardCreateForm {
   /**
    * Board Name
    */
+  @FormInput({ type: 'text', displayName: LOCALE.NAME as string, size: 28 })
   @KIsString('NAME')
   @KIsNotEmpty('NAME')
   @KLength('NAME', 2, 256)
@@ -42,6 +62,7 @@ export class BoardCreateForm {
   /**
    * Is posting enabled?
    */
+  @FormCheckbox({ displayName: LOCALE.ALLOW_POSTING as string })
   @Transform(normalizeBooleanCheckbox)
   @KIsBoolean('ALLOW_POSTING')
   @KIsNotEmpty('ALLOW_POSTING')
@@ -50,6 +71,9 @@ export class BoardCreateForm {
   /**
    * Disable Name & Email fields
    */
+  @FormCheckbox({
+    displayName: `<abbr title="${LOCALE.STRICT_ANONYMITY_ABBR as string}">${LOCALE.STRICT_ANONYMITY as string}</abbr>`
+  })
   @Transform(normalizeBooleanCheckbox)
   @KIsBoolean('STRICT_ANONYMITY')
   @KIsNotEmpty('STRICT_ANONYMITY')
@@ -61,6 +85,14 @@ export class BoardCreateForm {
    * `OPTIONAL` - File attachment is optional
    * `FORBIDDEN` - Files are strictly prohibited
    */
+  @FormSelect({
+    displayName: LOCALE.THREAD_FILE_POLICY as string,
+    options: [
+      { displayName: LOCALE.FILE_POLICY_STRICT as string, value: FileAttachmentMode.STRICT },
+      { displayName: LOCALE.FILE_POLICY_OPTIONAL as string, value: FileAttachmentMode.OPTIONAL },
+      { displayName: LOCALE.FILE_POLICY_FORBIDDEN as string, value: FileAttachmentMode.FORBIDDEN }
+    ]
+  })
   @KIsString('THREAD_FILE_POLICY')
   @KIsNotEmpty('THREAD_FILE_POLICY')
   @KIsIn('THREAD_FILE_POLICY', fileAttachmentModes)
@@ -72,6 +104,14 @@ export class BoardCreateForm {
    * `OPTIONAL` - File attachment is optional <br>
    * `FORBIDDEN` - Files are strictly prohibited
    */
+  @FormSelect({
+    displayName: LOCALE.REPLY_FILE_POLICY as string,
+    options: [
+      { displayName: LOCALE.FILE_POLICY_STRICT as string, value: FileAttachmentMode.STRICT },
+      { displayName: LOCALE.FILE_POLICY_OPTIONAL as string, value: FileAttachmentMode.OPTIONAL },
+      { displayName: LOCALE.FILE_POLICY_FORBIDDEN as string, value: FileAttachmentMode.FORBIDDEN }
+    ]
+  })
   @KIsString('REPLY_FILE_POLICY')
   @KIsNotEmpty('REPLY_FILE_POLICY')
   @KIsIn('REPLY_FILE_POLICY', fileAttachmentModes)
@@ -80,6 +120,10 @@ export class BoardCreateForm {
   /**
    * Delay between threads creations (seconds)
    */
+  @FormInput({
+    type: 'number',
+    displayName: `${LOCALE.DELAY_AFTER_THREAD as string} (${LOCALE.SECONDS as string})`
+  })
   @Transform(normalizeNumber)
   @KIsNumber('DELAY_AFTER_THREAD')
   @KIsNotEmpty('DELAY_AFTER_THREAD')
@@ -89,6 +133,10 @@ export class BoardCreateForm {
   /**
    * Delay between replies creations (seconds)
    */
+  @FormInput({
+    type: 'number',
+    displayName: `${LOCALE.DELAY_AFTER_REPLY as string} (${LOCALE.SECONDS as string})`
+  })
   @Transform(normalizeNumber)
   @KIsNumber('DELAY_AFTER_REPLY')
   @KIsNotEmpty('DELAY_AFTER_REPLY')
@@ -98,6 +146,10 @@ export class BoardCreateForm {
   /**
    * Minimal uploaded file size (bytes)
    */
+  @FormInput({
+    type: 'number',
+    displayName: `${LOCALE.MIN_FILE_SIZE as string} (${LOCALE.BYTES as string})`
+  })
   @Transform(normalizeNumber)
   @KIsNumber('MIN_FILE_SIZE')
   @KIsNotEmpty('MIN_FILE_SIZE')
@@ -107,6 +159,10 @@ export class BoardCreateForm {
   /**
    * Maximal uploaded file size (bytes)
    */
+  @FormInput({
+    type: 'number',
+    displayName: `${LOCALE.MAX_FILE_SIZE as string} (${LOCALE.BYTES as string})`
+  })
   @Transform(normalizeNumber)
   @KIsNumber('MAX_FILE_SIZE')
   @KIsNotEmpty('MAX_FILE_SIZE')
@@ -118,6 +174,9 @@ export class BoardCreateForm {
    * `true` - full wakaba markdown opportunities are enabled <br>
    * `false` - only replies (`>>123`), citations (`> test`) and links will be formated. <br>
    */
+  @FormCheckbox({
+    displayName: `<abbr title="${LOCALE.ALLOW_MARKDOWN_ABBR as string}">${LOCALE.ALLOW_MARKDOWN as string}</abbr>`
+  })
   @Transform(normalizeBooleanCheckbox)
   @KIsBoolean('ALLOW_MARKDOWN')
   @KIsNotEmpty('ALLOW_MARKDOWN')
@@ -126,6 +185,7 @@ export class BoardCreateForm {
   /**
    * Allow tripcode parsing
    */
+  @FormCheckbox({ displayName: LOCALE.ALLOW_TRIPCODES as string })
   @Transform(normalizeBooleanCheckbox)
   @KIsBoolean('ALLOW_TRIPCODES')
   @KIsNotEmpty('ALLOW_TRIPCODES')
@@ -134,6 +194,10 @@ export class BoardCreateForm {
   /**
    * Maximum number of threads that can be on the board at the same time
    */
+  @FormInput({
+    type: 'number',
+    displayName: LOCALE.MAX_THREADS_ON_BOARD as string
+  })
   @Transform(normalizeNumber)
   @KIsNumber('MAX_THREADS_ON_BOARD')
   @KIsNotEmpty('MAX_THREADS_ON_BOARD')
@@ -143,6 +207,10 @@ export class BoardCreateForm {
   /**
    * Number of posts after which the thread will not rise
    */
+  @FormInput({
+    type: 'number',
+    displayName: LOCALE.BUMP_LIMIT as string
+  })
   @Transform(normalizeNumber)
   @KIsNumber('BUMP_LIMIT')
   @KIsNotEmpty('BUMP_LIMIT')
@@ -152,6 +220,10 @@ export class BoardCreateForm {
   /**
    * Maximal size of Name, Email and subject fields
    */
+  @FormInput({
+    type: 'number',
+    displayName: `<abbr title="${LOCALE.MAX_STRING_FIELD_SIZE_ABBR as string}">${LOCALE.MAX_STRING_FIELD_SIZE as string}</abbr>`
+  })
   @Transform(normalizeNumber)
   @KIsNumber('MAX_STRING_FIELD_SIZE')
   @KIsNotEmpty('MAX_STRING_FIELD_SIZE')
@@ -162,6 +234,10 @@ export class BoardCreateForm {
   /**
    * Maximal size of Comment field
    */
+  @FormInput({
+    type: 'number',
+    displayName: LOCALE.MAX_COMMENT_SIZE as string
+  })
   @Transform(normalizeNumber)
   @KIsNumber('MAX_COMMENT_SIZE')
   @KIsNotEmpty('MAX_COMMENT_SIZE')
@@ -171,6 +247,7 @@ export class BoardCreateForm {
   /**
    * Default poster name
    */
+  @FormInput({ type: 'text', displayName: LOCALE.DEFAULT_POSTER_NAME as string, size: 28 })
   @KIsString('DEFAULT_POSTER_NAME')
   @KIsNotEmpty('DEFAULT_POSTER_NAME')
   @KLength('DEFAULT_POSTER_NAME', 1, 256)
@@ -179,6 +256,7 @@ export class BoardCreateForm {
   /**
    * Default moderator name
    */
+  @FormInput({ type: 'text', displayName: LOCALE.DEFAULT_MODERATOR_NAME as string, size: 28 })
   @KIsString('DEFAULT_MODERATOR_NAME')
   @KIsNotEmpty('DEFAULT_MODERATOR_NAME')
   @KLength('DEFAULT_MODERATOR_NAME', 1, 256)
@@ -187,6 +265,7 @@ export class BoardCreateForm {
   /**
    * Enable captcha
    */
+  @FormCheckbox({ displayName: LOCALE.ENABLE_CAPTCHA as string })
   @Transform(normalizeBooleanCheckbox)
   @KIsBoolean('ENABLE_CAPTCHA')
   @KIsNotEmpty('ENABLE_CAPTCHA')
@@ -195,6 +274,7 @@ export class BoardCreateForm {
   /**
    * Set case sensitivity for captcha
    */
+  @FormCheckbox({ displayName: LOCALE.IS_CAPTCHA_CASE_SENSITIVE as string })
   @Transform(normalizeBooleanCheckbox)
   @KIsBoolean('IS_CAPTCHA_CASE_SENSITIVE')
   @KIsNotEmpty('IS_CAPTCHA_CASE_SENSITIVE')
@@ -203,6 +283,10 @@ export class BoardCreateForm {
   /**
    * List of supported file types for current board (MIME)
    */
+  @FormCheckboxList({
+    displayName: LOCALE.ALLOWED_FILE_TYPES as string,
+    values: allowedFileTypes
+  })
   @Transform(normalizeStringArray)
   @KIsArray('ALLOWED_FILE_TYPES')
   @KIsIn('ALLOWED_FILE_TYPES', Constants.SUPPORTED_FILE_TYPES, { each: true })
@@ -211,6 +295,7 @@ export class BoardCreateForm {
   /**
    * HTML fragment with board rules
    */
+  @FormTextarea({ displayName: LOCALE.RULES as string, rows: 6, cols: 60 })
   @KIsString('RULES')
   @KIsNotEmpty('RULES')
   rules: string;

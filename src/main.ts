@@ -9,12 +9,12 @@ import * as session from 'express-session';
 import { sessionConfig } from '@config/session.config';
 import { IpFilterGuard, loadBlackList } from '@library/guards';
 import { loadGlobalSettings } from '@library/functions';
-import { getRandomBanner } from '@library/page-compiler';
 import { LOCALE } from '@locale/locale';
 import { PinoLogger, Logger } from 'nestjs-pino';
 import { Logger as NestLogger } from '@nestjs/common';
 import { ExceptionFilter } from '@library/filters';
 import { loggerConfig } from '@config/logger.config';
+import { applicationVersion, fileSize, getRandomBanner } from '@library/helpers';
 
 const bootstrap = async (): Promise<void> => {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
@@ -41,6 +41,8 @@ const bootstrap = async (): Promise<void> => {
   app.setLocal('SITE_SETTINGS', () => global.GLOBAL_SETTINGS);
   app.setLocal('LOCALE', LOCALE);
   app.setLocal('getRandomBanner', getRandomBanner);
+  app.setLocal('applicationVersion', applicationVersion);
+  app.setLocal('fileSize', fileSize);
 
   app.useGlobalGuards(new IpFilterGuard());
   app.getHttpAdapter().getInstance().set('trust proxy', true);

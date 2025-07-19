@@ -1,0 +1,15 @@
+extends ../layouts/common_layout
+include ../components/admin_bar
+include ../components/admin_links
+
+block content
+    div.adminbar
+        +ManagementAdminBar(session.payload.role)
+
+    div.logo #{SITE_SETTINGS().siteName}
+    hr
+    +AdminLinks(session.payload.role)
+
+    div.theader= commons.pageSubtitle
+
+    | !{tableHtml}

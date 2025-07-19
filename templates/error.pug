@@ -1,11 +1,10 @@
-include _inc/thread/_head
+extends ./layouts/common_layout
+include components/admin_bar
 
-html(lang=LOCALE.HTML_LANG)
-    +Head(LOCALE.ERROR)
-    body
-        h1(align='center')= LOCALE.ERROR
-        div(align='center')
-            p
-                b !{message}
-            p
-                a(href='/front')= LOCALE.TO_MAIN_PAGE
+block content
+    h1(align='center')= LOCALE.ERROR
+    div(align='center')
+        p
+            b !{message}
+        p
+            a(href='/front')= LOCALE.TO_MAIN_PAGE

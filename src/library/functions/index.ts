@@ -1,9 +1,9 @@
-import { GlobalSettingsForm } from '@admin/forms/global-settings';
 import { FilesystemOperator } from '@library/filesystem';
 import { Constants } from '@library/constants';
 import * as path from 'node:path';
 import * as fsExtra from 'fs-extra';
 import * as process from 'node:process';
+import { GlobalSettingsForm } from '@admin/forms';
 
 /**
  * Load global settings from the file. If the file is empty, load it from presets

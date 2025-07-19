@@ -24,7 +24,15 @@ export class BanMapper {
       userDto = this.userMapper.toDto(user);
     }
 
-    return new BanDto(ban.id, ban.createdAt, ban.ip, ban.till, ban.reason, userDto);
+    return new BanDto(
+      ban.id,
+      ban.createdAt,
+      ban.ip,
+      ban.till,
+      ban.reason,
+      userDto,
+      ban.boardId ? (ban['board'].url as string) : null
+    );
   }
 
   /**
@@ -37,7 +45,8 @@ export class BanMapper {
       ip: dto.ip,
       till: this.mapDateTill(dto),
       reason: dto.reason,
-      user: { connect: { id: userId } }
+      user: { connect: { id: userId } },
+      board: dto.boardId ? { connect: { id: dto.boardId } } : undefined
     };
   }
 

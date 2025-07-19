@@ -75,7 +75,7 @@ export default tseslint.config(
       'key-spacing': 'error',
       'keyword-spacing': ['error', { 'after': true, 'before': true }],
       'line-comment-position': 'off',
-      'linebreak-style': ['error', 'unix'],
+      'linebreak-style': ['error', 'windows'],
       'lines-around-comment': 'off',
       'lines-between-class-members': 'warn',
       'max-classes-per-file': 'off',
@@ -228,7 +228,7 @@ export default tseslint.config(
       'unicode-bom': ['error', 'never'],
       'vars-on-top': 'error',
       'wrap-iife': 'error',
-      'wrap-regex': 'error',
+      'wrap-regex': 'off',
       'yield-star-spacing': 'error',
       'yoda': 'error',
       '@typescript-eslint/no-explicit-any': 'off',
@@ -240,7 +240,8 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-return': 'off',
       '@typescript-eslint/no-misused-promises': 'off',
       '@typescript-eslint/unbound-method': 'off',
-      '@typescript-eslint/no-unnecessary-type-assertion': 'off'
+      '@typescript-eslint/no-unnecessary-type-assertion': 'off',
+      '@typescript-eslint/no-empty-object-type': 'off'
     },
   },
 );

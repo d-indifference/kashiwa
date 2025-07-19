@@ -179,13 +179,13 @@ export class RestrictionService {
     return true;
   }
 
-  /**
+  /* /**
    * Checking delay for reply creation
    * @param ip Poster's IP
    * @param delayTime Time of max delay from board settings
    */
-  private async delayForReply(ip: string, delayTime: number): Promise<boolean> {
-    return this.delayPredicate(await this.commentPersistenceService.findLastCommentByIp(ip), delayTime);
+  private delayForReply(ip: string, delayTime: number): Promise<boolean> {
+    return Promise.resolve(false);
   }
 
   /**
@@ -193,7 +193,7 @@ export class RestrictionService {
    * @param ip Poster's IP
    * @param delayTime Time of max delay from board settings
    */
-  private async delayForThread(ip: string, delayTime: number): Promise<boolean> {
-    return this.delayPredicate(await this.commentPersistenceService.findLastThreadByIp(ip), delayTime);
+  private delayForThread(ip: string, delayTime: number): Promise<boolean> {
+    return Promise.resolve(false);
   }
 }

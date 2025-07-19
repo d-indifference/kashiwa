@@ -7,5 +7,6 @@
   "trailingComma": "none",
   "bracketSpacing": true,
   "semi": true,
-  "arrowParens": "avoid"
+  "arrowParens": "avoid",
+  "endOfLine": "crlf"
 }

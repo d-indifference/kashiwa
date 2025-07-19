@@ -1,55 +1,65 @@
-import { IsEmail, IsIn, IsNotEmpty, IsOptional, IsString, IsUUID, Length } from 'class-validator';
-import { UserRole } from '@prisma/client';
+import { Form, FormHidden, FormInput, FormMethods, FormPassword, FormSelect } from '@admin/lib';
+import { IsOptional } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { emptyFormText } from '@admin/transforms';
-import { LOCALE, V_LOCALE, vStr } from '@locale/locale';
+import { KIsEmail, KIsIn, KIsNotEmpty, KIsString, KIsUUIDv4, KLength } from '@library/validators';
+import { LOCALE } from '@locale/locale';
+import { UserRole } from '@prisma/client';
 
 /**
  * Body object for staff updating form
  */
+@Form({ action: '/kashiwa/staff/edit', method: FormMethods.POST })
 export class StaffUpdateForm {
   /**
    * Update candidate object ID (strictly required)
    */
-  @IsString({ message: V_LOCALE['V_STRING'](vStr(LOCALE['ID'])) })
-  @IsNotEmpty({ message: V_LOCALE['V_NOT_EMPTY'](vStr(LOCALE['ID'])) })
-  @IsUUID('4', { message: V_LOCALE['V_UUIDV4'](vStr(LOCALE['ID'])) })
+  @FormHidden()
+  @KIsString('ID')
+  @KIsNotEmpty('ID')
+  @KIsUUIDv4('ID')
   id: string;
 
   /**
    * Username
    */
+  @FormInput({ type: 'text', size: 28, displayName: LOCALE.USERNAME as string })
   @IsOptional()
-  @IsString({ message: V_LOCALE['V_STRING'](vStr(LOCALE['USERNAME'])) })
-  @Length(3, 256, { message: V_LOCALE['V_NOT_EMPTY'](vStr(LOCALE['USERNAME']), vStr(3), vStr(256)) })
+  @KIsString('USERNAME')
+  @KLength('USERNAME', 3, 256)
   @Transform(emptyFormText)
   username?: string;
 
   /**
    * Email
    */
-  @IsOptional()
-  @IsString({ message: V_LOCALE['V_STRING'](vStr(LOCALE['FORM_EMAIL'])) })
-  @IsEmail(undefined, { message: V_LOCALE['V_EMAIL'](vStr(LOCALE['FORM_EMAIL'])) })
-  @Length(3, 256, { message: V_LOCALE['V_LENGTH'](vStr(LOCALE['FORM_EMAIL']), vStr(3), vStr(256)) })
-  @Transform(emptyFormText)
+  @FormInput({ type: 'email', size: 28, displayName: LOCALE.FORM_EMAIL as string })
+  @KIsString('FORM_EMAIL')
+  @KIsNotEmpty('FORM_EMAIL')
+  @KIsEmail('FORM_EMAIL')
+  @KLength('FORM_EMAIL', 3, 256)
   email?: string;
 
   /**
    * Role
    */
-  @IsOptional()
-  @IsString({ message: V_LOCALE['V_STRING'](vStr(LOCALE['ROLE'])) })
-  @IsIn([UserRole.ADMINISTRATOR, UserRole.MODERATOR], {
-    message: V_LOCALE['V_IN'](vStr(LOCALE['ROLE']), [UserRole.ADMINISTRATOR, UserRole.MODERATOR])
+  @FormSelect({
+    displayName: LOCALE.ROLE as string,
+    options: [
+      { displayName: LOCALE.ADMINISTRATOR as string, value: UserRole.ADMINISTRATOR },
+      { displayName: LOCALE.MODERATOR as string, value: UserRole.MODERATOR }
+    ]
   })
+  @IsOptional()
+  @KIsString('ROLE')
+  @KIsIn('ROLE', [UserRole.ADMINISTRATOR, UserRole.MODERATOR])
   role?: UserRole;
 
   /**
    * Non-hashed password
    */
+  @FormPassword({ size: 28, displayName: LOCALE.FORM_PASSWORD as string })
   @IsOptional()
-  @IsString({ message: V_LOCALE['V_STRING'](vStr(LOCALE['FORM_PASSWORD'])) })
-  @Transform(emptyFormText)
+  @KIsString('FORM_PASSWORD')
   password?: string;
 }

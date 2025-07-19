@@ -1,30 +1,41 @@
-import { Body, Controller, Get, Post, Req, Res, Session, UseGuards, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, Post, Render, Req, Res, Session, UseGuards, ValidationPipe } from '@nestjs/common';
+import { LOCALE } from '@locale/locale';
 import { FormDataRequest } from 'nestjs-form-data';
-import { SignInForm, SignUpForm } from '@admin/forms/auth';
 import { ISession } from '@admin/interfaces';
-import { Response, Request } from 'express';
-import { SessionGuard, SignInGuard, SignUpGuard } from '@admin/guards';
+import { Request, Response } from 'express';
 import { AuthService } from '@admin/services';
+import { RenderableFormPage, FormPage } from '@admin/lib';
+import { AuthSignUpForm, AuthSignInForm } from '@admin/forms';
+import { SessionGuard } from '@admin/guards';
 
 @Controller('kashiwa/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Get('sign-up')
-  public async getSignUpForm(@Res() res: Response): Promise<void> {
-    await this.authService.checkSignUpAccessAndResponse(res);
+  @Render('admin/auth_form_page')
+  public getSignUpForm(): RenderableFormPage {
+    return FormPage.toTemplateContent(new AuthSignUpForm(), {
+      pageTitle: global.GLOBAL_SETTINGS.siteName,
+      pageSubtitle: LOCALE.SIGN_UP as string,
+      goBack: '/front'
+    });
   }
 
   @Get('sign-in')
-  public getSignInForm(@Res() res: Response, @Session() session: ISession): void {
-    this.authService.checkSignInAccessAndResponse(res, session);
+  @Render('admin/auth_form_page')
+  public getSignInForm(): RenderableFormPage {
+    return FormPage.toTemplateContent(new AuthSignInForm('', ''), {
+      pageTitle: global.GLOBAL_SETTINGS.siteName,
+      pageSubtitle: LOCALE.SIGN_IN as string,
+      goBack: '/front'
+    });
   }
 
   @Post('sign-up')
   @FormDataRequest()
-  @UseGuards(SignUpGuard)
   public async signUp(
-    @Body(new ValidationPipe({ transform: true })) form: SignUpForm,
+    @Body(new ValidationPipe({ transform: true })) form: AuthSignUpForm,
     @Session() session: ISession,
     @Res() res: Response
   ): Promise<void> {
@@ -32,10 +43,9 @@ export class AuthController {
   }
 
   @Post('sign-in')
-  @UseGuards(SignInGuard)
   @FormDataRequest()
   public async signIn(
-    @Body(new ValidationPipe({ transform: true })) form: SignInForm,
+    @Body(new ValidationPipe({ transform: true })) form: AuthSignInForm,
     @Session() session: ISession,
     @Res() res: Response
   ): Promise<void> {

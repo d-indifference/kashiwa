@@ -28,7 +28,7 @@ export const locale: Record<string, LocaleArgument> = {
   SECONDS: ' seconds',
   BYTES: ' bytes',
   ALLOW_MARKDOWN: 'Allow markdown',
-  ALLOW_MARKDOWN_ABBR: 'If it is set to "no", only replies and citations will be allowed',
+  ALLOW_MARKDOWN_ABBR: 'If it is set to &#34;no&#34;, only replies and citations will be allowed',
   ALLOW_TRIPCODES: 'Allow tripcodes',
   MAX_THREADS_ON_BOARD: 'Max thread on board',
   BUMP_LIMIT: 'Bump limit',
@@ -234,7 +234,8 @@ export const locale: Record<string, LocaleArgument> = {
   MAKE_DUMP: 'Make dump',
   DUMP_CREATED: 'You can find your site dumped archive at: ',
   DB_CONNECTION_IS_NOT_SPEC: 'Database connection is not specified',
-  ENGINE_VERSION: 'Kashiwa engine version'
+  ENGINE_VERSION: 'Kashiwa engine version',
+  BROWSER_DOES_NOT_SUPPORT_FRAMES: 'Your browser doesn`t support frames'
 };
 
 export const localeValidators: Record<string, (...args: unknown[]) => string> = {
