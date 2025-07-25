@@ -1,8 +1,8 @@
 import { Constants } from '@library/constants';
-import { IsNumber, IsOptional } from 'class-validator';
+import { IsOptional } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { normalizePositiveInteger } from '@persistence/lib/transforms';
-import { V_LOCALE } from '@locale/locale';
+import { KIsNumber } from '@library/validators';
 
 /**
  * Data transfer object for paginated requests.
@@ -14,7 +14,7 @@ export class PageRequest {
    * The current page number (zero-based)
    */
   @IsOptional()
-  @IsNumber(undefined, { message: V_LOCALE['V_NUMBER']('page') })
+  @KIsNumber('page')
   @Transform(normalizePositiveInteger)
   page: number = 0;
 
@@ -23,7 +23,7 @@ export class PageRequest {
    * Optional. Defaults to `Constants.DEFAULT_PAGE_SIZE`.
    */
   @IsOptional()
-  @IsNumber(undefined, { message: V_LOCALE['V_NUMBER']('limit') })
+  @KIsNumber('limit')
   @Transform(normalizePositiveInteger)
   limit: number = Constants.DEFAULT_PAGE_SIZE;
 

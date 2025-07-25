@@ -25,3 +25,9 @@ export const normalizeNumber = (params: TransformFnParams) => Number(params.valu
  */
 export const normalizeStringArray = (params: TransformFnParams): string[] =>
   Array.isArray(params.value) ? params.value : [params.value];
+
+/**
+ * Transform function for HTML checkbox group or bigint values
+ */
+export const normalizeBigintArray = (params: TransformFnParams): bigint[] =>
+  Array.isArray(params.value) ? params.value.map((p: string) => BigInt(p)) : [BigInt(params.value as string)];

@@ -3,18 +3,17 @@ import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { Constants } from '@library/constants';
 import { ConfigService } from '@nestjs/config';
-import { FilesystemOperator } from '@library/filesystem';
 import * as cookieParser from 'cookie-parser';
 import * as session from 'express-session';
 import { sessionConfig } from '@config/session.config';
-import { IpFilterGuard, loadBlackList } from '@library/guards';
-import { loadGlobalSettings } from '@library/functions';
+import { IpFilterGuard } from '@library/guards';
 import { LOCALE } from '@locale/locale';
 import { PinoLogger, Logger } from 'nestjs-pino';
 import { Logger as NestLogger } from '@nestjs/common';
 import { ExceptionFilter } from '@library/filters';
 import { loggerConfig } from '@config/logger.config';
 import { applicationVersion, fileSize, getRandomBanner } from '@library/helpers';
+import { FileSystemProvider, GlobalSettingsProvider, IpBlacklistProvider } from '@library/providers';
 
 const bootstrap = async (): Promise<void> => {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
@@ -29,14 +28,12 @@ const bootstrap = async (): Promise<void> => {
   app.use(cookieParser());
   app.use(session(sessionConfig(config)));
 
-  await FilesystemOperator.mkdir(Constants.SETTINGS_DIR);
+  const fileSystem = new FileSystemProvider();
+  await fileSystem.ensureDir([Constants.SETTINGS_DIR]);
 
   const logger = app.get(Logger);
 
   app.useGlobalFilters(new ExceptionFilter(new PinoLogger(loggerConfig())));
-
-  await loadBlackList();
-  await loadGlobalSettings();
 
   app.setLocal('SITE_SETTINGS', () => global.GLOBAL_SETTINGS);
   app.setLocal('LOCALE', LOCALE);
@@ -44,7 +41,13 @@ const bootstrap = async (): Promise<void> => {
   app.setLocal('applicationVersion', applicationVersion);
   app.setLocal('fileSize', fileSize);
 
-  app.useGlobalGuards(new IpFilterGuard());
+  const ipFilterGuard = new IpFilterGuard(fileSystem, new IpBlacklistProvider());
+  app.useGlobalGuards(ipFilterGuard);
+  await ipFilterGuard.load();
+
+  const globalSettingsProvider = app.get(GlobalSettingsProvider);
+  await globalSettingsProvider.load();
+
   app.getHttpAdapter().getInstance().set('trust proxy', true);
 
   app.useLogger(logger);

@@ -1,0 +1,79 @@
+extends ./layouts/footered_layout
+include components/admin_bar
+include components/form/thread_form
+include components/post/thread
+include components/user_delete
+
+mixin PageHeader()
+    div.logo
+        div.banner
+            img(src=getRandomBanner() alt='banner')
+        | #{SITE_SETTINGS().siteName}
+    div.sublogo= SITE_SETTINGS().siteSlogan
+    hr
+
+
+mixin PostArea()
+    div.postarea
+        if board.boardSettings.allowPosting
+            form#postform(action=`/kashiwa/post/${board.url}` method='post' enctype='multipart/form-data')
+                +ThreadForm()
+
+
+mixin DelForm()
+    form#delform(action=`/kashiwa/delete/${board.url}` method='post')
+        for threadPreview in page.content
+          +ThreadPreview(board, threadPreview.thread, threadPreview.omittedPosts, threadPreview.omittedFiles)
+        +UserDelete()
+    script.
+      setDelPass(passwordCookie)
+
+
+mixin Pagination()
+    tbody
+        tr
+            td
+                if page.previous !== null
+                    if (page.previous === 0)
+                        form(method='get' action=`/${board.url}/kashiwa.html`)
+                            input(type='submit' value=LOCALE.PREVIOUS)
+                    else
+                        form(method='get' action=`/${board.url}/${page.previous}.html`)
+                            input(type='submit' value=LOCALE.PREVIOUS)
+                else
+                    span= LOCALE.PREVIOUS
+                    =' '
+            td
+              - let i = 0;
+                while i < page.total
+                    if i === page.current
+                        | [#{ page.current }]
+                    else
+                        if i === 0
+                            ='['
+                            a(href=`/${board.url}/kashiwa.html`) #{i}
+                            =']'
+                        else
+                            ='['
+                            a(href=`/${board.url}/${i}.html`) #{i}
+                            =']'
+                    - i++;
+            td
+                if page.next !== null
+                    form(method='get' action=`/${board.url}/${page.next}.html`)
+                        input(type='submit' value=LOCALE.NEXT)
+                else
+                    =' '
+                    span= LOCALE.NEXT
+
+
+block content
+    +AdminBar()
+    +PageHeader()
+    +PostArea()
+    +DelForm()
+    +Pagination()
+    br(clear='all')
+    +AdminBar()
+
+

@@ -7,3 +7,4 @@ export * from './dump.controller';
 export * from './staff.controller';
 export * from './board.controller';
 export * from './ban.controller';
+export * from './moderation.controller';

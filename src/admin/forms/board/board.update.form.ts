@@ -27,7 +27,7 @@ import {
   KMin
 } from '@library/validators';
 import { IsOptional } from 'class-validator';
-import { normalizeBooleanCheckbox, normalizeNumber, normalizeStringArray } from '@admin/transforms';
+import { normalizeBooleanCheckbox, normalizeNumber, normalizeStringArray } from '@library/transforms';
 import { Transform } from 'class-transformer';
 
 const fileAttachmentModes = [FileAttachmentMode.STRICT, FileAttachmentMode.FORBIDDEN, FileAttachmentMode.OPTIONAL];

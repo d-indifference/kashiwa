@@ -25,6 +25,12 @@ import { LOCALE } from '@locale/locale';
 import { FormDataRequest } from 'nestjs-form-data';
 import { Response } from 'express';
 
+const getDefaultNewStaffMemberForm = (): StaffCreateForm => {
+  const form = new StaffCreateForm();
+  form.role = UserRole.MODERATOR;
+  return form;
+};
+
 @Controller('kashiwa/staff')
 export class StaffController {
   constructor(private readonly staffService: StaffService) {}
@@ -52,10 +58,8 @@ export class StaffController {
   @UseGuards(SessionGuard)
   @Render('admin/common_form_page')
   public getCreationForm(@Session() session: ISession): RenderableSessionFormPage {
-    const form = new StaffCreateForm();
-    form.username = 'karlik';
-    form.email = 'karlik@karlik.com';
-    form.role = UserRole.MODERATOR;
+    const form = getDefaultNewStaffMemberForm();
+
     return FormPage.toSessionTemplateContent(session, form, {
       pageTitle: LOCALE.STAFF_PANEL as string,
       pageSubtitle: LOCALE.NEW_STAFF_MEMBER as string,

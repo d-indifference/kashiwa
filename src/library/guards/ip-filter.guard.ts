@@ -1,32 +1,19 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { getClientIp } from '@supercharge/request-ip';
-import * as path from 'node:path';
-import { Constants } from '@library/constants';
-import * as fsExtra from 'fs-extra';
-import { FilesystemOperator } from '@library/filesystem';
 import { LOCALE } from '@locale/locale';
-
-/**
- * Loads blacklist to `global`
- */
-export const loadBlackList = async (): Promise<void> => {
-  const pathToFile = path.join(Constants.Paths.FILE_BLACK_LIST);
-
-  if (!(await fsExtra.exists(pathToFile))) {
-    await FilesystemOperator.overwriteFile(['_settings', 'black_list'], '\r\n');
-  }
-
-  const blackList = FilesystemOperator.readFile('_settings', 'black_list');
-
-  global.ipBlackList = blackList.split('\r\n');
-  global.ipBlackList.pop();
-};
+import { FileSystemProvider, IpBlacklistProvider } from '@library/providers';
+import { Constants } from '@library/constants';
 
 /**
  * Filtering of permanent banned IPs
  */
 @Injectable()
 export class IpFilterGuard implements CanActivate {
+  constructor(
+    private readonly fileSystem: FileSystemProvider,
+    private readonly ipBlacklistProvider: IpBlacklistProvider
+  ) {}
+
   public canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest();
     const clientIp = getClientIp(request);
@@ -35,14 +22,23 @@ export class IpFilterGuard implements CanActivate {
       throw new ForbiddenException(LOCALE['UNABLE_TO_DETERMINATE_IP']);
     }
 
-    for (const pattern of global.ipBlackList as string[]) {
-      const regexpStr = `^${pattern}$`;
-      const regex = new RegExp(regexpStr);
-      if (regex.test(clientIp)) {
-        return false;
-      }
+    return !this.ipBlacklistProvider.isIpBlocked(clientIp);
+  }
+
+  /**
+   * Load IP blacklist to memory
+   */
+  public async load(): Promise<void> {
+    const blackListRelativePath = [Constants.SETTINGS_DIR, Constants.BLACK_LIST_FILE_NAME];
+
+    if (!(await this.fileSystem.pathExists(blackListRelativePath))) {
+      await this.fileSystem.writeTextFile(blackListRelativePath, '\r\n');
     }
 
-    return true;
+    const blackList = await this.fileSystem.readTextFile(blackListRelativePath);
+    global.ipBlackList = blackList.split('\r\n');
+    global.ipBlackList.pop();
+
+    this.ipBlacklistProvider.reloadBlacklist();
   }
 }

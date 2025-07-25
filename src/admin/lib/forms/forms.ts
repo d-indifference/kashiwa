@@ -137,7 +137,7 @@ export class Forms {
       }
 
       optionsHtml += `<input type="checkbox" name="${input.propertyKey}" value="${inputValue.value}" ${isChecked ? 'checked' : ''} id="${inputValue.value}">
-                      <label for="${inputValue.value}">${inputValue.value}</label><br>`;
+                      <label for="${inputValue.value}">${inputValue.displayName}</label><br>`;
     }
 
     return `

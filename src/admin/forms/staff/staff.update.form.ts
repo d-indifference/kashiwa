@@ -1,7 +1,7 @@
 import { Form, FormHidden, FormInput, FormMethods, FormPassword, FormSelect } from '@admin/lib';
 import { IsOptional } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { emptyFormText } from '@admin/transforms';
+import { emptyFormText } from '@library/transforms';
 import { KIsEmail, KIsIn, KIsNotEmpty, KIsString, KIsUUIDv4, KLength } from '@library/validators';
 import { LOCALE } from '@locale/locale';
 import { UserRole } from '@prisma/client';

@@ -5,7 +5,7 @@ import { exec } from 'child_process';
 import * as path from 'node:path';
 import { LOCALE } from '@locale/locale';
 import * as process from 'node:process';
-import * as fsExtra from 'fs-extra';
+import { FileSystemProvider } from '@library/providers';
 
 const execAsync = promisify(exec);
 
@@ -14,7 +14,10 @@ const execAsync = promisify(exec);
  */
 @Injectable()
 export class DatabaseDumpingUtilsProvider {
-  constructor(private readonly logger: PinoLogger) {
+  constructor(
+    private readonly fileSystem: FileSystemProvider,
+    private readonly logger: PinoLogger
+  ) {
     this.logger.setContext(DatabaseDumpingUtilsProvider.name);
   }
 
@@ -61,7 +64,7 @@ export class DatabaseDumpingUtilsProvider {
     const dumpFilePath = this.toDumpFilePath();
     const dumpFileName = this.getDumpFileName(table);
 
-    await fsExtra.ensureDir(dumpFilePath);
+    await this.fileSystem.ensureDirOutOfVolume(dumpFilePath);
 
     const fullSqlPath = path.join(dumpFilePath, dumpFileName);
     await this.runPgDump(connectionString, fullSqlPath, ['--data-only', '--inserts', `--table=kashiwa.${table}`]);

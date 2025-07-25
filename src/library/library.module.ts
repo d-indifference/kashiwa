@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { ImageboardFileProvider } from '@library/filesystem';
+import { FileSystemProvider, GlobalSettingsProvider, IpBlacklistProvider } from '@library/providers';
 
 /**
  * Module for library / shared functionality & utils
  */
 @Module({
-  providers: [ImageboardFileProvider],
-  exports: [ImageboardFileProvider]
+  providers: [FileSystemProvider, IpBlacklistProvider, GlobalSettingsProvider],
+  exports: [FileSystemProvider, IpBlacklistProvider, GlobalSettingsProvider]
 })
 export class LibraryModule {}

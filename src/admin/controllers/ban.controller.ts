@@ -20,7 +20,7 @@ import { FormDataRequest } from 'nestjs-form-data';
 import { Response } from 'express';
 import { BanCreateForm } from '@admin/forms/ban';
 import { Transform } from 'class-transformer';
-import { emptyFormText } from '@admin/transforms';
+import { emptyFormText } from '@library/transforms';
 import { TablePage } from '@admin/pages';
 import { RenderableSessionFormPage } from '@admin/lib';
 

@@ -7,6 +7,7 @@ import { AppController } from './app.controller';
 import { LoggerModule } from 'nestjs-pino';
 import { loggerConfig } from '@config/logger.config';
 import { AdminModule } from '@admin/admin.module';
+import { PostingModule } from '@posting/posting.module';
 
 @Module({
   controllers: [AppController],
@@ -22,7 +23,8 @@ import { AdminModule } from '@admin/admin.module';
     }),
     LoggerModule.forRoot(loggerConfig()),
     LibraryModule,
-    AdminModule
+    AdminModule,
+    PostingModule
   ],
   providers: []
 })

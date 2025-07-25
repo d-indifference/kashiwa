@@ -134,7 +134,7 @@ export class UserPersistenceService {
   }
 
   /**
-   * Check if username is unique
+   * Check if username is unique on creation
    */
   private async checkUniqueUserOnCreate(dto: UserCreateDto): Promise<void> {
     const entity = await this.prisma.user.findFirst({ where: { username: dto.username } });

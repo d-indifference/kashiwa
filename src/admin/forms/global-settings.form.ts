@@ -3,7 +3,7 @@ import { Transform } from 'class-transformer';
 import { IsOptional } from 'class-validator';
 import { Form, FormInput, FormTextarea, FormMethods } from '@admin/lib';
 import { LOCALE } from '@locale/locale';
-import { emptyFormText } from '@admin/transforms';
+import { emptyFormText } from '@library/transforms';
 
 /**
  * Form for setting of global site settings

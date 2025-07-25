@@ -1,0 +1,47 @@
+extends layouts/reply_layout
+include components/admin_bar
+include components/form/reply_form
+include components/post/thread
+include components/user_delete
+
+
+mixin PageHeader()
+    div.logo
+        div.banner
+            img(src=getRandomBanner() alt='banner')
+        | #{SITE_SETTINGS().siteName}
+    div.sublogo= SITE_SETTINGS().siteSlogan
+    hr
+    | [
+    a(href=`/${board.url}/kashiwa.html`)= LOCALE.GO_BACK
+    | ]
+    div.theader
+        | #{LOCALE.POST_REPLY}
+
+
+
+mixin PostArea()
+    div.postarea
+        if board.boardSettings.allowPosting
+            form#postform(action=`/kashiwa/post/${board.url}/${thread.num}` method='post' enctype='multipart/form-data')
+                +ReplyForm()
+            hr
+
+
+mixin DelForm()
+    form#delform(action=`/kashiwa/delete/${board.url}/${thread.num}` method='post')
+        +Thread(board, thread)
+        +UserDelete()
+    script.
+      setDelPass(passwordCookie)
+
+
+block content
+    +AdminBar()
+    +PageHeader()
+    +PostArea()
+    +DelForm()
+    br(clear='all')
+    +AdminBar()
+
+

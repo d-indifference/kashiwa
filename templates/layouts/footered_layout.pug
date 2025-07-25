@@ -1,7 +1,5 @@
 extends ./common_layout
+include ../components/footer
 
 block footer
-    p.footer
-        ='- '
-        a(href='https://github.com/d-indifference/kashiwa') Kashiwa #{applicationVersion()}
-        =' -'
+    +Footer()

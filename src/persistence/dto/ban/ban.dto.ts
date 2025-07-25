@@ -34,6 +34,9 @@ export class BanDto {
    */
   user?: UserDto | null;
 
+  /**
+   * URL of board. If it is `null`, user will be banned everywhere
+   */
   boardUrl: string | null;
 
   constructor(

@@ -13,5 +13,8 @@ model AttachedFile {
 
   comments Comment[]
 
+  boardId String @map("board_id") @db.Uuid
+  board   Board  @relation(fields: [boardId], references: [id], onDelete: Restrict)
+
   @@map("attached_file")
 }

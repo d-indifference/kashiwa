@@ -7,10 +7,11 @@ import { LOCALE } from '@locale/locale';
 import { Response } from 'express';
 import { Constants } from '@library/constants';
 import { DatabaseDumpingUtilsProvider } from '@admin/providers';
-import * as fsExtra from 'fs-extra';
+import { Dirent } from 'fs-extra';
 import * as path from 'path';
 import * as fs from 'node:fs';
 import * as archiver from 'archiver';
+import { FileSystemProvider } from '@library/providers';
 
 /**
  * Service for creating of site contend and database dump archives
@@ -19,6 +20,7 @@ import * as archiver from 'archiver';
 export class DumpService {
   constructor(
     private readonly databaseDumpingUtils: DatabaseDumpingUtilsProvider,
+    private readonly fileSystem: FileSystemProvider,
     private readonly logger: PinoLogger
   ) {
     this.logger.setContext(DumpService.name);
@@ -72,8 +74,7 @@ export class DumpService {
    * Get full path of cached files for archivation
    */
   private async getCacheForArchivation(form: DumpForm): Promise<string[]> {
-    const appVolume = Constants.Paths.APP_VOLUME;
-    const entries = await fsExtra.readdir(appVolume, { withFileTypes: true });
+    const entries = await this.fileSystem.readDir(undefined);
     return entries
       .filter(entry => this.cacheFilterPredicate(form, entry))
       .map(entry => path.join(Constants.Paths.APP_VOLUME, entry.name));
@@ -82,7 +83,7 @@ export class DumpService {
   /**
    * Predicate for filter files which are need to be dumped
    */
-  private cacheFilterPredicate(form: DumpForm, entry: fsExtra.Dirent): boolean {
+  private cacheFilterPredicate(form: DumpForm, entry: Dirent): boolean {
     if (!entry.isDirectory()) {
       return false;
     }
@@ -138,6 +139,6 @@ export class DumpService {
    * Clear temporary cached directories and files
    */
   private async afterArchiving(): Promise<void> {
-    await fsExtra.remove('/tmp/kashiwa-db');
+    await this.fileSystem.removePathOutOfVolume('/tmp/kashiwa-db');
   }
 }

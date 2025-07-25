@@ -1,0 +1,31 @@
+include ./post_components
+
+
+mixin ReplyPreview(_board, _opening_post, _comment)
+    table
+        tbody
+            tr
+                td.doubledash
+                    ='>>'
+                td.reply(id=`reply${_comment.num}`)
+                    +CommentLabel(_board, _comment, true)
+                    +ReplyPreviewRefLink(_board, _opening_post, _comment)
+                    br
+                    if _comment.attachedFile
+                        +AttachedFile(_board, _comment)
+                    +ReplyCommentPreview(_comment, _board, _opening_post)
+
+
+mixin Reply(_board, _opening_post, _comment)
+    table
+        tbody
+            tr
+                td.doubledash
+                    ='>>'
+                td.reply(id=`reply${_comment.num}`)
+                    +CommentLabel(_board, _comment, true)
+                    +ReplyRefLink(_board, _comment)
+                    br
+                    if _comment.attachedFile
+                        +AttachedFile(_board, _comment)
+                    +CommentFull(_comment, _board, _opening_post)

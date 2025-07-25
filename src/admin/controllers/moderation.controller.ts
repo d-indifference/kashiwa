@@ -1,0 +1,72 @@
+import {
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Query,
+  Render,
+  Res,
+  Session,
+  UseGuards,
+  ValidationPipe
+} from '@nestjs/common';
+import { ModerationService } from '@admin/services';
+import { SessionGuard } from '@admin/guards';
+import { PageRequest } from '@persistence/lib/page';
+import { ISession } from '@admin/interfaces';
+import { TablePage } from '@admin/pages';
+import { Response } from 'express';
+import { ParseBigintPipe } from '@library/pipes';
+
+@Controller('kashiwa/moderation')
+export class ModerationController {
+  constructor(private readonly moderationService: ModerationService) {}
+
+  @Get()
+  @UseGuards(SessionGuard)
+  @Render('admin/common_table_page')
+  public async getBoardsList(
+    @Query(new ValidationPipe({ transform: true })) page: PageRequest,
+    @Session() session: ISession
+  ): Promise<TablePage> {
+    return await this.moderationService.findBoardsForModeration(session, page);
+  }
+
+  @Get(':id')
+  @UseGuards(SessionGuard)
+  @Render('admin/common_table_page')
+  public async getCommentsForModeration(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query(new ValidationPipe({ transform: true })) page: PageRequest,
+    @Session() session: ISession
+  ): Promise<TablePage> {
+    return await this.moderationService.findCommentsForModeration(session, id, page);
+  }
+
+  @Post('delete-post/:url/:num')
+  @UseGuards(SessionGuard)
+  public async deletePost(
+    @Param('url') url: string,
+    @Param('num', ParseBigintPipe) num: bigint,
+    @Res() res: Response
+  ): Promise<void> {
+    await this.moderationService.deleteComment(url, num, res);
+  }
+
+  @Post('delete-file/:url/:num')
+  @UseGuards(SessionGuard)
+  public async deleteFile(
+    @Param('url') url: string,
+    @Param('num', ParseBigintPipe) num: bigint,
+    @Res() res: Response
+  ): Promise<void> {
+    await this.moderationService.clearFile(url, num, res);
+  }
+
+  @Post('delete-by-ip/:url/:ip')
+  @UseGuards(SessionGuard)
+  public async deleteByIp(@Param('url') url: string, @Param('ip') ip: string, @Res() res: Response): Promise<void> {
+    await this.moderationService.deleteAllByIp(url, ip, res);
+  }
+}

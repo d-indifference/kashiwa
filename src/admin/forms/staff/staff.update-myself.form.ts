@@ -3,7 +3,7 @@ import { LOCALE } from '@locale/locale';
 import { IsOptional } from 'class-validator';
 import { KIsEmail, KIsNotEmpty, KIsString, KLength } from '@library/validators';
 import { Transform } from 'class-transformer';
-import { emptyFormText } from '@admin/transforms';
+import { emptyFormText } from '@library/transforms';
 
 /**
  * Body object for staff updating form for every user

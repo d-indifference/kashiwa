@@ -1,6 +1,7 @@
 import { Page } from '@persistence/lib/page';
 import { LOCALE } from '@locale/locale';
 import { fileSize, simpleFormatDateTime } from '@library/helpers';
+import { isDefined } from 'class-validator';
 
 /**
  * Mapper of table value for its string converting
@@ -42,6 +43,15 @@ export class TableConstructor<T> {
   }
 
   /**
+   * Conversion of field value to string. If field === null, returns '-'
+   * @param header Table header for this mapped column
+   * @param field Field name
+   */
+  public nullablePlainValue<K extends keyof T>(header: string, field: K): TableConstructor<T> {
+    return this.mappedValue(header, obj => (isDefined(obj[field]) ? String(obj[field]) : '-'));
+  }
+
+  /**
    * Conversion of field value to date-time format
    * @param header Table header for this mapped column
    * @param field Field name
@@ -63,8 +73,9 @@ export class TableConstructor<T> {
    * Making an HTML table string from Prisma page of entities
    * @param page Prisma result page object
    * @param linkToEntities Link to handler for creation a new entity of this type
+   * @param withoutNew If it is `true`, link to creation form of new object will be hidden
    */
-  public fromPage(page: Page<T>, linkToEntities: string): string {
+  public fromPage(page: Page<T>, linkToEntities: string, withoutNew = false): string {
     let tableHtml = `<table align="center" style="'white-space: nowrap">
     <thead>
     <tr class="row1">
@@ -89,7 +100,10 @@ export class TableConstructor<T> {
 
     tableHtml += '</tbody></table>';
     tableHtml += this.createPaginator(page, linkToEntities);
-    tableHtml += `<div align="center">[<a href="${linkToEntities}/new">${LOCALE['ADD_NEW'] as string}</a>]</div>`;
+
+    if (!withoutNew) {
+      tableHtml += `<div align="center">[<a href="${linkToEntities}/new">${LOCALE['ADD_NEW'] as string}</a>]</div>`;
+    }
 
     return tableHtml;
   }

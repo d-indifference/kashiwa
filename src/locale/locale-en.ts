@@ -235,7 +235,10 @@ export const locale: Record<string, LocaleArgument> = {
   DUMP_CREATED: 'You can find your site dumped archive at: ',
   DB_CONNECTION_IS_NOT_SPEC: 'Database connection is not specified',
   ENGINE_VERSION: 'Kashiwa engine version',
-  BROWSER_DOES_NOT_SUPPORT_FRAMES: 'Your browser doesn`t support frames'
+  BROWSER_DOES_NOT_SUPPORT_FRAMES: 'Your browser doesn`t support frames',
+  POST_NUMBER: 'Post number',
+  POST_PARENT: 'Parent post',
+  BIGINT_VALIDATION_FAILED: 'Validation failed (bigint string is expected)'
 };
 
 export const localeValidators: Record<string, (...args: unknown[]) => string> = {
@@ -257,5 +260,6 @@ export const localeValidators: Record<string, (...args: unknown[]) => string> = 
   V_NUMBER_STRING: (...args: string[]) => `"${args[0]}": should be a numeric string<br>`,
   V_MIN_LENGTH: (...args: string[]) => `"${args[0]}": minimal input length is ${args[1]}<br>`,
   V_FILE: (...args: string[]) => `"${args[0]}": should be a file<br>`,
-  V_MAX_FILE_SIZE: (...args: string[]) => `"${args[0]}": the file is too large<br>`
+  V_MAX_FILE_SIZE: (...args: string[]) => `"${args[0]}": the file is too large<br>`,
+  V_BIGINT: (...args: string[]) => `"${args[0]}": must be a bigint or a string representing a bigint<br>`
 };

@@ -26,6 +26,29 @@ import { Constants } from '@library/constants';
 import { FormDataRequest } from 'nestjs-form-data';
 import { Response } from 'express';
 
+const getDefaultNewBoardForm = (): BoardCreateForm => {
+  const form = new BoardCreateForm();
+  form.allowPosting = true;
+  form.threadFileAttachmentMode = FileAttachmentMode.OPTIONAL;
+  form.replyFileAttachmentMode = FileAttachmentMode.OPTIONAL;
+  form.delayAfterThread = 30;
+  form.delayAfterReply = 15;
+  form.minFileSize = 1;
+  form.maxFileSize = 3145728;
+  form.allowMarkdown = true;
+  form.allowTripcodes = true;
+  form.maxThreadsOnBoard = 100;
+  form.bumpLimit = 250;
+  form.maxStringFieldSize = 100;
+  form.maxCommentSize = 1000;
+  form.defaultPosterName = LOCALE.ANONYMOUS as string;
+  form.defaultModeratorName = LOCALE.MODERATOR as string;
+  form.allowedFileTypes = Constants.SUPPORTED_FILE_TYPES.filter(t => t.startsWith('image/'));
+  form.rules = LOCALE.RULES_DEFAULT as string;
+
+  return form;
+};
+
 @Controller('kashiwa/board')
 export class BoardController {
   constructor(private readonly boardService: BoardService) {}
@@ -46,24 +69,7 @@ export class BoardController {
   @UseGuards(SessionGuard)
   @Render('admin/common_form_page')
   public getBoardForm(@Session() session: ISession): RenderableSessionFormPage {
-    const form = new BoardCreateForm();
-    form.allowPosting = true;
-    form.threadFileAttachmentMode = FileAttachmentMode.OPTIONAL;
-    form.replyFileAttachmentMode = FileAttachmentMode.OPTIONAL;
-    form.delayAfterThread = 30;
-    form.delayAfterReply = 15;
-    form.minFileSize = 1;
-    form.maxFileSize = 3145728;
-    form.allowMarkdown = true;
-    form.allowTripcodes = true;
-    form.maxThreadsOnBoard = 100;
-    form.bumpLimit = 250;
-    form.maxStringFieldSize = 100;
-    form.maxCommentSize = 1000;
-    form.defaultPosterName = LOCALE.ANONYMOUS as string;
-    form.defaultModeratorName = LOCALE.MODERATOR as string;
-    form.allowedFileTypes = Constants.SUPPORTED_FILE_TYPES.filter(t => t.startsWith('image/'));
-    form.rules = LOCALE.RULES_DEFAULT as string;
+    const form = getDefaultNewBoardForm();
 
     return FormPage.toSessionTemplateContent(session, form, {
       pageTitle: LOCALE.BOARDS as string,

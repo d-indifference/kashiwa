@@ -3,12 +3,14 @@ import { Injectable } from '@nestjs/common';
 import { PageRequest } from '@persistence/lib/page';
 import { BanPersistenceService, BoardPersistenceService } from '@persistence/services';
 import { FormPage, RenderableSessionFormPage, TableConstructor } from '@admin/lib';
-import { BanCreateDto, BanDto, TimeUnits } from '@persistence/dto/ban';
+import { BanCreateDto, BanDto } from '@persistence/dto/ban';
 import { LOCALE } from '@locale/locale';
 import { TablePage } from '@admin/pages';
 import { BanCreateForm } from '@admin/forms/ban';
 import { Response } from 'express';
 import { Constants } from '@library/constants';
+import { Cron } from '@nestjs/schedule';
+import { getDefaultBanForm } from '@admin/misc';
 
 /**
  * A service for the operations of `Ban` model
@@ -40,6 +42,14 @@ export class BanService {
   }
 
   /**
+   * Deletion of old bans
+   */
+  @Cron(Constants.BAN_ROTATION_INTERVAL)
+  public async deleteOldBans(): Promise<void> {
+    await this.banPersistenceService.deleteOldBans();
+  }
+
+  /**
    * Get page of current bans
    * @param session Session object
    * @param page Page request
@@ -60,15 +70,7 @@ export class BanService {
    * @param boardUrl URL of board where user should be banned
    */
   public getBanForm(session: ISession, ip?: string, boardUrl?: string): RenderableSessionFormPage {
-    const formContent = new BanCreateForm();
-    formContent.timeValue = 3;
-    formContent.timeUnit = TimeUnits.HOURS;
-    formContent.reason = LOCALE.BAN_REASON_DEFAULT as string;
-    formContent.boardUrl = boardUrl ?? '';
-
-    if (ip) {
-      formContent.ip = ip ?? '';
-    }
+    const formContent = getDefaultBanForm(ip, boardUrl);
 
     return FormPage.toSessionTemplateContent(session, formContent, {
       goBack: '/kashiwa/ban',

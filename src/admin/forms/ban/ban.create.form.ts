@@ -5,7 +5,7 @@ import { KISEnum, KIsIp, KIsNotEmpty, KIsNumber, KIsString } from '@library/vali
 import { Form, FormHidden, FormInput, FormMethods, FormSelect, FormTextarea } from '@admin/lib';
 import { LOCALE } from '@locale/locale';
 import { IsOptional } from 'class-validator';
-import { normalizeFormEmptyString } from '@admin/transforms';
+import { normalizeFormEmptyString } from '@library/transforms';
 
 /**
  * Form with information to create a new ban

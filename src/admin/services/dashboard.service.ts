@@ -3,20 +3,21 @@ import { BoardPersistenceService, CommentPersistenceService } from '@persistence
 import * as process from 'node:process';
 import * as os from 'node:os';
 import * as path from 'node:path';
-import * as fs from 'fs/promises';
 import { LOCALE } from '@locale/locale';
 import { UserRole } from '@prisma/client';
 import { Request } from 'express';
 import { DashboardUtilsProvider } from '@admin/providers';
 import { DashboardPage } from '@admin/pages';
 import { ISession } from '@admin/interfaces';
+import { FileSystemProvider } from '@library/providers';
 
 @Injectable()
 export class DashboardService {
   constructor(
     private readonly boardPersistenceService: BoardPersistenceService,
     private readonly commentPersistenceService: CommentPersistenceService,
-    private readonly utils: DashboardUtilsProvider
+    private readonly utils: DashboardUtilsProvider,
+    private readonly fileSystem: FileSystemProvider
   ) {}
 
   /**
@@ -26,15 +27,15 @@ export class DashboardService {
    */
   public async getDashboardPage(req: Request, session: ISession): Promise<DashboardPage> {
     const statsFromDb = await this.getStatsFromDb();
-    const diskSpaceUsed = this.getDiskSpaceUsed();
+    const diskSpaceUsed = await this.getDiskSpaceUsed();
     const processInfo = this.getProcessInfo();
     const osInfo = this.getOsInfo();
     const port = this.getPort(req);
     const dependencies = await this.getDependencies();
     const postgresVersion = await this.utils.getPostgresVersion();
-    const imageMagickVersion = 'nil'; // await this.utils.getImageMagickVersion();
-    const pgDumpVersion = 'nil'; // await this.utils.getPgDumpVersion();
-    const zipVersion = 'nil'; // await this.utils.getZipVersion();
+    const imageMagickVersion = await this.utils.getImageMagickVersion();
+    const pgDumpVersion = await this.utils.getPgDumpVersion();
+    const zipVersion = await this.utils.getZipVersion();
 
     return {
       commons: {
@@ -72,8 +73,8 @@ export class DashboardService {
   /**
    * Get info about size of application volume
    */
-  private getDiskSpaceUsed(): number {
-    return 0;
+  private async getDiskSpaceUsed(): Promise<number> {
+    return await this.fileSystem.dirSize([]);
   }
 
   /**
@@ -108,7 +109,7 @@ export class DashboardService {
   private async getDependencies(): Promise<Pick<DashboardPage, 'dependencies' | 'devDependencies'>> {
     const pathToPackageJson = path.join(process.cwd(), 'package.json');
 
-    const buffer = await fs.readFile(pathToPackageJson, { encoding: 'utf-8' });
+    const buffer = await this.fileSystem.readTextFileOutOfVolume(pathToPackageJson);
     const content: Record<string, unknown> = JSON.parse(buffer);
 
     return {

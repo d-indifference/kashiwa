@@ -2,17 +2,18 @@ import { Injectable } from '@nestjs/common';
 import { Response } from 'express';
 import { ISession } from '../interfaces';
 import { LOCALE } from '@locale/locale';
-import * as fsExtra from 'fs-extra';
 import { Constants } from '@library/constants';
-import * as path from 'path';
 import { FormPage, RenderableSessionFormPage } from '@admin/lib';
 import { GlobalSettingsForm } from '@admin/forms';
+import { FileSystemProvider } from '@library/providers';
 
 /**
  * Service for form operations with the global settings object
  */
 @Injectable()
 export class GlobalSettingsService {
+  constructor(private readonly fileSystem: FileSystemProvider) {}
+
   /**
    * Get global settings to the form
    * @param session Session object
@@ -46,7 +47,6 @@ export class GlobalSettingsService {
 
   private async overwriteSettingsFile(form: GlobalSettingsForm): Promise<void> {
     const content = JSON.stringify(form);
-    const fullPathToSettings = path.join(Constants.Paths.SETTINGS, Constants.FILE_GLOBAL_SETTINGS);
-    await fsExtra.writeFile(fullPathToSettings, content, { encoding: 'utf-8' });
+    await this.fileSystem.writeTextFile([Constants.SETTINGS_DIR, Constants.FILE_GLOBAL_SETTINGS], content);
   }
 }

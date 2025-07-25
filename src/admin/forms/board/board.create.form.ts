@@ -1,6 +1,5 @@
 import { FileAttachmentMode } from '@prisma/client';
 import { Transform } from 'class-transformer';
-import { normalizeBooleanCheckbox, normalizeNumber, normalizeStringArray } from '@admin/transforms';
 import { Constants } from '@library/constants';
 import {
   KCustomBoardMatches,
@@ -26,6 +25,7 @@ import {
   FormTextarea
 } from '@admin/lib';
 import { LOCALE } from '@locale/locale';
+import { normalizeBooleanCheckbox, normalizeNumber, normalizeStringArray } from '@library/transforms';
 
 const fileAttachmentModes = [FileAttachmentMode.STRICT, FileAttachmentMode.FORBIDDEN, FileAttachmentMode.OPTIONAL];
 

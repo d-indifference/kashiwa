@@ -7,3 +7,4 @@ export * from './dump.service';
 export * from './staff.service';
 export * from './board.service';
 export * from './ban.service';
+export * from './moderation.service';

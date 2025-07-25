@@ -1,0 +1,13 @@
+mixin UserDelete()
+    table.userdelete
+        tr
+            td
+                | #{LOCALE.USER_DELETE_DELETE_POST} [
+                label
+                    input(type='checkbox' name='fileOnly')
+                    = LOCALE.USER_DELETE_ONLY_FILE
+                | ]
+                br
+                = LOCALE.FORM_PASSWORD
+                input(type='password' name='password' size='8')
+                input(type='submit' value=LOCALE.DELETE)

@@ -13,6 +13,7 @@ import {
   DumpService,
   GlobalSettingsService,
   IpFilterService,
+  ModerationService,
   SpamListService,
   StaffService
 } from '@admin/services';
@@ -25,13 +26,21 @@ import {
   DumpController,
   StaffController,
   BoardController,
-  BanController
+  BanController,
+  ModerationController
 } from '@admin/controllers';
 import { DashboardUtilsProvider, DatabaseDumpingUtilsProvider } from '@admin/providers';
-import { CachingProvider } from '@library/providers';
+import { ScheduleModule } from '@nestjs/schedule';
+import { CachingModule } from '@caching/caching.module';
 
 @Module({
-  imports: [NestjsFormDataModule.config(nestjsFormDataConfig), LibraryModule, PersistenceModule],
+  imports: [
+    NestjsFormDataModule.config(nestjsFormDataConfig),
+    ScheduleModule.forRoot(),
+    LibraryModule,
+    PersistenceModule,
+    CachingModule
+  ],
   providers: [
     PrismaService,
     AuthService,
@@ -43,9 +52,9 @@ import { CachingProvider } from '@library/providers';
     DumpService,
     DatabaseDumpingUtilsProvider,
     StaffService,
-    CachingProvider,
     BoardService,
-    BanService
+    BanService,
+    ModerationService
   ],
   controllers: [
     AuthController,
@@ -56,7 +65,8 @@ import { CachingProvider } from '@library/providers';
     DumpController,
     StaffController,
     BoardController,
-    BanController
+    BanController,
+    ModerationController
   ]
 })
 export class AdminModule implements NestModule {

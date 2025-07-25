@@ -14,13 +14,16 @@ export class BanService {
    * Check if non-admin user has an actual ban. If the ban is actual, throws 403
    * @param ip Poster's IP
    * @param isAdmin Check if user is admin
+   * @param boardUrl Board URL
    */
-  public async checkBan(ip: string, isAdmin: boolean): Promise<void> {
+  public async checkBan(ip: string, isAdmin: boolean, boardUrl: string): Promise<void> {
     if (!isAdmin) {
       const ban = await this.banPersistenceService.getCurrentBan(ip);
 
       if (ban) {
-        throw new ForbiddenException(this.makeBanMessage(ban));
+        if (!ban.boardUrl || ban.boardUrl === boardUrl) {
+          throw new ForbiddenException(this.makeBanMessage(ban));
+        }
       }
     }
   }

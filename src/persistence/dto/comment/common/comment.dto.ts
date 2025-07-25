@@ -4,6 +4,8 @@ import { AttachedFileDto } from '@persistence/dto/comment/common/attached-file.d
  * DTO for comment and its replies
  */
 export class CommentDto {
+  id: string;
+
   /**
    * Number on board
    */

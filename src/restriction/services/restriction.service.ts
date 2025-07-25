@@ -5,7 +5,6 @@ import {
   Injectable,
   InternalServerErrorException
 } from '@nestjs/common';
-import { CommentPersistenceService } from '@persistence/services';
 import { BoardDto, BoardSettingsDto } from '@persistence/dto/board';
 import { HttpExceptionOptions } from '@nestjs/common/exceptions/http.exception';
 import {
@@ -23,6 +22,7 @@ import { AntiSpamService } from '@restriction/modules/antispam/services';
 import { BanService } from '@restriction/services/ban.service';
 import { CaptchaSolvingPredicateProvider } from '@captcha/providers';
 import { LOCALE } from '@locale/locale';
+import { BoardPersistenceService, CommentPersistenceService } from '@persistence/services';
 
 /**
  * Type for describing of Exception class
@@ -47,6 +47,7 @@ export enum RestrictionType {
 export class RestrictionService {
   constructor(
     private readonly commentPersistenceService: CommentPersistenceService,
+    private readonly boardPersistenceService: BoardPersistenceService,
     private readonly antiSpamService: AntiSpamService,
     private readonly banService: BanService,
     private readonly captchaSolvingPredicateProvider: CaptchaSolvingPredicateProvider
@@ -56,22 +57,23 @@ export class RestrictionService {
    * Apply posting restrictions
    * @param restrictionType Type of comment which will be restricted
    * @param ip Poster's IP
-   * @param board Board DTO
+   * @param url Board URL
    * @param form Thread / Reply creation form
    * @param isAdmin Is poster admin / moderator
    */
   public async checkRestrictions(
     restrictionType: RestrictionType,
     ip: string,
-    board: BoardDto,
+    url: string,
     form: FormsType,
     isAdmin: boolean
   ): Promise<void> {
+    const board = await this.boardPersistenceService.findByUrl(url);
     if (board.boardSettings === undefined) {
       throw new InternalServerErrorException(LOCALE['YOU_CANNOT_CREATE_WITHOUT_BOARD_SETTINGS']);
     } else {
       const settings: BoardSettingsDto = board.boardSettings;
-      await this.applyRestrictions(restrictionType, ip, settings, form, isAdmin);
+      await this.applyRestrictions(restrictionType, ip, board, settings, form, isAdmin);
     }
   }
 
@@ -81,6 +83,7 @@ export class RestrictionService {
   private async applyRestrictions(
     restrictionType: RestrictionType,
     ip: string,
+    board: BoardDto,
     settings: BoardSettingsDto,
     form: FormsType,
     isAdmin: boolean
@@ -96,15 +99,15 @@ export class RestrictionService {
     }
 
     this.checkRestriction(() => allowPosting(settings), LOCALE['BOARD_IS_CLOSED'] as string, ForbiddenException);
-    await this.banService.checkBan(ip, isAdmin);
+    await this.banService.checkBan(ip, isAdmin, board.url);
     this.checkRestriction(() => strictAnonymity(settings, form), LOCALE['PLEASE_STAY_ANONYMOUS'] as string);
     this.checkRestriction(
       () => maxStringFieldSize(settings, form),
-      (LOCALE['FAILED_MAX_STRING_SIZE'] as CallableFunction)(settings.maxStringFieldSize)
+      (LOCALE['FAILED_MAX_STRING_SIZE'] as CallableFunction)(settings.maxStringFieldSize) as string
     );
     this.checkRestriction(
       () => maxCommentSize(settings, form),
-      (LOCALE['FAILED_COMMENT_SIZE'] as CallableFunction)(settings.maxCommentSize)
+      (LOCALE['FAILED_COMMENT_SIZE'] as CallableFunction)(settings.maxCommentSize) as string
     );
     this.antiSpamService.checkSpam(form, isAdmin);
     this.checkRestriction(() => forbiddenFiles(restrictionType, settings, form), LOCALE['FORBIDDEN_FILES'] as string);
@@ -179,13 +182,13 @@ export class RestrictionService {
     return true;
   }
 
-  /* /**
+  /*
    * Checking delay for reply creation
    * @param ip Poster's IP
    * @param delayTime Time of max delay from board settings
    */
-  private delayForReply(ip: string, delayTime: number): Promise<boolean> {
-    return Promise.resolve(false);
+  private async delayForReply(ip: string, delayTime: number): Promise<boolean> {
+    return this.delayPredicate(await this.commentPersistenceService.findLastCommentByIp(ip), delayTime);
   }
 
   /**
@@ -193,7 +196,7 @@ export class RestrictionService {
    * @param ip Poster's IP
    * @param delayTime Time of max delay from board settings
    */
-  private delayForThread(ip: string, delayTime: number): Promise<boolean> {
-    return Promise.resolve(false);
+  private async delayForThread(ip: string, delayTime: number): Promise<boolean> {
+    return this.delayPredicate(await this.commentPersistenceService.findLastThreadByIp(ip), delayTime);
   }
 }

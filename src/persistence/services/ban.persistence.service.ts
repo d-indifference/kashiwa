@@ -3,7 +3,7 @@ import { PrismaService } from '@persistence/lib';
 import { BanMapper } from '@persistence/mappers';
 import { Page, PageRequest } from '@persistence/lib/page';
 import { BanCreateDto, BanDto } from '@persistence/dto/ban';
-import { Ban, Prisma } from '@prisma/client';
+import { Ban, Prisma, User } from '@prisma/client';
 import { PinoLogger } from 'nestjs-pino';
 
 /**
@@ -31,7 +31,7 @@ export class BanPersistenceService {
       Prisma.BanInclude
     >(this.prisma, 'ban', page, {}, { createdAt: 'desc' }, { user: true, board: true });
 
-    return entities.map(entity => this.banMapper.toDto(entity, entity['user']));
+    return entities.map(entity => this.banMapper.toDto(entity, entity['user'] as User));
   }
 
   /**
@@ -42,7 +42,7 @@ export class BanPersistenceService {
     const lastBan = await this.prisma.ban.findFirst({
       where: { ip },
       orderBy: { createdAt: 'desc' },
-      include: { user: true }
+      include: { user: true, board: true }
     });
 
     if (!lastBan) {
@@ -91,7 +91,9 @@ export class BanPersistenceService {
   /**
    * Deletion of old bans
    */
-  private async deleteOldBans(): Promise<void> {
-    await this.prisma.ban.deleteMany({ where: { till: { lt: new Date() } } });
+  public async deleteOldBans(): Promise<void> {
+    this.logger.info('deleteOldBans');
+    const batch = await this.prisma.ban.deleteMany({ where: { till: { lt: new Date() } } });
+    this.logger.info({ count: batch.count }, 'deleted bans');
   }
 }

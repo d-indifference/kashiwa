@@ -9,7 +9,7 @@ import { NextFunction, Request, Response } from 'express';
 @Injectable()
 export class RedirectForSignInMiddleware implements NestMiddleware {
   public use(req: Request, res: Response, next: NextFunction): void {
-    const isAdminPanelProtectedRoute = /^\/kashiwa(?!\/auth)(\/.*)?$/.test(req.path);
+    const isAdminPanelProtectedRoute = /^\/kashiwa(?!\/(?:auth|post|delete))(\/.*)?$/.test(req.path);
     const session: ISession = req.session as unknown as ISession;
     const isAuthenticated = session.payload;
 

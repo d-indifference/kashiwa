@@ -1,5 +1,6 @@
 import * as process from 'node:process';
 import * as path from 'node:path';
+import { CronExpression } from '@nestjs/schedule';
 
 /**
  * Application constants
@@ -16,23 +17,8 @@ export class Constants {
     /** application volume */
     public static APP_VOLUME = path.join(process.cwd(), 'volumes', 'application.kashiwa');
 
-    /** full path to settings directory */
-    public static SETTINGS = path.join(process.cwd(), 'volumes', 'application.kashiwa', '_settings');
-
-    /** full path to .presets directory */
+    /** `.presets` directory */
     public static PRESETS = path.join(process.cwd(), '.presets');
-
-    /** full path to `spam` file */
-    public static FILE_SPAM = path.join(process.cwd(), 'volumes', 'application.kashiwa', '_settings', 'spam');
-
-    /** full path to `black_list` file */
-    public static FILE_BLACK_LIST = path.join(
-      process.cwd(),
-      'volumes',
-      'application.kashiwa',
-      '_settings',
-      'black_list'
-    );
   };
 
   /** Settings directory name */
@@ -49,6 +35,15 @@ export class Constants {
 
   /** Archived pages directory name */
   public static ARCH_DIR = 'arch';
+
+  /** `spam` file name */
+  public static SPAM_FILE_NAME = 'spam';
+
+  /** `black_list` file name */
+  public static BLACK_LIST_FILE_NAME = 'black_list';
+
+  /** `global-settings` file name */
+  public static FILE_GLOBAL_SETTINGS = 'global-settings';
 
   /** Default thumbnail side size */
   public static DEFAULT_THUMBNAIL_SIDE = 200;
@@ -90,9 +85,12 @@ export class Constants {
   /** Simple string datetime format */
   public static SIMPLE_DATE_FORMAT = 'dd MMM yyyy HH:mm';
 
-  /** `global-settings` file name */
-  public static FILE_GLOBAL_SETTINGS = 'global-settings';
-
   /** `dump-target'` file name */
   public static FILE_DUMP_TARGET = 'dump-target';
+
+  /** Cron expression of ban rotation interval */
+  public static BAN_ROTATION_INTERVAL = CronExpression.EVERY_HOUR;
+
+  /** Maximum validated file size in bytes */
+  public static MAX_VALIDATED_FILE_SIZE = 20e6 - 1;
 }

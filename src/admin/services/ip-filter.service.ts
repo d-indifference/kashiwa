@@ -3,16 +3,20 @@ import { Injectable } from '@nestjs/common';
 import { FormPage, RenderableSessionFormPage } from '@admin/lib';
 import { IpFilterForm } from '@admin/forms';
 import { LOCALE } from '@locale/locale';
-import * as fsExtra from 'fs-extra';
-import * as path from 'path';
 import { Constants } from '@library/constants';
 import { Response } from 'express';
+import { FileSystemProvider, IpBlacklistProvider } from '@library/providers';
 
 /**
  * Service for handling of the IP denylist form
  */
 @Injectable()
 export class IpFilterService {
+  constructor(
+    private readonly fileSystem: FileSystemProvider,
+    private readonly ipBlacklist: IpBlacklistProvider
+  ) {}
+
   /**
    * Load denylist to form
    * @param session Session object
@@ -42,16 +46,17 @@ export class IpFilterService {
 
     global.ipBlackList = ipFilterList;
     await this.overwriteSpamList(form);
+    this.ipBlacklist.reloadBlacklist();
 
     res.redirect('/kashiwa/ip-filter');
   }
 
   private async readBlackList(): Promise<string> {
-    return await fsExtra.readFile(path.join(Constants.Paths.SETTINGS, 'black_list'), 'utf-8');
+    return await this.fileSystem.readTextFile([Constants.SETTINGS_DIR, Constants.BLACK_LIST_FILE_NAME]);
   }
 
   private async overwriteSpamList(form: IpFilterForm): Promise<void> {
     const content = form.blackList;
-    await fsExtra.writeFile(path.join(Constants.Paths.SETTINGS, 'black_list'), content, { encoding: 'utf-8' });
+    await this.fileSystem.writeTextFile([Constants.SETTINGS_DIR, Constants.BLACK_LIST_FILE_NAME], content);
   }
 }

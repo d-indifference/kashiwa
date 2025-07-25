@@ -6,6 +6,7 @@ model Board {
 
   boardSettings BoardSettings?
   comments      Comment[]
+  attachedFiles AttachedFile[]
 
   bans Ban[]
 

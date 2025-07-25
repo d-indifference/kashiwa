@@ -9,13 +9,13 @@ import {
   CommentPersistenceService,
   BanPersistenceService
 } from '@persistence/services';
-import { CachingProvider } from '@library/providers';
+import { LibraryModule } from '@library/library.module';
 
 /**
  * Module for Prisma queries
  */
 @Module({
-  imports: [ConfigModule],
+  imports: [ConfigModule, LibraryModule],
   providers: [
     PrismaService,
     UserMapper,
@@ -26,8 +26,7 @@ import { CachingProvider } from '@library/providers';
     CommentPersistenceService,
     AttachedFilePersistenceService,
     BanMapper,
-    BanPersistenceService,
-    CachingProvider
+    BanPersistenceService
   ],
   exports: [
     UserPersistenceService,

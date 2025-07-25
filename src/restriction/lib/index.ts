@@ -1,8 +1,9 @@
 import { BoardSettingsDto } from '@persistence/dto/board';
 import { RestrictionType } from '@restriction/services';
 import { FileAttachmentMode } from '@prisma/client';
+import { ReplyCreateForm, ThreadCreateForm } from '@posting/forms';
 
-export type FormsType = any;
+export type FormsType = ThreadCreateForm | ReplyCreateForm;
 
 /**
  * `allowPosting` param checking.

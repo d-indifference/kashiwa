@@ -3,10 +3,11 @@ import { PrismaService } from '@persistence/lib';
 import { BoardMapper } from '@persistence/mappers';
 import { Page, PageRequest } from '@persistence/lib/page';
 import { BoardCreateDto, BoardDto, BoardShortDto, BoardUpdateDto } from '@persistence/dto/board';
-import { Board } from '@prisma/client';
+import { Board, BoardSettings } from '@prisma/client';
 import { Constants } from '@library/constants';
 import { LOCALE } from '@locale/locale';
 import { PinoLogger } from 'nestjs-pino';
+import { AttachedFilePersistenceService } from '@persistence/services/attached-file.persistence.service';
 
 /**
  * Database queries for `Board` model
@@ -16,7 +17,8 @@ export class BoardPersistenceService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly boardMapper: BoardMapper,
-    private readonly logger: PinoLogger
+    private readonly logger: PinoLogger,
+    private readonly attachedFilePersistenceService: AttachedFilePersistenceService
   ) {
     this.logger.setContext(BoardPersistenceService.name);
   }
@@ -52,7 +54,7 @@ export class BoardPersistenceService {
   public async findDtoById(id: string): Promise<BoardDto> {
     const board = await this.findById(id);
 
-    return this.boardMapper.toDto(board, board['boardSettings']);
+    return this.boardMapper.toDto(board, board['boardSettings'] as BoardSettings);
   }
 
   /**
@@ -169,10 +171,10 @@ export class BoardPersistenceService {
   public async remove(id: string): Promise<void> {
     this.logger.info({ id }, 'remove');
 
-    await this.findById(id);
+    const board = await this.findById(id);
 
     await this.prisma.comment.deleteMany({ where: { boardId: id } });
-    // await this.attachedFilePersistenceService.removeOrphaned();
+    await this.attachedFilePersistenceService.removeOrphaned(board.url);
     await this.prisma.board.delete({ where: { id }, include: { boardSettings: true } });
   }
 

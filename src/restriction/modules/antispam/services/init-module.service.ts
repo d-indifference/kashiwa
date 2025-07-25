@@ -1,22 +1,22 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import * as fsExtra from 'fs-extra';
 import { Constants } from '@library/constants';
 import * as path from 'node:path';
-import * as process from 'node:process';
-import { FilesystemOperator } from '@library/filesystem';
+import { FileSystemProvider } from '@library/providers';
 
 /**
  * Service for antispam module initialization
  */
 @Injectable()
 export class InitModuleService implements OnModuleInit {
+  constructor(private readonly fileSystem: FileSystemProvider) {}
+
   public onModuleInit() {
     this.activateSpamBase().then();
   }
 
   /** Activates spam base. If spam base does not exist, take it from presets */
   private async activateSpamBase(): Promise<void> {
-    if (!(await fsExtra.exists(Constants.Paths.FILE_SPAM))) {
+    if (!(await this.fileSystem.pathExists([Constants.SETTINGS_DIR, Constants.SPAM_FILE_NAME]))) {
       await this.initSpamFile();
     }
     await this.readSpamFile();
@@ -24,8 +24,7 @@ export class InitModuleService implements OnModuleInit {
 
   /** Read custom spam base and load it to globals */
   private async readSpamFile(): Promise<void> {
-    const payloadBuffer = await fsExtra.readFile(Constants.Paths.FILE_SPAM);
-    const spamFileContent = payloadBuffer.toString('utf-8');
+    const spamFileContent = await this.fileSystem.readTextFile([Constants.SETTINGS_DIR, Constants.SPAM_FILE_NAME]);
 
     global.spamExpressions = spamFileContent.split('\r\n');
     global.spamExpressions.pop();
@@ -33,11 +32,10 @@ export class InitModuleService implements OnModuleInit {
 
   /** Get spam base from presets */
   private async initSpamFile(): Promise<void> {
-    const payloadBuffer = await fsExtra.readFile(path.join(process.cwd(), '.presets', 'spam'));
-    const spamPresetFileContent = payloadBuffer.toString('utf-8');
-
+    const spamPresetFileContent = await this.fileSystem.readTextFileOutOfVolume(
+      path.join(Constants.Paths.PRESETS, Constants.SPAM_FILE_NAME)
+    );
     const spamList = spamPresetFileContent.replaceAll('\n', '\r\n');
-
-    await FilesystemOperator.overwriteFile(['_settings', 'spam'], spamList);
+    await this.fileSystem.writeTextFile([Constants.SETTINGS_DIR, Constants.SPAM_FILE_NAME], spamList);
   }
 }

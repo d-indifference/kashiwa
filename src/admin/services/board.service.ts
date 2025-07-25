@@ -1,6 +1,6 @@
 import { ISession } from '@admin/interfaces';
 import { Injectable } from '@nestjs/common';
-import { BoardPersistenceService } from '@persistence/services';
+import { BoardPersistenceService, CommentPersistenceService } from '@persistence/services';
 import { PageRequest } from '@persistence/lib/page';
 import { TablePage } from '@admin/pages';
 import { FormPage, RenderableSessionFormPage, TableConstructor } from '@admin/lib';
@@ -10,7 +10,7 @@ import { Constants } from '@library/constants';
 import { BoardSettings } from '@prisma/client';
 import { BoardCreateForm, BoardUpdateForm } from '@admin/forms/board';
 import { Response } from 'express';
-import { CachingProvider } from '@library/providers';
+import { CachingProvider } from '@caching/providers';
 
 /**
  * Service for working with boards
@@ -21,10 +21,14 @@ export class BoardService {
 
   constructor(
     private readonly boardPersistenceService: BoardPersistenceService,
+    private readonly commentPersistenceService: CommentPersistenceService,
     private readonly cachingProvider: CachingProvider
   ) {
     this.tableConstructor = new TableConstructor<BoardShortDto>()
-      .mappedValue(LOCALE.URL as string, obj => `/<a href="${obj.url}/kashiwa${Constants.HTML_SUFFIX}">${obj.url}</a>/`)
+      .mappedValue(
+        LOCALE.URL as string,
+        obj => `/<a href="/${obj.url}/kashiwa${Constants.HTML_SUFFIX}">${obj.url}</a>/`
+      )
       .plainValue(LOCALE.NAME as string, 'name')
       .plainValue(LOCALE.LAST_POST_INDEX as string, 'postCount')
       .mappedValue(LOCALE.EDIT as string, obj => `[<a href="/kashiwa/board/edit/${obj.id}">Edit</a>]`);
@@ -156,6 +160,7 @@ export class BoardService {
     );
 
     const updatedBoard = await this.boardPersistenceService.update(dto);
+    await this.cachingProvider.fullyReloadCache(board.url);
     await this.cachingProvider.renameCache(board.url, updatedBoard.url);
 
     res.redirect(`/kashiwa/board/edit/${updatedBoard.id}`);
@@ -180,7 +185,9 @@ export class BoardService {
    * @param id Board ID
    * @param res `Express.js` response
    */
-  public reloadBoardCache(id: string, res: Response): void {
+  public async reloadBoardCache(id: string, res: Response): Promise<void> {
+    const board = await this.boardPersistenceService.findById(id);
+    await this.cachingProvider.fullyReloadCache(board.url);
     res.redirect(`/kashiwa/board/edit/${id}`);
   }
 
@@ -192,7 +199,9 @@ export class BoardService {
   public async clearBoard(id: string, res: Response): Promise<void> {
     const board = await this.boardPersistenceService.findById(id);
     await this.boardPersistenceService.nullifyPostCount(id);
+    await this.commentPersistenceService.removeAllFromBoard(board.url);
     await this.cachingProvider.clearCache(board.url);
+    await this.cachingProvider.fullyReloadCache(board.url);
 
     res.redirect(`/kashiwa/board/edit/${id}`);
   }
