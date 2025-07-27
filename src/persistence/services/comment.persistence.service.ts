@@ -199,7 +199,6 @@ export class CommentPersistenceService {
     this.logger.info({ url, input }, 'createComment');
 
     await this.boardPersistenceService.incrementPostCount(url);
-
     input.num = await this.boardPersistenceService.getCurrentPostCount(url);
 
     const newComment = await this.prisma.comment.create({
@@ -225,11 +224,13 @@ export class CommentPersistenceService {
 
     const board = await this.boardPersistenceService.findByUrl(url);
 
-    await this.prisma.comment.update({
+    const batch = await this.prisma.comment.update({
       where: { boardId_num: { boardId: board.id, num }, NOT: { lastHit: null } },
       include: { board: true },
       data: { lastHit: new Date() }
     });
+
+    this.logger.info({ id: batch.id }, '[SUCCESS] updateThreadLastHit');
   }
 
   /**
@@ -237,21 +238,21 @@ export class CommentPersistenceService {
    * @param url Board URL
    */
   public async removeAllFromBoard(url: string): Promise<void> {
-    this.logger.info({ url }, 'removeAllBy');
+    this.logger.info({ url }, 'removeAllFromBoard');
 
-    await this.prisma.$transaction(async tx => {
-      await tx.comment.deleteMany({ where: { board: { url } } });
-
-      await this.attachedFilePersistenceService.removeOrphaned(url);
-    });
+    const batch = await this.prisma.comment.deleteMany({ where: { board: { url } } });
+    await this.attachedFilePersistenceService.removeOrphaned(url);
+    this.logger.info({ count: batch.count }, '[SUCCESS] removeAllFromBoard');
   }
 
   /**
    * Remove thread with the oldest last hit on board
    * @param url Board URL
    */
-  public async removeThreadWithOldestLastHit(url: string): Promise<void> {
+  public async removeThreadWithOldestLastHit(url: string): Promise<bigint | null> {
     this.logger.info({ url }, 'removeThreadWithOldestLastHit');
+
+    let removedThread: Comment | null = null;
 
     await this.prisma.$transaction(async tx => {
       const oldestThread = await tx.comment.findFirst({
@@ -260,11 +261,15 @@ export class CommentPersistenceService {
       });
 
       if (oldestThread) {
-        await tx.comment.delete({ where: { id: oldestThread.id } });
+        const batch = await tx.comment.delete({ where: { id: oldestThread.id } });
+        this.logger.info({ id: batch.id }, '[SUCCESS] removeThreadWithOldestLastHit');
+        removedThread = oldestThread;
       }
-
-      await this.attachedFilePersistenceService.removeOrphaned(url);
     });
+
+    await this.attachedFilePersistenceService.removeOrphaned(url);
+
+    return removedThread ? removedThread['num'] : null;
   }
 
   /**
@@ -276,17 +281,16 @@ export class CommentPersistenceService {
   public async removeByPassword(url: string, nums: bigint[], password: string): Promise<void> {
     this.logger.info({ url, password, nums }, 'removeByPassword');
 
-    await this.prisma.$transaction(async tx => {
-      await tx.comment.deleteMany({
-        where: {
-          board: { url },
-          password,
-          num: { in: nums }
-        }
-      });
-
-      await this.attachedFilePersistenceService.removeOrphaned(url);
+    const batch = await this.prisma.comment.deleteMany({
+      where: {
+        board: { url },
+        password,
+        num: { in: nums }
+      }
     });
+
+    await this.attachedFilePersistenceService.removeOrphaned(url);
+    this.logger.info({ count: batch.count }, '[SUCCESS] removeByPassword');
   }
 
   /**
@@ -297,10 +301,9 @@ export class CommentPersistenceService {
   public async removeByIp(url: string, ip: string): Promise<void> {
     this.logger.info({ url, ip }, 'removeByIp');
 
-    await this.prisma.$transaction(async tx => {
-      await tx.comment.deleteMany({ where: { board: { url }, ip } });
-      await this.attachedFilePersistenceService.removeOrphaned(url);
-    });
+    const batch = await this.prisma.comment.deleteMany({ where: { board: { url }, ip } });
+    await this.attachedFilePersistenceService.removeOrphaned(url);
+    this.logger.info({ count: batch.count }, '[SUCCESS] removeByIp');
   }
 
   /**
@@ -311,9 +314,8 @@ export class CommentPersistenceService {
   public async remove(url: string, num: bigint): Promise<void> {
     this.logger.info({ url, num }, 'remove');
 
-    await this.prisma.$transaction(async tx => {
-      await tx.comment.deleteMany({ where: { board: { url }, num } });
-      await this.attachedFilePersistenceService.removeOrphaned(url);
-    });
+    const batch = await this.prisma.comment.deleteMany({ where: { board: { url }, num } });
+    await this.attachedFilePersistenceService.removeOrphaned(url);
+    this.logger.info({ count: batch.count }, '[SUCCESS] remove');
   }
 }

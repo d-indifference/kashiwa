@@ -53,7 +53,6 @@ export class BoardPersistenceService {
    */
   public async findDtoById(id: string): Promise<BoardDto> {
     const board = await this.findById(id);
-
     return this.boardMapper.toDto(board, board['boardSettings'] as BoardSettings);
   }
 
@@ -63,7 +62,6 @@ export class BoardPersistenceService {
    */
   public async findShortDtoById(id: string): Promise<BoardShortDto> {
     const board = await this.findById(id);
-
     return this.boardMapper.toShortDto(board);
   }
 
@@ -160,8 +158,8 @@ export class BoardPersistenceService {
     this.logger.info({ url }, 'incrementPostCount');
 
     const board = await this.findByUrlNoMapping(url);
-
-    await this.prisma.board.update({ data: { postCount: board.postCount + 1 }, where: { id: board.id } });
+    const batch = await this.prisma.board.update({ data: { postCount: board.postCount + 1 }, where: { id: board.id } });
+    this.logger.info({ id: batch.id }, '[SUCCESS] incrementPostCount');
   }
 
   /**

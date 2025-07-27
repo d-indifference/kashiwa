@@ -43,11 +43,11 @@ export class AttachedFilePersistenceService {
 
     await this.prisma.$transaction(async tx => {
       const updateCandidates = await tx.attachedFile.findMany({
-        where: { comments: { every: { board: { url }, num: { in: nums }, password } } },
+        where: { comments: { some: { board: { url }, num: { in: nums }, password } } },
         select: { id: true, name: true, thumbnail: true }
       });
 
-      await tx.attachedFile.updateMany({
+      const batch = await tx.attachedFile.updateMany({
         data: { name: 'NO_THUMB', thumbnail: null },
         where: { id: { in: updateCandidates.map(c => c.id) } }
       });
@@ -61,6 +61,8 @@ export class AttachedFilePersistenceService {
             ])
         )
       );
+
+      this.logger.info({ count: batch.count }, '[SUCCESS] clearByPassword');
     });
   }
 
@@ -80,7 +82,7 @@ export class AttachedFilePersistenceService {
 
       if (comment) {
         if (comment.attachedFile) {
-          await tx.attachedFile.update({
+          const updated = await tx.attachedFile.update({
             where: { id: comment.attachedFile?.id },
             data: { name: 'NO_THUMB', thumbnail: null }
           });
@@ -88,6 +90,8 @@ export class AttachedFilePersistenceService {
             await this.fileSystem.removePath([url, Constants.SRC_DIR, comment.attachedFile?.name]),
             await this.fileSystem.removePath([url, Constants.THUMB_DIR, comment.attachedFile?.thumbnail ?? '0'])
           ]);
+
+          this.logger.info({ id: updated.id }, '[SUCCESS] clearFromComment');
         }
       }
     });
@@ -115,7 +119,8 @@ export class AttachedFilePersistenceService {
         )
       );
 
-      await tx.attachedFile.deleteMany({ where: { id: { in: orphaned.map(o => o.id) } } });
+      const batch = await tx.attachedFile.deleteMany({ where: { id: { in: orphaned.map(o => o.id) } } });
+      this.logger.info({ count: batch.count }, '[SUCCESS] removeOrphaned');
     });
   }
 }

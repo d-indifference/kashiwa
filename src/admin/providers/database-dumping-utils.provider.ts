@@ -78,7 +78,7 @@ export class DatabaseDumpingUtilsProvider {
   private getDatabaseConnectionString(): string {
     const url = process.env.DATABASE_URL;
     if (url) {
-      return url;
+      return url.split('?')[0];
     }
     throw new InternalServerErrorException(LOCALE['DB_CONNECTION_IS_NOT_SPEC']);
   }

@@ -51,6 +51,7 @@
     "nestjs-form-data": "^1.9.93",
     "nestjs-pino": "^4.4.0",
     "nestjs-real-ip": "^3.0.1",
+    "node-cache": "^5.1.2",
     "pino": "^9.7.0",
     "pino-pretty": "^13.0.0",
     "pug": "^3.0.3",

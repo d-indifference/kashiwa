@@ -105,7 +105,8 @@ export class UserPersistenceService {
   public async remove(id: string): Promise<void> {
     this.logger.info({ id }, 'remove');
 
-    await this.prisma.user.delete({ where: { id } });
+    const batch = await this.prisma.user.delete({ where: { id } });
+    this.logger.info({ id: batch.id }, '[SUCCESS] remove');
   }
 
   /**

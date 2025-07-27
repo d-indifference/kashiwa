@@ -96,7 +96,7 @@ export class CommentCreateService {
     ip: string,
     isAdmin: boolean
   ): Promise<Prisma.CommentCreateInput> {
-    const input = await this.toCommentCreateInput(board, isAdmin, ip, form, false);
+    const input = await this.toCommentCreateInput(board, isAdmin, ip, form, form.sage);
     const parent = await this.commentPersistenceService.findOpeningPost(board.url, parentNum);
     input.parent = { connect: { id: parent.id } };
     return input;
@@ -141,7 +141,11 @@ export class CommentCreateService {
 
     if (board.boardSettings) {
       if (threadCount > board.boardSettings.maxThreadsOnBoard) {
-        await this.commentPersistenceService.removeThreadWithOldestLastHit(board.url);
+        const oldestThreadNum = await this.commentPersistenceService.removeThreadWithOldestLastHit(board.url);
+
+        if (oldestThreadNum) {
+          await this.cachingProvider.removeThreadPage(board.url, oldestThreadNum);
+        }
       }
     }
   }

@@ -76,6 +76,15 @@ export class CachingProvider {
     await this.cachingUpdateProvider.reloadCacheForThread(url, num);
   }
 
+  /**
+   * Remove page for thread by its board and number
+   * @param url Board URL
+   * @param num Thread number
+   */
+  public async removeThreadPage(url: string, num: bigint): Promise<void> {
+    await this.fileSystem.removePath([url, Constants.RES_DIR, `${num.toString()}.${Constants.HTML_SUFFIX}`]);
+  }
+
   private async mkdir(...dirs: string[]): Promise<void> {
     await this.fileSystem.ensureDir(dirs);
   }

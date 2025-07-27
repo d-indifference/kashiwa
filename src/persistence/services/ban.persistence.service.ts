@@ -84,8 +84,9 @@ export class BanPersistenceService {
   public async remove(id: string): Promise<void> {
     this.logger.info({ id }, 'remove');
 
-    await this.prisma.ban.delete({ where: { id } });
+    const batch = await this.prisma.ban.delete({ where: { id } });
     await this.deleteOldBans();
+    this.logger.info({ id: batch.id }, '[SUCCESS] remove');
   }
 
   /**
@@ -94,6 +95,6 @@ export class BanPersistenceService {
   public async deleteOldBans(): Promise<void> {
     this.logger.info('deleteOldBans');
     const batch = await this.prisma.ban.deleteMany({ where: { till: { lt: new Date() } } });
-    this.logger.info({ count: batch.count }, 'deleted bans');
+    this.logger.info({ count: batch.count }, '[SUCCESS] deleteOldBans');
   }
 }
