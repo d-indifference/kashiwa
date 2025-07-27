@@ -4,7 +4,7 @@ import { LOCALE } from '@locale/locale';
 import { Response } from 'express';
 import { SpamListForm } from '@admin/forms';
 import { FormPage, RenderableSessionFormPage } from '@admin/lib';
-import { FileSystemProvider } from '@library/providers';
+import { FileSystemProvider, SiteContextProvider } from '@library/providers';
 import { ISession } from '@admin/interfaces';
 
 /**
@@ -12,7 +12,10 @@ import { ISession } from '@admin/interfaces';
  */
 @Injectable()
 export class SpamListService {
-  constructor(private readonly fileSystem: FileSystemProvider) {}
+  constructor(
+    private readonly fileSystem: FileSystemProvider,
+    private readonly siteContext: SiteContextProvider
+  ) {}
 
   /**
    * Load the spam list to form
@@ -41,7 +44,7 @@ export class SpamListService {
       spamList.pop();
     }
 
-    global.spamExpressions = spamList;
+    this.siteContext.setSpamExpressions(spamList);
     await this.overwriteSpamList(form);
 
     res.redirect('/kashiwa/spam');

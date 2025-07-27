@@ -8,7 +8,7 @@ import { LOCALE } from '@locale/locale';
 import { BoardDto } from '@persistence/dto/board';
 import { Page, PageRequest } from '@persistence/lib/page';
 import { BoardPage, ThreadPage } from '@caching/pages';
-import { FileSystemProvider } from '@library/providers';
+import { FileSystemProvider, SiteContextProvider } from '@library/providers';
 import { ThreadCollapsedDto } from '@persistence/dto/comment/collapsed';
 import { CommentDto } from '@persistence/dto/comment/common';
 import { CaptchaGeneratorProvider } from '@captcha/providers';
@@ -22,7 +22,8 @@ export class CachingUpdateProvider {
     private readonly commentPersistenceService: CommentPersistenceService,
     private readonly boardPersistenceService: BoardPersistenceService,
     private readonly fileSystem: FileSystemProvider,
-    private readonly captchaGeneratorProvider: CaptchaGeneratorProvider
+    private readonly captchaGeneratorProvider: CaptchaGeneratorProvider,
+    private readonly siteContext: SiteContextProvider
   ) {}
 
   /**
@@ -125,7 +126,7 @@ export class CachingUpdateProvider {
     const compiledFunction = pug.compileFile(path.join(Constants.Paths.TEMPLATES, template));
     return compiledFunction({
       ...content,
-      SITE_SETTINGS: () => global.GLOBAL_SETTINGS,
+      SITE_SETTINGS: () => this.siteContext.getGlobalSettings(),
       getRandomBanner,
       LOCALE,
       fileSize,

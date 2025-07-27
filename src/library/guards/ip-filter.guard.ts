@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { getClientIp } from '@supercharge/request-ip';
 import { LOCALE } from '@locale/locale';
-import { FileSystemProvider, IpBlacklistProvider } from '@library/providers';
+import { FileSystemProvider, IpBlacklistProvider, SiteContextProvider } from '@library/providers';
 import { Constants } from '@library/constants';
 
 /**
@@ -11,7 +11,8 @@ import { Constants } from '@library/constants';
 export class IpFilterGuard implements CanActivate {
   constructor(
     private readonly fileSystem: FileSystemProvider,
-    private readonly ipBlacklistProvider: IpBlacklistProvider
+    private readonly ipBlacklistProvider: IpBlacklistProvider,
+    private readonly siteContext: SiteContextProvider
   ) {}
 
   public canActivate(context: ExecutionContext): boolean {
@@ -36,8 +37,10 @@ export class IpFilterGuard implements CanActivate {
     }
 
     const blackList = await this.fileSystem.readTextFile(blackListRelativePath);
-    global.ipBlackList = blackList.split('\r\n');
-    global.ipBlackList.pop();
+    const ipBlackList = blackList.split('\r\n');
+    ipBlackList.pop();
+
+    this.siteContext.setSpamExpressions(ipBlackList);
 
     this.ipBlacklistProvider.reloadBlacklist();
   }

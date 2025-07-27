@@ -238,7 +238,10 @@ export const locale: Record<string, LocaleArgument> = {
   BROWSER_DOES_NOT_SUPPORT_FRAMES: 'Your browser doesn`t support frames',
   POST_NUMBER: 'Post number',
   POST_PARENT: 'Parent post',
-  BIGINT_VALIDATION_FAILED: 'Validation failed (bigint string is expected)'
+  BIGINT_VALIDATION_FAILED: 'Validation failed (bigint string is expected)',
+  GLOBAL_SETTINGS_NOT_FOUND: 'Global site settings are not found',
+  SPAM_EXPRESSIONS_NOT_FOUND: 'Spam expressions are not found',
+  IP_BLACK_LIST_NOT_FOUND: 'Ip blacklist does not found'
 };
 
 export const localeValidators: Record<string, (...args: unknown[]) => string> = {

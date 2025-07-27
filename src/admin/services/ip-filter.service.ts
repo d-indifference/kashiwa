@@ -5,7 +5,7 @@ import { IpFilterForm } from '@admin/forms';
 import { LOCALE } from '@locale/locale';
 import { Constants } from '@library/constants';
 import { Response } from 'express';
-import { FileSystemProvider, IpBlacklistProvider } from '@library/providers';
+import { FileSystemProvider, IpBlacklistProvider, SiteContextProvider } from '@library/providers';
 
 /**
  * Service for handling of the IP denylist form
@@ -14,7 +14,8 @@ import { FileSystemProvider, IpBlacklistProvider } from '@library/providers';
 export class IpFilterService {
   constructor(
     private readonly fileSystem: FileSystemProvider,
-    private readonly ipBlacklist: IpBlacklistProvider
+    private readonly ipBlacklist: IpBlacklistProvider,
+    private readonly siteContext: SiteContextProvider
   ) {}
 
   /**
@@ -44,7 +45,7 @@ export class IpFilterService {
       ipFilterList.pop();
     }
 
-    global.ipBlackList = ipFilterList;
+    this.siteContext.setIpBlackList(ipFilterList);
     await this.overwriteSpamList(form);
     this.ipBlacklist.reloadBlacklist();
 

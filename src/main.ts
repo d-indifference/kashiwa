@@ -13,7 +13,12 @@ import { Logger as NestLogger } from '@nestjs/common';
 import { ExceptionFilter } from '@library/filters';
 import { loggerConfig } from '@config/logger.config';
 import { applicationVersion, fileSize, getRandomBanner } from '@library/helpers';
-import { FileSystemProvider, GlobalSettingsProvider, IpBlacklistProvider } from '@library/providers';
+import {
+  FileSystemProvider,
+  GlobalSettingsProvider,
+  IpBlacklistProvider,
+  SiteContextProvider
+} from '@library/providers';
 
 const bootstrap = async (): Promise<void> => {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
@@ -35,17 +40,20 @@ const bootstrap = async (): Promise<void> => {
 
   app.useGlobalFilters(new ExceptionFilter(new PinoLogger(loggerConfig())));
 
-  app.setLocal('SITE_SETTINGS', () => global.GLOBAL_SETTINGS);
+  const siteContext = app.get(SiteContextProvider);
+
+  app.setLocal('SITE_SETTINGS', () => siteContext.getGlobalSettings());
   app.setLocal('LOCALE', LOCALE);
   app.setLocal('getRandomBanner', getRandomBanner);
   app.setLocal('applicationVersion', applicationVersion);
   app.setLocal('fileSize', fileSize);
 
-  const ipFilterGuard = new IpFilterGuard(fileSystem, new IpBlacklistProvider());
+  const ipBlacklistProvider = app.get(IpBlacklistProvider);
+  const ipFilterGuard = new IpFilterGuard(fileSystem, ipBlacklistProvider, siteContext);
   app.useGlobalGuards(ipFilterGuard);
   await ipFilterGuard.load();
 
-  const globalSettingsProvider = app.get(GlobalSettingsProvider);
+  const globalSettingsProvider = new GlobalSettingsProvider(fileSystem, siteContext);
   await globalSettingsProvider.load();
 
   app.getHttpAdapter().getInstance().set('trust proxy', true);

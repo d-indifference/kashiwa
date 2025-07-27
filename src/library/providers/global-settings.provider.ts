@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { FileSystemProvider } from '@library/providers/index';
+import { FileSystemProvider, SiteContextProvider } from '@library/providers';
 import path from 'node:path';
 import { Constants } from '@library/constants';
 import { GlobalSettingsForm } from '@admin/forms';
@@ -9,7 +9,10 @@ import { GlobalSettingsForm } from '@admin/forms';
  */
 @Injectable()
 export class GlobalSettingsProvider {
-  constructor(private readonly fileSystem: FileSystemProvider) {}
+  constructor(
+    private readonly fileSystem: FileSystemProvider,
+    private readonly siteContext: SiteContextProvider
+  ) {}
 
   /**
    * Load global site settings to memory.
@@ -24,7 +27,6 @@ export class GlobalSettingsProvider {
       await this.fileSystem.copyPath(presetPath, filePath);
     }
     const fileContent = await this.fileSystem.readTextFile(filePath);
-
-    global.GLOBAL_SETTINGS = JSON.parse(fileContent) as GlobalSettingsForm;
+    this.siteContext.setGlobalSettings(JSON.parse(fileContent) as GlobalSettingsForm);
   }
 }

@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { LOCALE } from '@locale/locale';
+import { SiteContextProvider } from '@library/providers';
 
 /** Base template for a posting form  */
 interface PostingForm {
@@ -16,8 +17,10 @@ interface PostingForm {
 export class AntiSpamService {
   private readonly compiledSpamRegexes: RegExp[];
 
-  constructor() {
-    this.compiledSpamRegexes = ((global.spamExpressions || []) as string[]).map(pattern => new RegExp(pattern, 'ig'));
+  constructor(private readonly siteContext: SiteContextProvider) {
+    this.compiledSpamRegexes = ((this.siteContext.getSpamExpressions() || []) as string[]).map(
+      pattern => new RegExp(pattern, 'ig')
+    );
   }
 
   public checkSpam<T extends PostingForm>(form: T, isAdmin: boolean): void {

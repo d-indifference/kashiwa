@@ -1,14 +1,17 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { Constants } from '@library/constants';
 import * as path from 'node:path';
-import { FileSystemProvider } from '@library/providers';
+import { FileSystemProvider, SiteContextProvider } from '@library/providers';
 
 /**
  * Service for antispam module initialization
  */
 @Injectable()
 export class InitModuleService implements OnModuleInit {
-  constructor(private readonly fileSystem: FileSystemProvider) {}
+  constructor(
+    private readonly fileSystem: FileSystemProvider,
+    private readonly siteContext: SiteContextProvider
+  ) {}
 
   public onModuleInit() {
     this.activateSpamBase().then();
@@ -26,8 +29,10 @@ export class InitModuleService implements OnModuleInit {
   private async readSpamFile(): Promise<void> {
     const spamFileContent = await this.fileSystem.readTextFile([Constants.SETTINGS_DIR, Constants.SPAM_FILE_NAME]);
 
-    global.spamExpressions = spamFileContent.split('\r\n');
-    global.spamExpressions.pop();
+    const spamExpressions = spamFileContent.split('\r\n');
+    spamExpressions.pop();
+
+    this.siteContext.setSpamExpressions(spamExpressions);
   }
 
   /** Get spam base from presets */

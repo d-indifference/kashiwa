@@ -67,12 +67,4 @@ export class GlobalSettingsForm {
   @KIsString('MENU_FRAME')
   @KIsNotEmpty('MENU_FRAME')
   menuFrame: string;
-
-  /**
-   * Create a form from stored object
-   * @param obj Stored object from global settings
-   */
-  public static fromGlobalSettings(obj: Pick<GlobalSettingsForm, keyof GlobalSettingsForm>) {
-    return Object.assign(new GlobalSettingsForm(), obj);
-  }
 }

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { SiteContextProvider } from '@library/providers/site-context.provider';
 
 interface TrieNode {
   children: { [key: string]: TrieNode };
@@ -10,6 +11,8 @@ interface TrieNode {
  */
 @Injectable()
 export class IpBlacklistProvider {
+  constructor(private readonly siteContext: SiteContextProvider) {}
+
   private trie: TrieNode = { children: {}, isBlocked: false };
 
   /**
@@ -38,7 +41,7 @@ export class IpBlacklistProvider {
   }
 
   private loadBlacklist(): void {
-    const ipBlackList: string[] = global.ipBlackList as string[];
+    const ipBlackList: string[] = this.siteContext.getIpBlackList() || [];
 
     for (const pattern of ipBlackList) {
       const binary = this.patternToBinary(pattern);

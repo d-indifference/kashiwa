@@ -7,16 +7,20 @@ import { AuthService } from '@admin/services';
 import { RenderableFormPage, FormPage } from '@admin/lib';
 import { AuthSignUpForm, AuthSignInForm } from '@admin/forms';
 import { SessionGuard } from '@admin/guards';
+import { SiteContextProvider } from '@library/providers';
 
 @Controller('kashiwa/auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly siteContext: SiteContextProvider
+  ) {}
 
   @Get('sign-up')
   @Render('admin/auth_form_page')
   public getSignUpForm(): RenderableFormPage {
     return FormPage.toTemplateContent(new AuthSignUpForm(), {
-      pageTitle: global.GLOBAL_SETTINGS.siteName,
+      pageTitle: this.siteContext.getGlobalSettings().siteName,
       pageSubtitle: LOCALE.SIGN_UP as string,
       goBack: '/front'
     });
@@ -26,7 +30,7 @@ export class AuthController {
   @Render('admin/auth_form_page')
   public getSignInForm(): RenderableFormPage {
     return FormPage.toTemplateContent(new AuthSignInForm('', ''), {
-      pageTitle: global.GLOBAL_SETTINGS.siteName,
+      pageTitle: this.siteContext.getGlobalSettings().siteName,
       pageSubtitle: LOCALE.SIGN_IN as string,
       goBack: '/front'
     });

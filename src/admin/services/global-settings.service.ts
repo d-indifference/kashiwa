@@ -5,31 +5,30 @@ import { LOCALE } from '@locale/locale';
 import { Constants } from '@library/constants';
 import { FormPage, RenderableSessionFormPage } from '@admin/lib';
 import { GlobalSettingsForm } from '@admin/forms';
-import { FileSystemProvider } from '@library/providers';
+import { FileSystemProvider, SiteContextProvider } from '@library/providers';
 
 /**
  * Service for form operations with the global settings object
  */
 @Injectable()
 export class GlobalSettingsService {
-  constructor(private readonly fileSystem: FileSystemProvider) {}
+  constructor(
+    private readonly fileSystem: FileSystemProvider,
+    private readonly siteContext: SiteContextProvider
+  ) {}
 
   /**
    * Get global settings to the form
    * @param session Session object
    */
   public getGlobalSettings(session: ISession): RenderableSessionFormPage {
-    return FormPage.toSessionTemplateContent(
-      session,
-      GlobalSettingsForm.fromGlobalSettings(
-        global.GLOBAL_SETTINGS as Pick<GlobalSettingsForm, keyof GlobalSettingsForm>
-      ),
-      {
-        pageSubtitle: LOCALE['EDIT_SITE_SETTINGS'] as string,
-        pageTitle: LOCALE['SITE_SETTINGS'] as string,
-        goBack: '/kashiwa'
-      }
-    );
+    const globalSettings = this.siteContext.getGlobalSettings();
+
+    return FormPage.toSessionTemplateContent(session, globalSettings, {
+      pageSubtitle: LOCALE['EDIT_SITE_SETTINGS'] as string,
+      pageTitle: LOCALE['SITE_SETTINGS'] as string,
+      goBack: '/kashiwa'
+    });
   }
 
   /**
@@ -38,7 +37,7 @@ export class GlobalSettingsService {
    * @param res `Express.js object`
    */
   public async saveGlobalSettings(form: GlobalSettingsForm, res: Response): Promise<void> {
-    global.GLOBAL_SETTINGS = form;
+    this.siteContext.setGlobalSettings(form);
 
     await this.overwriteSettingsFile(form);
 
