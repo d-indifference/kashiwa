@@ -35,11 +35,14 @@ export class IpBlacklistProvider {
   /**
    * Rebuild the IP adresses tree
    */
-  public reloadBlacklist() {
+  public reloadBlacklist(): void {
     this.trie = { children: {}, isBlocked: false };
     this.loadBlacklist();
   }
 
+  /**
+   * Loads the blacklist from the site context and populates the trie.
+   */
   private loadBlacklist(): void {
     const ipBlackList: string[] = this.siteContext.getIpBlackList() || [];
 
@@ -49,6 +52,9 @@ export class IpBlacklistProvider {
     }
   }
 
+  /**
+   * Converts an IP pattern to binary representation with wildcard support.
+   */
   private patternToBinary(pattern: string): string {
     if (this.isIPv4Pattern(pattern)) {
       return this.ipv4ToBinary(pattern);
@@ -59,14 +65,23 @@ export class IpBlacklistProvider {
     }
   }
 
+  /**
+   * Checks whether the pattern is a valid IPv4 address with optional wildcards.
+   */
   private isIPv4Pattern(pattern: string): boolean {
     return /^(\d{1,3}|\*)\.(\d{1,3}|\*)\.(\d{1,3}|\*)\.(\d{1,3}|\*)$/.test(pattern);
   }
 
+  /**
+   * Checks whether the pattern is a valid IPv6 address with optional wildcards.
+   */
   private isIPv6Pattern(pattern: string): boolean {
     return /^([0-9a-fA-F]{1,4}|\*)?(:[0-9a-fA-F]{1,4}|\*){0,7}$/.test(pattern);
   }
 
+  /**
+   * Converts an IPv4 pattern to a 32-bit binary string.
+   */
   private ipv4ToBinary(pattern: string): string {
     const parts = pattern.split('.');
     let binary = '';
@@ -86,6 +101,9 @@ export class IpBlacklistProvider {
     return binary;
   }
 
+  /**
+   * Converts an IPv6 pattern to a 128-bit binary string.
+   */
   private ipv6ToBinary(pattern: string): string {
     const parts = pattern.split(':').filter(Boolean);
     let binary = '';
@@ -114,6 +132,9 @@ export class IpBlacklistProvider {
     return binary;
   }
 
+  /**
+   * Inserts a binary IP representation into the trie.
+   */
   private insertIntoTrie(binary: string) {
     let node = this.trie;
     for (const bit of binary) {
@@ -125,6 +146,9 @@ export class IpBlacklistProvider {
     node.isBlocked = true;
   }
 
+  /**
+   * Recursively checks if a binary IP string matches any blocked path in the trie.
+   */
   private checkTrie(binary: string, node: TrieNode, index: number): boolean {
     if (index === binary.length) {
       return node.isBlocked;

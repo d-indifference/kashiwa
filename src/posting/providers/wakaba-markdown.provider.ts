@@ -15,6 +15,7 @@ export class WakabaMarkdownProvider {
    * @param input Comment text
    * @param boardUrl Board URL
    * @param isMarkdownEnabled Flag from board settings. If it is `false`, only replies, citations and links markdown allowed
+   * @param isAdmin Check if user is an administrator / moderator
    */
   public async formatAsWakaba(
     input: string,

@@ -11,7 +11,8 @@ interface PostingForm {
 }
 
 /**
- * Service for spam protection
+ * Service for spam protection.
+ * Uses regular expressions from site context to validate user-submitted fields.
  */
 @Injectable()
 export class AntiSpamService {
@@ -23,6 +24,12 @@ export class AntiSpamService {
     );
   }
 
+  /**
+   * Checks the form fields for spam based on predefined regex patterns.
+   * Throws an exception if a spam pattern is found in any field (for non-admins).
+   * @param form The posting form to check
+   * @param isAdmin Whether the user is an admin and should bypass the spam check
+   */
   public checkSpam<T extends PostingForm>(form: T, isAdmin: boolean): void {
     if (isAdmin) {
       return;

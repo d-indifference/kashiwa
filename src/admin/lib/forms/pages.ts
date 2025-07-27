@@ -12,6 +12,10 @@ export class RenderableFormPage extends CommonPage {
    */
   form: string;
 
+  /**
+   * @param form Stringified form
+   * @param commons Page commons (title, subtitle, etc.)
+   */
   constructor(form: string, commons: CommonPageCommons) {
     super();
     this.form = form;

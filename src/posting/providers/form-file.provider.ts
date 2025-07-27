@@ -58,32 +58,50 @@ export class FormFileProvider {
     return result;
   }
 
+  /**
+   * Save file to `src` directory and return its destination
+   */
   private async saveFileToSrc(file: MemoryStoredFile, url: string): Promise<[string, string]> {
     const dest = this.getFileDestination(file, url);
     await this.fileSystem.writeBinaryFile(dest, file.buffer);
     return dest;
   }
 
+  /**
+   * Get saved file name based on current timestamp
+   */
   private getTimestampFilename(): string {
     return DateTime.now().toMillis().toString();
   }
 
+  /**
+   * Get the new destination of the saved file
+   */
   private getFileDestination(file: MemoryStoredFile, url: string): [string, string] {
     const newName = this.getTimestampFilename();
     const fileName = `${newName}.${file.extension}`;
     return [`${url}${path.sep}${Constants.SRC_DIR}`, fileName];
   }
 
+  /**
+   * Check if file is an image
+   */
   private isImage(file: MemoryStoredFile): boolean {
     return file.mimeType.split('/')[0] === 'image';
   }
 
+  /**
+   * Get source file dimensions and set them to creation input
+   */
   private async toImageDimensions(input: Prisma.AttachedFileCreateInput, dest: string, name: string): Promise<void> {
     const { width, height } = await this.imagemagickProvider.getImageDimensions([dest, name]);
     input.width = width;
     input.height = height;
   }
 
+  /**
+   * Make an image thumbnail and set its data to creation input
+   */
   private async toImageThumbnail(input: Prisma.AttachedFileCreateInput, dest: string, file: string): Promise<void> {
     const { thumbnail, thumbnailWidth, thumbnailHeight } = await this.imagemagickProvider.thumbnailImage(dest, file, {
       width: input.width ?? -1,

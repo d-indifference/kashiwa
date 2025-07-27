@@ -44,6 +44,9 @@ export class GlobalSettingsService {
     res.redirect('/kashiwa/global-settings');
   }
 
+  /**
+   * Overwrite the settings file from form data
+   */
   private async overwriteSettingsFile(form: GlobalSettingsForm): Promise<void> {
     const content = JSON.stringify(form);
     await this.fileSystem.writeTextFile([Constants.SETTINGS_DIR, Constants.FILE_GLOBAL_SETTINGS], content);

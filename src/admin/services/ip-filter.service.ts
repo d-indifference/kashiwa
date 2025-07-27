@@ -46,17 +46,23 @@ export class IpFilterService {
     }
 
     this.siteContext.setIpBlackList(ipFilterList);
-    await this.overwriteSpamList(form);
+    await this.overwriteBlackList(form);
     this.ipBlacklist.reloadBlacklist();
 
     res.redirect('/kashiwa/ip-filter');
   }
 
+  /**
+   * Get the blacklist file content
+   */
   private async readBlackList(): Promise<string> {
     return await this.fileSystem.readTextFile([Constants.SETTINGS_DIR, Constants.BLACK_LIST_FILE_NAME]);
   }
 
-  private async overwriteSpamList(form: IpFilterForm): Promise<void> {
+  /**
+   * Overwrite the blacklist file by form content
+   */
+  private async overwriteBlackList(form: IpFilterForm): Promise<void> {
     const content = form.blackList;
     await this.fileSystem.writeTextFile([Constants.SETTINGS_DIR, Constants.BLACK_LIST_FILE_NAME], content);
   }

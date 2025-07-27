@@ -11,6 +11,9 @@ import { DashboardPage } from '@admin/pages';
 import { ISession } from '@admin/interfaces';
 import { FileSystemProvider } from '@library/providers';
 
+/**
+ * Service for rendering the dashboard page
+ */
 @Injectable()
 export class DashboardService {
   constructor(

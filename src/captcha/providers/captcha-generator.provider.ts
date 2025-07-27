@@ -31,6 +31,9 @@ export class CaptchaGeneratorProvider {
     };
   }
 
+  /**
+   * Create the captcha object based on configuration
+   */
   private create(): svgCaptcha.CaptchaObj {
     const size = this.config.getOrThrow<number>('captcha.size');
     const ignoreChars = this.config.getOrThrow<string>('captcha.ignoreChars');

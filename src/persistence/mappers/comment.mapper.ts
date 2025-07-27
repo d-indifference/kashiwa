@@ -76,6 +76,9 @@ export class CommentMapper {
     return { omittedPosts: 0, omittedFiles: 0 };
   }
 
+  /**
+   * Map attached file model to common dto
+   */
   private mapAttachedFile(model: AttachedFile | null): AttachedFileDto | null {
     if (!model) {
       return null;
@@ -84,6 +87,9 @@ export class CommentMapper {
     return { ...model };
   }
 
+  /**
+   * Map attached file model to moderation dto
+   */
   private mapAttachedFileModeration(model: AttachedFile | null): AttachedFileModerationDto | null {
     if (!model) {
       return null;

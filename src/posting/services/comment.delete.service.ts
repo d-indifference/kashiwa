@@ -34,6 +34,9 @@ export class CommentDeleteService {
     }
   }
 
+  /**
+   * Get the deletion way from form and process post deletion
+   */
   private async processCommentDeletion(url: string, form: CommentDeleteForm): Promise<void> {
     if (form.fileOnly) {
       await this.attachedFilePersistenceService.clearByPassword(url, form.delete, form.password);
@@ -42,6 +45,10 @@ export class CommentDeleteService {
     }
   }
 
+  /**
+   * Make the redirection string. If the thread will be deleted, user will be redirected to the board start page,
+   * else user will stay in the thread
+   */
   private makeRedirectionString(url: string, form: CommentDeleteForm, num: bigint): string {
     if (form.delete.includes(num) && !form.fileOnly) {
       return `/${url}/kashiwa${Constants.HTML_SUFFIX}}`;

@@ -78,6 +78,9 @@ export class CommentCreateService {
     res.redirect(`/${url}/res/${parentNum}${Constants.HTML_SUFFIX}#${newReply.num}`);
   }
 
+  /**
+   * Make the `Prisma.CommentCreateInput` for the new thread
+   */
   private async toThreadCreateInput(
     board: BoardDto,
     form: ThreadCreateForm,
@@ -89,6 +92,9 @@ export class CommentCreateService {
     return input;
   }
 
+  /**
+   * Make the `Prisma.CommentCreateInput` for the new reply
+   */
   private async toReplyCreateInput(
     board: BoardDto,
     parentNum: bigint,
@@ -102,6 +108,9 @@ export class CommentCreateService {
     return input;
   }
 
+  /**
+   * Make the `Prisma.CommentCreateInput` with the same fields for thread & reply
+   */
   private async toCommentCreateInput(
     board: BoardDto,
     isAdmin: boolean,
@@ -136,6 +145,9 @@ export class CommentCreateService {
     };
   }
 
+  /**
+   * Delete a thread with the oldest `lastHit` value if the board capacity is exceeded
+   */
   private async deleteOldestPostOnMaxThreadsOnBoard(board: BoardDto): Promise<void> {
     const threadCount = await this.commentPersistenceService.threadCount(board.url);
 
@@ -150,12 +162,26 @@ export class CommentCreateService {
     }
   }
 
+  /**
+   * Update the thread's last hit if the reply does not contain a sage
+   */
   private async updateLastHit(board: BoardDto, form: ReplyCreateForm, parentNum: bigint): Promise<void> {
     const childrenLength = await this.commentPersistenceService.findRepliesCount(board.url, parentNum);
     if (board.boardSettings) {
-      if (!form.sage && childrenLength <= board.boardSettings?.bumpLimit) {
+      if (this.getSageFromForm(form) && childrenLength <= board.boardSettings?.bumpLimit) {
         await this.commentPersistenceService.updateThreadLastHit(board.url, parentNum);
       }
     }
+  }
+
+  /**
+   * Get sage options from the form
+   */
+  private getSageFromForm(form: ReplyCreateForm): boolean {
+    if (form.email) {
+      return form.email.trim().toLowerCase() !== 'sage';
+    }
+
+    return !form.sage;
   }
 }

@@ -114,8 +114,8 @@ export class BoardController {
   @Post('reload/:id')
   @Roles(UserRole.ADMINISTRATOR)
   @UseGuards(SessionGuard)
-  public reloadBoardCache(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response): void {
-    this.boardService.reloadBoardCache(id, res);
+  public async reloadBoardCache(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response): Promise<void> {
+    await this.boardService.reloadBoardCache(id, res);
   }
 
   @Post('clear/:id')

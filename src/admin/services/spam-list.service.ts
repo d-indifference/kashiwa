@@ -50,10 +50,16 @@ export class SpamListService {
     res.redirect('/kashiwa/spam');
   }
 
+  /**
+   * Get the spam list file content
+   */
   private async readSpamList(): Promise<string> {
     return await this.fileSystem.readTextFile([Constants.SETTINGS_DIR, Constants.SPAM_FILE_NAME]);
   }
 
+  /**
+   * Overwrite the spam list file by form content
+   */
   private async overwriteSpamList(form: SpamListForm): Promise<void> {
     const content = form.spamList;
     await this.fileSystem.writeTextFile([Constants.SETTINGS_DIR, Constants.SPAM_FILE_NAME], content);

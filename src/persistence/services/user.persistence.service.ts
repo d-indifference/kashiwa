@@ -59,11 +59,7 @@ export class UserPersistenceService {
   public async findByIdStrict(id: string): Promise<User | null> {
     const user = await this.prisma.user.findFirst({ where: { id } });
 
-    if (!user) {
-      return null;
-    }
-
-    return user;
+    return user ?? null;
   }
 
   /**

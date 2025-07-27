@@ -28,6 +28,9 @@ export class BanService {
     }
   }
 
+  /**
+   * Returns localized ban message string
+   */
   private makeBanMessage(dto: BanDto): string {
     return (LOCALE['YOU_HAVE_BEEN_BANNED'] as CallableFunction)(dto.till.toLocaleDateString(), dto.reason);
   }

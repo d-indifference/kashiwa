@@ -85,14 +85,17 @@ export class CachingProvider {
     await this.fileSystem.removePath([url, Constants.RES_DIR, `${num.toString()}.${Constants.HTML_SUFFIX}`]);
   }
 
+  /** Make a directory */
   private async mkdir(...dirs: string[]): Promise<void> {
     await this.fileSystem.ensureDir(dirs);
   }
 
+  /** Delete a directory */
   private async rmdir(dir: string): Promise<void> {
     await this.fileSystem.removePath([dir]);
   }
 
+  /** Remove all (and only) files from the directory */
   private async removeFilesFromDir(...dirs: string[]): Promise<void> {
     const entries = (await this.fileSystem.readDir(dirs)).filter(e => e.isFile());
     await Promise.all(
@@ -102,10 +105,12 @@ export class CachingProvider {
     );
   }
 
+  /** Remove all contents from the directory */
   private async emptyDir(...dirs: string[]): Promise<void> {
     await this.fileSystem.emptyDir(dirs);
   }
 
+  /** Rename a directory */
   private async renameDir(oldName: string, newName: string): Promise<void> {
     await this.fileSystem.renameDir([oldName], [newName]);
   }
