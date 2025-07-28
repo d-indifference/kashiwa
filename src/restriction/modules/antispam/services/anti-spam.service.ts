@@ -27,7 +27,7 @@ export class AntiSpamService {
    */
   public compileSpamRegexes(): void {
     this.compiledSpamRegexes = ((this.siteContext.getSpamExpressions() || []) as string[]).map(
-      pattern => new RegExp(this.escapeRegExp(pattern), 'i')
+      pattern => new RegExp(pattern, 'i')
     );
   }
 
@@ -53,12 +53,5 @@ export class AntiSpamService {
         }
       }
     }
-  }
-
-  /**
-   * Escapes regex meta-symbols
-   */
-  private escapeRegExp(str: string): string {
-    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 }

@@ -40,11 +40,7 @@ export class SpamListService {
    * @param res `Express.js` response
    */
   public async saveSpamList(form: SpamListForm, res: Response): Promise<void> {
-    const spamList = form.spamList.split('\r\n');
-
-    if (spamList.at(-1) === '') {
-      spamList.pop();
-    }
+    const spamList = form.spamList.split('\r\n').filter(str => str !== '');
 
     this.siteContext.setSpamExpressions(spamList);
     await this.overwriteSpamList(form);

@@ -39,11 +39,7 @@ export class IpFilterService {
    * @param res `Express.js` response
    */
   public async saveIpFilter(form: IpFilterForm, res: Response): Promise<void> {
-    const ipFilterList = form.blackList.split('\r\n');
-
-    if (ipFilterList.at(-1) === '') {
-      ipFilterList.pop();
-    }
+    const ipFilterList = form.blackList.split('\r\n').filter(str => str !== '');
 
     this.siteContext.setIpBlackList(ipFilterList);
     await this.overwriteBlackList(form);

@@ -29,7 +29,7 @@ export class InitModuleService implements OnModuleInit {
   private async readSpamFile(): Promise<void> {
     const spamFileContent = await this.fileSystem.readTextFile([Constants.SETTINGS_DIR, Constants.SPAM_FILE_NAME]);
 
-    const spamExpressions = spamFileContent.split('\r\n');
+    const spamExpressions = spamFileContent.split('\r\n').filter(str => str !== '');
 
     this.siteContext.setSpamExpressions(spamExpressions);
   }
@@ -39,7 +39,13 @@ export class InitModuleService implements OnModuleInit {
     const spamPresetFileContent = await this.fileSystem.readTextFileOutOfVolume(
       path.join(Constants.Paths.PRESETS, Constants.SPAM_FILE_NAME)
     );
-    const spamList = spamPresetFileContent.replaceAll('\n', '\r\n');
+
+    console.log(spamPresetFileContent);
+
+    const spamList = spamPresetFileContent
+      .split('\n')
+      .filter(str => str !== '')
+      .join('\r\n');
     await this.fileSystem.writeTextFile([Constants.SETTINGS_DIR, Constants.SPAM_FILE_NAME], spamList);
   }
 }

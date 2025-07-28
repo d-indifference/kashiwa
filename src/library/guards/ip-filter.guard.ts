@@ -37,8 +37,7 @@ export class IpFilterGuard implements CanActivate {
     }
 
     const blackList = await this.fileSystem.readTextFile(blackListRelativePath);
-    const ipBlackList = blackList.split('\r\n');
-    ipBlackList.pop();
+    const ipBlackList = blackList.split('\r\n').filter(str => str !== '');
 
     this.siteContext.setIpBlackList(ipBlackList);
 
