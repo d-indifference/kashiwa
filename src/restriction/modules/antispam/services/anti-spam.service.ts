@@ -16,11 +16,18 @@ interface PostingForm {
  */
 @Injectable()
 export class AntiSpamService {
-  private readonly compiledSpamRegexes: RegExp[];
+  private compiledSpamRegexes: RegExp[];
 
   constructor(private readonly siteContext: SiteContextProvider) {
+    this.compileSpamRegexes();
+  }
+
+  /**
+   * Get spam base from memory and compile it to regexp array
+   */
+  public compileSpamRegexes(): void {
     this.compiledSpamRegexes = ((this.siteContext.getSpamExpressions() || []) as string[]).map(
-      pattern => new RegExp(pattern, 'ig')
+      pattern => new RegExp(this.escapeRegExp(pattern), 'i')
     );
   }
 
@@ -39,10 +46,19 @@ export class AntiSpamService {
 
     for (const regex of this.compiledSpamRegexes) {
       for (const field of fieldsToCheck) {
-        if (field && regex.test(field)) {
-          throw new BadRequestException((LOCALE['INPUT_CONTAINS_SPAM'] as CallableFunction)(regex.source));
+        if (field) {
+          if (regex.test(field)) {
+            throw new BadRequestException((LOCALE['INPUT_CONTAINS_SPAM'] as CallableFunction)(regex.source));
+          }
         }
       }
     }
+  }
+
+  /**
+   * Escapes regex meta-symbols
+   */
+  private escapeRegExp(str: string): string {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 }

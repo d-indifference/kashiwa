@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import * as NodeCache from 'node-cache';
 
 /**
- * In-memory cache provider using node-cache.
+ * In-memory cache provider.
  * Designed for storing runtime application data such as site settings,
  * IP blacklists, and spam lists.
  */

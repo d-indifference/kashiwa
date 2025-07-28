@@ -18,7 +18,7 @@ export class InitModuleService implements OnModuleInit {
   }
 
   /** Activates spam base. If spam base does not exist, take it from presets */
-  private async activateSpamBase(): Promise<void> {
+  public async activateSpamBase(): Promise<void> {
     if (!(await this.fileSystem.pathExists([Constants.SETTINGS_DIR, Constants.SPAM_FILE_NAME]))) {
       await this.initSpamFile();
     }
@@ -30,7 +30,6 @@ export class InitModuleService implements OnModuleInit {
     const spamFileContent = await this.fileSystem.readTextFile([Constants.SETTINGS_DIR, Constants.SPAM_FILE_NAME]);
 
     const spamExpressions = spamFileContent.split('\r\n');
-    spamExpressions.pop();
 
     this.siteContext.setSpamExpressions(spamExpressions);
   }

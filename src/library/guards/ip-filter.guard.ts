@@ -40,7 +40,7 @@ export class IpFilterGuard implements CanActivate {
     const ipBlackList = blackList.split('\r\n');
     ipBlackList.pop();
 
-    this.siteContext.setSpamExpressions(ipBlackList);
+    this.siteContext.setIpBlackList(ipBlackList);
 
     this.ipBlacklistProvider.reloadBlacklist();
   }

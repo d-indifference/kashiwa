@@ -67,4 +67,21 @@ export class GlobalSettingsForm {
   @KIsString('MENU_FRAME')
   @KIsNotEmpty('MENU_FRAME')
   menuFrame: string;
+
+  /**
+   * Make a new decorated object from non-decorated form
+   * @param form Non-decorated form of the same type
+   */
+  public static fromNonDecoratedForm(form: GlobalSettingsForm): GlobalSettingsForm {
+    const newForm = new GlobalSettingsForm();
+    newForm.siteName = form.siteName;
+    newForm.siteSlogan = form.siteSlogan;
+    newForm.mainPage = form.mainPage;
+    newForm.boardList = form.boardList;
+    newForm.faqPage = form.faqPage;
+    newForm.rulesPage = form.rulesPage;
+    newForm.menuFrame = form.menuFrame;
+
+    return form;
+  }
 }

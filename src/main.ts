@@ -19,6 +19,7 @@ import {
   IpBlacklistProvider,
   SiteContextProvider
 } from '@library/providers';
+import { AntiSpamService, InitModuleService } from '@restriction/modules/antispam/services';
 
 const bootstrap = async (): Promise<void> => {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
@@ -55,6 +56,12 @@ const bootstrap = async (): Promise<void> => {
 
   const globalSettingsProvider = new GlobalSettingsProvider(fileSystem, siteContext);
   await globalSettingsProvider.load();
+
+  const antispamInit = app.get(InitModuleService);
+  await antispamInit.activateSpamBase();
+
+  const antiSpam = app.get(AntiSpamService);
+  antiSpam.compileSpamRegexes();
 
   app.getHttpAdapter().getInstance().set('trust proxy', true);
 

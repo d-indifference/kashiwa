@@ -32,14 +32,19 @@ import {
 import { DashboardUtilsProvider, DatabaseDumpingUtilsProvider } from '@admin/providers';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CachingModule } from '@caching/caching.module';
+import { AntiSpamModule } from '@restriction/modules/antispam/anti-spam.module';
 
+/**
+ * Module for administration panel
+ */
 @Module({
   imports: [
     NestjsFormDataModule.config(nestjsFormDataConfig),
     ScheduleModule.forRoot(),
     LibraryModule,
     PersistenceModule,
-    CachingModule
+    CachingModule,
+    AntiSpamModule
   ],
   providers: [
     PrismaService,

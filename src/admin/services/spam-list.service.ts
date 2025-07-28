@@ -6,6 +6,7 @@ import { SpamListForm } from '@admin/forms';
 import { FormPage, RenderableSessionFormPage } from '@admin/lib';
 import { FileSystemProvider, SiteContextProvider } from '@library/providers';
 import { ISession } from '@admin/interfaces';
+import { AntiSpamService } from '@restriction/modules/antispam/services';
 
 /**
  * Service for handling of the spam list form
@@ -14,7 +15,8 @@ import { ISession } from '@admin/interfaces';
 export class SpamListService {
   constructor(
     private readonly fileSystem: FileSystemProvider,
-    private readonly siteContext: SiteContextProvider
+    private readonly siteContext: SiteContextProvider,
+    private readonly antiSpamService: AntiSpamService
   ) {}
 
   /**
@@ -46,6 +48,7 @@ export class SpamListService {
 
     this.siteContext.setSpamExpressions(spamList);
     await this.overwriteSpamList(form);
+    this.antiSpamService.compileSpamRegexes();
 
     res.redirect('/kashiwa/spam');
   }

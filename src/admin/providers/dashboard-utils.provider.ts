@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { promisify } from 'node:util';
 import { exec } from 'child_process';
 import { PrismaService } from '@persistence/lib';
@@ -67,7 +67,7 @@ export class DashboardUtilsProvider {
     } catch (e) {
       const message = `${LOCALE[errorLocale] as string}: ${e.stderr || e.message}`;
       Logger.error(message, 'DashboardUtilsProvider');
-      throw new InternalServerErrorException(message);
+      return message;
     }
   }
 }

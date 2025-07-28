@@ -23,8 +23,9 @@ export class GlobalSettingsService {
    */
   public getGlobalSettings(session: ISession): RenderableSessionFormPage {
     const globalSettings = this.siteContext.getGlobalSettings();
+    const form = GlobalSettingsForm.fromNonDecoratedForm(globalSettings);
 
-    return FormPage.toSessionTemplateContent(session, globalSettings, {
+    return FormPage.toSessionTemplateContent(session, form, {
       pageSubtitle: LOCALE['EDIT_SITE_SETTINGS'] as string,
       pageTitle: LOCALE['SITE_SETTINGS'] as string,
       goBack: '/kashiwa'
