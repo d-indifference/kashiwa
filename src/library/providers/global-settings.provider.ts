@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { FileSystemProvider, SiteContextProvider } from '@library/providers';
-import path from 'node:path';
+import * as path from 'node:path';
 import { Constants } from '@library/constants';
 import { GlobalSettingsForm } from '@admin/forms';
 
