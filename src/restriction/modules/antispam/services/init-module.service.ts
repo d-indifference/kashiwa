@@ -40,8 +40,6 @@ export class InitModuleService implements OnModuleInit {
       path.join(Constants.Paths.PRESETS, Constants.SPAM_FILE_NAME)
     );
 
-    console.log(spamPresetFileContent);
-
     const spamList = spamPresetFileContent
       .split('\n')
       .filter(str => str !== '')
