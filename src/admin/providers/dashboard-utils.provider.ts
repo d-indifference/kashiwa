@@ -1,11 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { promisify } from 'node:util';
-import { exec } from 'child_process';
+import { exec, PromiseWithChild } from 'child_process';
 import { PrismaService } from '@persistence/lib';
 import { Prisma } from '@prisma/client';
 import { LOCALE } from '@locale/locale';
-
-const execAsync = promisify(exec);
 
 /**
  * Utility provider for getting versions of external tools (database, imagemagick, etc.)
@@ -62,12 +60,19 @@ export class DashboardUtilsProvider {
     stdoutFormatCb: (stdout: string) => string
   ): Promise<string> {
     try {
-      const { stdout } = await execAsync(command);
+      const { stdout } = await this.execAsync()(command);
       return stdoutFormatCb(stdout);
     } catch (e) {
       const message = `${LOCALE[errorLocale] as string}: ${e.stderr || e.message}`;
       Logger.error(message, 'DashboardUtilsProvider');
       return message;
     }
+  }
+
+  /**
+   * A wrapper for `exec` from `node:child_process`
+   */
+  private execAsync(): (command: string) => PromiseWithChild<{ stdout: string; stderr: string }> {
+    return promisify(exec);
   }
 }

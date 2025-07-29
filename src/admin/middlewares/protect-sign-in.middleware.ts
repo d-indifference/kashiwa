@@ -12,8 +12,12 @@ export class ProtectSignInMiddleware implements NestMiddleware {
   public use(req: Request, _res: Response, next: NextFunction): void {
     const session: ISession = req.session as unknown as ISession;
 
-    if (session.payload) {
-      throw new ForbiddenException(LOCALE['ALREADY_SIGNED_IN']);
+    if (session) {
+      if (session.payload) {
+        throw new ForbiddenException(LOCALE['ALREADY_SIGNED_IN']);
+      } else {
+        next();
+      }
     } else {
       next();
     }

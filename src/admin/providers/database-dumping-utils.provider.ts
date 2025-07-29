@@ -1,13 +1,11 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { promisify } from 'node:util';
-import { exec } from 'child_process';
+import { exec, PromiseWithChild } from 'child_process';
 import * as path from 'node:path';
 import { LOCALE } from '@locale/locale';
 import * as process from 'node:process';
 import { FileSystemProvider } from '@library/providers';
-
-const execAsync = promisify(exec);
 
 /**
  * Utility provider for database table dumping
@@ -108,9 +106,16 @@ export class DatabaseDumpingUtilsProvider {
     const pgDumpCmd = ['pg_dump', ...options, `"${connectionUrl}"`, `> "${outputPath}"`].join(' ');
 
     try {
-      await execAsync(pgDumpCmd);
+      await this.execAsync()(pgDumpCmd);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
+  }
+
+  /**
+   * A wrapper for `exec` from `node:child_process`
+   */
+  private execAsync(): (command: string) => PromiseWithChild<{ stdout: string; stderr: string }> {
+    return promisify(exec);
   }
 }
