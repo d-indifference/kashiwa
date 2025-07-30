@@ -76,7 +76,7 @@ export class IpBlacklistProvider {
    * Checks whether the pattern is a valid IPv6 address with optional wildcards.
    */
   private isIPv6Pattern(pattern: string): boolean {
-    return /^([0-9a-fA-F]{1,4}|\*)?(:[0-9a-fA-F]{1,4}|\*){0,7}$/.test(pattern);
+    return /^((([0-9A-Fa-f]{1,4}|\*):){1,6}:|(([0-9A-Fa-f]{1,4}|\*):){7})([0-9A-Fa-f]{1,4}|\*)$/.test(pattern);
   }
 
   /**

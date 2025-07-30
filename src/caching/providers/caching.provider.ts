@@ -24,7 +24,7 @@ export class CachingProvider {
       await this.mkdir(url, Constants.RES_DIR),
       await this.mkdir(url, Constants.THUMB_DIR)
     ]);
-    await this.fullyReloadCache(url);
+    await this.cachingUpdateProvider.fullyReloadCache(url);
   }
 
   /**

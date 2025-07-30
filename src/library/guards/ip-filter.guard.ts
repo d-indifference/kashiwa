@@ -27,7 +27,7 @@ export class IpFilterGuard implements CanActivate {
   }
 
   /**
-   * Load IP blacklist to memory
+   * Load IP black list to memory
    */
   public async load(): Promise<void> {
     const blackListRelativePath = [Constants.SETTINGS_DIR, Constants.BLACK_LIST_FILE_NAME];
