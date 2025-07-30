@@ -1,17 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@persistence/lib';
-import { CommentMapper } from '@persistence/mappers';
+import { PinoLogger } from 'nestjs-pino';
 import { CommentDto } from '@persistence/dto/comment/common';
-import { Comment, Prisma } from '@prisma/client';
+import { LOCALE } from '@locale/locale';
+import { CommentMapper } from '@persistence/mappers';
+import { Prisma, Comment } from '@prisma/client';
 import { BoardPersistenceService } from '@persistence/services/board.persistence.service';
 import { Page, PageRequest } from '@persistence/lib/page';
 import { ThreadCollapsedDto } from '@persistence/dto/comment/collapsed';
 import { AttachedFilePersistenceService } from '@persistence/services/attached-file.persistence.service';
-import { FilesystemOperator } from '@library/filesystem';
-import { Constants } from '@library/constants';
 import { CommentModerationDto } from '@persistence/dto/comment/moderation';
-import { LOCALE } from '@locale/locale';
-import { PinoLogger } from 'nestjs-pino';
 
 /**
  * Database queries for `Comment` model
@@ -20,8 +18,8 @@ import { PinoLogger } from 'nestjs-pino';
 export class CommentPersistenceService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly boardPersistenceService: BoardPersistenceService,
     private readonly commentMapper: CommentMapper,
+    private readonly boardPersistenceService: BoardPersistenceService,
     private readonly attachedFilePersistenceService: AttachedFilePersistenceService,
     private readonly logger: PinoLogger
   ) {
@@ -29,8 +27,23 @@ export class CommentPersistenceService {
   }
 
   /**
-   * Find all comments and paginate them for thread preview page
-   * @param boardId ID of board
+   * Get all comments count
+   */
+  public async countAll(): Promise<number> {
+    return (await this.prisma.comment.count()) as number;
+  }
+
+  /**
+   * Get threads count on board
+   * @param url board URL
+   */
+  public async threadCount(url: string): Promise<number> {
+    return (await this.prisma.comment.count({ where: { board: { url }, NOT: { lastHit: null } } })) as number;
+  }
+
+  /**
+   * Get all threads with their replies and paginate them
+   * @param boardId Board ID
    * @param page Page request
    */
   public async findAll(boardId: string, page: PageRequest): Promise<Page<ThreadCollapsedDto>> {
@@ -39,33 +52,52 @@ export class CommentPersistenceService {
       Prisma.CommentWhereInput,
       Prisma.CommentOrderByWithAggregationInput,
       Prisma.CommentInclude
-    >(this.prisma, 'comment', page, { boardId, lastHit: { not: null } }, { lastHit: 'desc' }, { attachedFile: true });
+    >(
+      this.prisma,
+      'comment',
+      page,
+      { boardId, lastHit: { not: null } },
+      { lastHit: 'desc' },
+      { attachedFile: true, children: { orderBy: { createdAt: 'asc' }, include: { attachedFile: true } } }
+    );
 
-    return await this.commentMapper.mapBoardPage(comments);
+    return comments.map(c => this.commentMapper.toCollapsedDto(c));
   }
 
   /**
-   * Find all thread numbers of board
-   * @param url Board URL
+   * Find list of all thread numbers on board
+   * @param url board URL
    */
-  public async findAllThreadNums(url: string): Promise<bigint[]> {
-    const board = await this.boardPersistenceService.findByUrl(url);
-    const result = await this.prisma.comment.findMany({
-      select: { num: true },
-      where: { boardId: board.id, NOT: { lastHit: null } }
-    });
-
-    return result.map(r => r.num);
+  public async findThreadNums(url: string): Promise<bigint[]> {
+    return (
+      await this.prisma.comment.findMany({
+        where: { board: { url }, NOT: { lastHit: null } },
+        select: { num: true }
+      })
+    ).map(n => n.num);
   }
 
   /**
-   * Find all comments ID on board
+   * Get all threads with their replies and paginate them as moderation DTO
    * @param boardId Board ID
+   * @param page Page request
    */
-  public async findAllCommentIds(boardId: string): Promise<string[]> {
-    const ids = await this.prisma.comment.findMany({ select: { id: true }, where: { boardId } });
+  public async findManyForModeration(boardId: string, page: PageRequest): Promise<Page<CommentModerationDto>> {
+    const comments = await Page.ofFilter<
+      Comment,
+      Prisma.CommentWhereInput,
+      Prisma.CommentOrderByWithAggregationInput,
+      Prisma.CommentInclude
+    >(
+      this.prisma,
+      'comment',
+      page,
+      { board: { id: boardId } },
+      { createdAt: 'desc' },
+      { attachedFile: { include: { board: true } }, parent: true, board: true }
+    );
 
-    return ids.map(comment => comment.id);
+    return comments.map(c => this.commentMapper.toModerationDto(c));
   }
 
   /**
@@ -75,7 +107,11 @@ export class CommentPersistenceService {
    */
   public async findThread(url: string, num: bigint): Promise<CommentDto> {
     const openingPost = await this.prisma.comment.findFirst({
-      include: { board: { include: { boardSettings: true } }, attachedFile: true },
+      include: {
+        board: { include: { boardSettings: true } },
+        attachedFile: true,
+        children: { include: { attachedFile: true }, orderBy: { createdAt: 'asc' } }
+      },
       where: { board: { url }, num, NOT: { lastHit: null } }
     });
 
@@ -83,13 +119,22 @@ export class CommentPersistenceService {
       throw new NotFoundException((LOCALE['THREAD_NOT_FOUND'] as CallableFunction)(url, num.toString()));
     }
 
-    const replies = await this.prisma.comment.findMany({
-      where: { parentId: openingPost.id },
-      include: { attachedFile: true },
-      orderBy: { num: 'asc' }
-    });
+    return this.commentMapper.toDto(openingPost, openingPost.children);
+  }
 
-    return this.commentMapper.toDto(openingPost, openingPost.attachedFile, replies);
+  /**
+   * Find opening post by board URL and thread number. If not found, throws 404.
+   * @param url Board URL
+   * @param num Thread number on board
+   */
+  public async findOpeningPost(url: string, num: bigint): Promise<CommentDto> {
+    const post = await this.prisma.comment.findFirst({ where: { board: { url }, num, NOT: { lastHit: null } } });
+
+    if (!post) {
+      throw new NotFoundException((LOCALE['THREAD_NOT_FOUND'] as CallableFunction)(url, num.toString()));
+    }
+
+    return this.commentMapper.toDto(post);
   }
 
   /**
@@ -103,115 +148,46 @@ export class CommentPersistenceService {
       where: { board: { url }, num }
     })) as Comment | null;
 
-    if (comment) {
-      return comment;
-    }
-
-    return null;
+    return comment ?? null;
   }
 
   /**
-   * Find comments by password, nums and board URL
+   * Find count of thread replies by board URL and thread number
    * @param url Board URL
-   * @param nums Comments number on board
-   * @param password Poster's password
+   * @param num Thread number on board
    */
-  public async findCommentUserDeletionCandidates(url: string, nums: bigint[], password: string): Promise<string[]> {
-    const board = await this.boardPersistenceService.findByUrl(url);
-
-    const comments = await this.prisma.comment.findMany({
-      select: { id: true },
-      where: { boardId: board.id, password, num: { in: nums } }
-    });
-
-    return comments.map(comment => comment.id);
+  public async findRepliesCount(url: string, num: bigint): Promise<number> {
+    return (await this.prisma.comment.count({
+      where: { parent: { board: { url }, num, NOT: { lastHit: null } }, lastHit: null }
+    })) as number;
   }
 
   /**
-   * Find all comments and paginate them for moderation page
-   * @param boardId ID of board
-   * @param page Page request
-   */
-  public async findForModeration(boardId: string, page: PageRequest): Promise<Page<CommentModerationDto>> {
-    const board = await this.boardPersistenceService.findShortDtoById(boardId);
-
-    const comments = await Page.ofFilter<
-      Comment,
-      Prisma.CommentWhereInput,
-      Prisma.CommentOrderByWithAggregationInput,
-      Prisma.CommentInclude
-    >(this.prisma, 'comment', page, { boardId }, { createdAt: 'desc' }, { attachedFile: true, parent: true });
-
-    return comments.map(comment => this.commentMapper.toModerationDto(board, comment));
-  }
-
-  /**
-   * Get actual threads count on board
-   * @param boardId Board ID
-   */
-  public async getThreadsCount(boardId: string): Promise<number> {
-    return (await this.prisma.comment.count({ where: { boardId, NOT: { lastHit: null }, parentId: null } })) as number;
-  }
-
-  /**
-   * Find thread with the oldest last hit by board ID
-   * @param boardId Board ID
-   */
-  public async findThreadIdWithOldestLastHit(boardId: string): Promise<string | null> {
-    const comment = await this.prisma.comment.findFirst({
-      where: { boardId, NOT: { lastHit: null } },
-      orderBy: { lastHit: 'asc' },
-      select: { id: true }
-    });
-
-    if (comment) {
-      return comment.id;
-    }
-
-    return null;
-  }
-
-  /**
-   * Find last comment (thread or reply) from this IP
+   * Find last comment (thread or reply) from IP
    * @param ip Poster's IP
    */
   public async findLastCommentByIp(ip: string): Promise<{ createdAt: Date } | null> {
-    const comment = await this.prisma.comment.findFirst({
-      where: { ip },
-      orderBy: { createdAt: 'desc' },
-      select: { createdAt: true }
-    });
-
-    if (!comment) {
-      return null;
-    }
-
-    return comment;
+    return (
+      (await this.prisma.comment.findFirst({
+        where: { ip },
+        orderBy: { createdAt: 'desc' },
+        select: { createdAt: true }
+      })) ?? null
+    );
   }
 
   /**
-   * Find last thread from this IP
+   * Find last thread from IP
    * @param ip Poster's IP
    */
   public async findLastThreadByIp(ip: string): Promise<Pick<Comment, 'createdAt'> | null> {
-    const comment = await this.prisma.comment.findFirst({
-      where: { ip, parentId: null },
-      orderBy: { createdAt: 'desc' },
-      select: { createdAt: true }
-    });
-
-    if (!comment) {
-      return null;
-    }
-
-    return comment;
-  }
-
-  /**
-   * Get all comments count
-   */
-  public async countAll(): Promise<number> {
-    return (await this.prisma.comment.count()) as number;
+    return (
+      (await this.prisma.comment.findFirst({
+        where: { ip, parentId: null },
+        orderBy: { createdAt: 'desc' },
+        select: { createdAt: true }
+      })) ?? null
+    );
   }
 
   /**
@@ -223,15 +199,19 @@ export class CommentPersistenceService {
     this.logger.info({ url, input }, 'createComment');
 
     await this.boardPersistenceService.incrementPostCount(url);
-
     input.num = await this.boardPersistenceService.getCurrentPostCount(url);
 
     const newComment = await this.prisma.comment.create({
-      include: { attachedFile: true, board: true, children: true },
+      include: {
+        parent: { include: { children: true } },
+        attachedFile: true,
+        board: { include: { boardSettings: true } },
+        children: { include: { attachedFile: true }, orderBy: { createdAt: 'asc' } }
+      },
       data: input
     });
 
-    return this.commentMapper.toDto(newComment, newComment.attachedFile, newComment.children);
+    return this.commentMapper.toDto(newComment, newComment.children);
   }
 
   /**
@@ -244,61 +224,98 @@ export class CommentPersistenceService {
 
     const board = await this.boardPersistenceService.findByUrl(url);
 
-    await this.prisma.comment.update({
+    const batch = await this.prisma.comment.update({
       where: { boardId_num: { boardId: board.id, num }, NOT: { lastHit: null } },
       include: { board: true },
       data: { lastHit: new Date() }
     });
+
+    this.logger.info({ id: batch.id }, '[SUCCESS] updateThreadLastHit');
   }
 
   /**
-   * Remove comment and its `AttachedFile` by ID
-   * @param id Comment ID
-   */
-  public async removeCommentById(id: string): Promise<void> {
-    this.logger.info({ id }, 'removeCommentById');
-
-    const comment = await this.prisma.comment.findFirst({
-      where: { id },
-      include: { attachedFile: true, board: true }
-    });
-
-    if (comment) {
-      if (comment.attachedFile) {
-        await this.attachedFilePersistenceService.removeById(comment.attachedFile.id);
-      }
-
-      await FilesystemOperator.remove(comment.board.url, Constants.RES_DIR, `${comment.num}${Constants.HTML_SUFFIX}`);
-      await this.prisma.comment.delete({ where: { id } });
-
-      await this.removeOrphanReplies(comment.board.url);
-    }
-  }
-
-  /**
-   * Remove comment and its `AttachedFile` by IP
-   * @param boardId Board ID
-   * @param ip Poster's IP
-   */
-  public async removeAllCommentsByIp(boardId: string, ip: string): Promise<void> {
-    this.logger.info({ ip }, 'removeAllCommentsByIp');
-
-    const comments = await this.prisma.comment.findMany({ select: { id: true }, where: { ip, boardId } });
-
-    for (const commentId of comments) {
-      await this.removeCommentById(commentId.id);
-    }
-  }
-
-  /**
-   * Remove replies without opening post from databases with their files
+   * Remove all comment from board
    * @param url Board URL
    */
-  public async removeOrphanReplies(url: string): Promise<void> {
-    this.logger.info({ url }, 'removeOrphanReplies');
-    const board = await this.boardPersistenceService.findByUrl(url);
+  public async removeAllFromBoard(url: string): Promise<void> {
+    this.logger.info({ url }, 'removeAllFromBoard');
 
-    await this.prisma.comment.deleteMany({ where: { boardId: board.id, parentId: null, lastHit: null } });
-    await this.attachedFilePersistenceService.removeOrphaned();
+    const batch = await this.prisma.comment.deleteMany({ where: { board: { url } } });
+    await this.attachedFilePersistenceService.removeOrphaned(url);
+    this.logger.info({ count: batch.count }, '[SUCCESS] removeAllFromBoard');
+  }
+
+  /**
+   * Remove thread with the oldest last hit on board
+   * @param url Board URL
+   */
+  public async removeThreadWithOldestLastHit(url: string): Promise<bigint | null> {
+    this.logger.info({ url }, 'removeThreadWithOldestLastHit');
+
+    let removedThread: Comment | null = null;
+
+    await this.prisma.$transaction(async tx => {
+      const oldestThread = await tx.comment.findFirst({
+        where: { NOT: { lastHit: null }, board: { url } },
+        orderBy: { lastHit: 'asc' }
+      });
+
+      if (oldestThread) {
+        const batch = await tx.comment.delete({ where: { id: oldestThread.id } });
+        this.logger.info({ id: batch.id }, '[SUCCESS] removeThreadWithOldestLastHit');
+        removedThread = oldestThread;
+      }
+    });
+
+    await this.attachedFilePersistenceService.removeOrphaned(url);
+
+    return removedThread ? removedThread['num'] : null;
+  }
+
+  /**
+   * Delete comments on board by comment nums and password.
+   * @param url Board URL
+   * @param nums List of comment nums
+   * @param password User's password
+   */
+  public async removeByPassword(url: string, nums: bigint[], password: string): Promise<void> {
+    this.logger.info({ url, password, nums }, 'removeByPassword');
+
+    const batch = await this.prisma.comment.deleteMany({
+      where: {
+        board: { url },
+        password,
+        num: { in: nums }
+      }
+    });
+
+    await this.attachedFilePersistenceService.removeOrphaned(url);
+    this.logger.info({ count: batch.count }, '[SUCCESS] removeByPassword');
+  }
+
+  /**
+   * Remove all posts of current IP from board
+   * @param url Board URL
+   * @param ip Poster's Ip
+   */
+  public async removeByIp(url: string, ip: string): Promise<void> {
+    this.logger.info({ url, ip }, 'removeByIp');
+
+    const batch = await this.prisma.comment.deleteMany({ where: { board: { url }, ip } });
+    await this.attachedFilePersistenceService.removeOrphaned(url);
+    this.logger.info({ count: batch.count }, '[SUCCESS] removeByIp');
+  }
+
+  /**
+   * Remove comment
+   * @param url Board URL
+   * @param num Thread number
+   */
+  public async remove(url: string, num: bigint): Promise<void> {
+    this.logger.info({ url, num }, 'remove');
+
+    const batch = await this.prisma.comment.deleteMany({ where: { board: { url }, num } });
+    await this.attachedFilePersistenceService.removeOrphaned(url);
+    this.logger.info({ count: batch.count }, '[SUCCESS] remove');
   }
 }

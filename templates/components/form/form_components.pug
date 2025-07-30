@@ -1,0 +1,57 @@
+mixin FormInputText(_locale, _name, _size)
+    tr
+        td.postblock= _locale
+        td
+            input(type='text' name=_name size=_size)
+
+
+mixin FormSubject()
+    tr
+        td.postblock= LOCALE.FORM_SUBJECT
+        td
+            input(type='text' name='subject' size=35)
+            input(type='submit' value=LOCALE.FORM_SUBMIIT)
+
+
+mixin FormTextarea(_locale, _name, _rows, _cols)
+    tr
+        td.postblock= _locale
+        td
+            textarea(name=_name rows=_rows cols=_cols)
+
+
+mixin FormFile()
+    tr
+        td.postblock= LOCALE.FORM_FILE
+        td
+            input(type='file' name='file' size=35 accept=board.boardSettings.allowedFileTypes.join(','))
+
+
+mixin FormCaptcha()
+    tr
+        td.postblock= LOCALE.FORM_CAPTCHA
+        td
+            | !{captcha.image}
+            br
+            input(type='text' size=15 name='captcha')
+            input(type='hidden' name='nya' value=captcha.cryptoAnswer)
+
+
+mixin FormPassword()
+    tr
+        td.postblock= LOCALE.FORM_PASSWORD
+        td
+            input(type='password' name='password' size=8)
+            |  (#{LOCALE.FORM_PASSWORD_EXPLANATION})
+
+
+mixin FormRules(_attachment_file_mode)
+    tr
+        td(colspan=2)
+            div.rules
+                if _attachment_file_mode !== 'FORBIDDEN'
+                    ul
+                        li #{LOCALE.FORM_RULES_ALLOWED_FILE_TYPES} #{board.boardSettings.allowedFileTypes.map(t => t.split('/')[1]).join(', ').toUpperCase()}
+                        li #{LOCALE.FORM_RULES_MAX_FILE_SIZE} #{fileSize(board.boardSettings.maxFileSize)}
+                        li #{LOCALE.FORM_RULES_THUMB}
+                | !{board.boardSettings.rules}

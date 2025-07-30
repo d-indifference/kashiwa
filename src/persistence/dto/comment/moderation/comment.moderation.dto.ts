@@ -22,7 +22,7 @@ export class CommentModerationDto {
   /**
    * Parent's thread number on board
    */
-  parentNum: bigint | null;
+  parentNum: bigint;
 
   /**
    * Board URL
@@ -63,7 +63,7 @@ export class CommentModerationDto {
     id: string,
     ip: string,
     num: bigint,
-    parentNum: bigint | null,
+    parentNum: bigint,
     boardUrl: string,
     createdAt: Date,
     name: string,

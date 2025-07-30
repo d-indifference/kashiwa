@@ -28,7 +28,7 @@ export const locale: Record<string, LocaleArgument> = {
   SECONDS: ' seconds',
   BYTES: ' bytes',
   ALLOW_MARKDOWN: 'Allow markdown',
-  ALLOW_MARKDOWN_ABBR: 'If it is set to "no", only replies and citations will be allowed',
+  ALLOW_MARKDOWN_ABBR: 'If it is set to &#34;no&#34;, only replies and citations will be allowed',
   ALLOW_TRIPCODES: 'Allow tripcodes',
   MAX_THREADS_ON_BOARD: 'Max thread on board',
   BUMP_LIMIT: 'Bump limit',
@@ -234,7 +234,14 @@ export const locale: Record<string, LocaleArgument> = {
   MAKE_DUMP: 'Make dump',
   DUMP_CREATED: 'You can find your site dumped archive at: ',
   DB_CONNECTION_IS_NOT_SPEC: 'Database connection is not specified',
-  ENGINE_VERSION: 'Kashiwa engine version'
+  ENGINE_VERSION: 'Kashiwa engine version',
+  BROWSER_DOES_NOT_SUPPORT_FRAMES: 'Your browser doesn`t support frames',
+  POST_NUMBER: 'Post number',
+  POST_PARENT: 'Parent post',
+  BIGINT_VALIDATION_FAILED: 'Validation failed (bigint string is expected)',
+  GLOBAL_SETTINGS_NOT_FOUND: 'Global site settings are not found',
+  SPAM_EXPRESSIONS_NOT_FOUND: 'Spam expressions are not found',
+  IP_BLACK_LIST_NOT_FOUND: 'Ip blacklist does not found'
 };
 
 export const localeValidators: Record<string, (...args: unknown[]) => string> = {
@@ -256,5 +263,6 @@ export const localeValidators: Record<string, (...args: unknown[]) => string> = 
   V_NUMBER_STRING: (...args: string[]) => `"${args[0]}": should be a numeric string<br>`,
   V_MIN_LENGTH: (...args: string[]) => `"${args[0]}": minimal input length is ${args[1]}<br>`,
   V_FILE: (...args: string[]) => `"${args[0]}": should be a file<br>`,
-  V_MAX_FILE_SIZE: (...args: string[]) => `"${args[0]}": the file is too large<br>`
+  V_MAX_FILE_SIZE: (...args: string[]) => `"${args[0]}": the file is too large<br>`,
+  V_BIGINT: (...args: string[]) => `"${args[0]}": must be a bigint or a string representing a bigint<br>`
 };

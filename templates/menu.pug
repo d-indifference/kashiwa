@@ -1,4 +1,4 @@
-include _inc/_styles_script
+include ./components/head/head_attributes
 
 html(xmlns='http://www.w3.org/1999/xhtml' xml:lang=LOCALE.HTML_LANG)
     head
@@ -6,6 +6,6 @@ html(xmlns='http://www.w3.org/1999/xhtml' xml:lang=LOCALE.HTML_LANG)
         meta(name='robots' content='nofollow')
         meta(name='viewport' content='width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0')
         meta(http-equiv='X-UA-Compatible' content='ie=edge')
-        +StylesScript(LOCALE.MENU_FRAME)
+        +HeadAttributes(LOCALE.MENU_FRAME)
     body
         | !{SITE_SETTINGS().menuFrame}

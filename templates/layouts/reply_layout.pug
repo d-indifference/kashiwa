@@ -1,0 +1,9 @@
+include ../components/head/html5_head
+include ../components/footer
+
+html(lang=LOCALE.HTML_LANG)
+    +Html5Head(commons.pageTitle)
+
+    body.replypage
+        block content
+        +Footer()

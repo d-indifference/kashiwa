@@ -47,7 +47,10 @@ export class SessionGuard implements CanActivate {
     }
   }
 
-  private throwForbiddenWithSignInLink() {
+  /**
+   * Throw an exception with localized link
+   */
+  private throwForbiddenWithSignInLink(): void {
     throw new ForbiddenException(LOCALE['YOU_NEED_TO_BE_AUTHORIZED']);
   }
 }

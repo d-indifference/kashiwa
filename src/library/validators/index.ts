@@ -17,7 +17,9 @@ import {
   IsArray,
   IsUUID,
   IsNumberString,
-  MinLength
+  MinLength,
+  registerDecorator,
+  ValidationArguments
 } from 'class-validator';
 import { LOCALE, V_LOCALE, vStr } from '@locale/locale';
 import * as ValidatorJS from 'validator';
@@ -168,3 +170,50 @@ export const KMaxFileSize =
   (field: string, size: number, options?: ValidationOptions) => (obj: object, prop: string) => {
     MaxFileSize(size, { message: V_LOCALE['V_MAX_FILE_SIZE'](vStr(LOCALE[field]), size), ...options })(obj, prop);
   };
+
+/**
+ * Localized wrapper for custom `@IsBigInt`
+ */
+export const KIsBigint = (field: string, options?: ValidationOptions) => (obj: object, prop: string) => {
+  IsBigInt({ message: V_LOCALE['V_BIGINT'](vStr(LOCALE[field])), ...options })(obj, prop);
+};
+
+/**
+ * Validate `bigint` type field with `class-validator`
+ */
+export const IsBigInt = (validationOptions?: ValidationOptions) => {
+  return function (object: object, propertyName: string) {
+    registerDecorator({
+      name: 'isBigInt',
+      target: object.constructor,
+      propertyName,
+      options: validationOptions,
+      validator: {
+        validate(value: unknown, args: ValidationArguments): boolean {
+          if (Array.isArray(value)) {
+            return value.every(isValidBigInt);
+          }
+          return isValidBigInt(value);
+        },
+        defaultMessage(args: ValidationArguments) {
+          return `${args.property} must be a bigint or a string representing a bigint`;
+        }
+      }
+    });
+  };
+};
+
+const isValidBigInt = (value: unknown): boolean => {
+  try {
+    if (typeof value === 'bigint') {
+      return true;
+    }
+    if (typeof value === 'string' && /^-?\d+$/.test(value)) {
+      BigInt(value);
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+};

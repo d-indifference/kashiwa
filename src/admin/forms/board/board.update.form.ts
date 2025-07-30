@@ -1,6 +1,15 @@
-import { IsOptional } from 'class-validator';
-import { Transform } from 'class-transformer';
-import { normalizeBooleanCheckbox, normalizeNumber, normalizeStringArray } from '@admin/transforms';
+import {
+  Form,
+  FormCheckbox,
+  FormCheckboxList,
+  FormCheckboxListOptionOptions,
+  FormHidden,
+  FormInput,
+  FormMethods,
+  FormSelect,
+  FormTextarea
+} from '@admin/lib';
+import { LOCALE } from '@locale/locale';
 import { FileAttachmentMode } from '@prisma/client';
 import { Constants } from '@library/constants';
 import {
@@ -17,16 +26,27 @@ import {
   KMax,
   KMin
 } from '@library/validators';
+import { IsOptional } from 'class-validator';
+import { normalizeBooleanCheckbox, normalizeNumber, normalizeStringArray } from '@library/transforms';
+import { Transform } from 'class-transformer';
 
 const fileAttachmentModes = [FileAttachmentMode.STRICT, FileAttachmentMode.FORBIDDEN, FileAttachmentMode.OPTIONAL];
 
+const allowedFileTypes: FormCheckboxListOptionOptions[] = Constants.SUPPORTED_FILE_TYPES.map(fileType => ({
+  value: fileType,
+  name: 'allowedFileType',
+  displayName: fileType
+}));
+
 /**
- * Form object for creation of new board
+ * Form object for updating of new board
  */
+@Form({ action: '/kashiwa/board/edit', method: FormMethods.POST })
 export class BoardUpdateForm {
   /**
    * Update candidate object ID (strictly required)
    */
+  @FormHidden()
   @KIsString('ID')
   @KIsNotEmpty('ID')
   @KIsUUIDv4('ID')
@@ -35,6 +55,7 @@ export class BoardUpdateForm {
   /**
    * Board URL path
    */
+  @FormInput({ type: 'text', displayName: LOCALE.URL as string, size: 28 })
   @IsOptional()
   @KIsString('URL')
   @KLength('URL', 1, 64)
@@ -44,6 +65,7 @@ export class BoardUpdateForm {
   /**
    * Board Name
    */
+  @FormInput({ type: 'text', displayName: LOCALE.NAME as string, size: 28 })
   @IsOptional()
   @KIsString('NAME')
   @KLength('NAME', 2, 256)
@@ -52,6 +74,7 @@ export class BoardUpdateForm {
   /**
    * Is posting enabled
    */
+  @FormCheckbox({ displayName: LOCALE.ALLOW_POSTING as string })
   @IsOptional()
   @Transform(normalizeBooleanCheckbox)
   @KIsBoolean('ALLOW_POSTING')
@@ -60,6 +83,9 @@ export class BoardUpdateForm {
   /**
    * Disable Name & Email fields
    */
+  @FormCheckbox({
+    displayName: `<abbr title="${LOCALE.STRICT_ANONYMITY_ABBR as string}">${LOCALE.STRICT_ANONYMITY as string}</abbr>`
+  })
   @IsOptional()
   @Transform(normalizeBooleanCheckbox)
   @KIsBoolean('STRICT_ANONYMITY')
@@ -71,6 +97,14 @@ export class BoardUpdateForm {
    * `OPTIONAL` - File attachment is optional
    * `FORBIDDEN` - Files are strictly prohibited
    */
+  @FormSelect({
+    displayName: LOCALE.THREAD_FILE_POLICY as string,
+    options: [
+      { displayName: LOCALE.FILE_POLICY_STRICT as string, value: FileAttachmentMode.STRICT },
+      { displayName: LOCALE.FILE_POLICY_OPTIONAL as string, value: FileAttachmentMode.OPTIONAL },
+      { displayName: LOCALE.FILE_POLICY_FORBIDDEN as string, value: FileAttachmentMode.FORBIDDEN }
+    ]
+  })
   @IsOptional()
   @KIsString('THREAD_FILE_POLICY')
   @KIsIn('THREAD_FILE_POLICY', fileAttachmentModes)
@@ -82,6 +116,14 @@ export class BoardUpdateForm {
    * `OPTIONAL` - File attachment is optional <br>
    * `FORBIDDEN` - Files are strictly prohibited
    */
+  @FormSelect({
+    displayName: LOCALE.REPLY_FILE_POLICY as string,
+    options: [
+      { displayName: LOCALE.FILE_POLICY_STRICT as string, value: FileAttachmentMode.STRICT },
+      { displayName: LOCALE.FILE_POLICY_OPTIONAL as string, value: FileAttachmentMode.OPTIONAL },
+      { displayName: LOCALE.FILE_POLICY_FORBIDDEN as string, value: FileAttachmentMode.FORBIDDEN }
+    ]
+  })
   @IsOptional()
   @KIsString('REPLY_FILE_POLICY')
   @KIsIn('REPLY_FILE_POLICY', fileAttachmentModes)
@@ -90,6 +132,10 @@ export class BoardUpdateForm {
   /**
    * Delay between threads creations (seconds)
    */
+  @FormInput({
+    type: 'number',
+    displayName: `${LOCALE.DELAY_AFTER_THREAD as string} (${LOCALE.SECONDS as string})`
+  })
   @IsOptional()
   @Transform(normalizeNumber)
   @KIsNumber('DELAY_AFTER_THREAD')
@@ -99,6 +145,10 @@ export class BoardUpdateForm {
   /**
    * Delay between replies creations (seconds)
    */
+  @FormInput({
+    type: 'number',
+    displayName: `${LOCALE.DELAY_AFTER_REPLY as string} (${LOCALE.SECONDS as string})`
+  })
   @IsOptional()
   @Transform(normalizeNumber)
   @KIsNumber('DELAY_AFTER_REPLY')
@@ -108,6 +158,10 @@ export class BoardUpdateForm {
   /**
    * Minimal uploaded file size (bytes)
    */
+  @FormInput({
+    type: 'number',
+    displayName: `${LOCALE.MIN_FILE_SIZE as string} (${LOCALE.BYTES as string})`
+  })
   @IsOptional()
   @Transform(normalizeNumber)
   @KIsNumber('MIN_FILE_SIZE')
@@ -117,6 +171,10 @@ export class BoardUpdateForm {
   /**
    * Maximal uploaded file size (bytes)
    */
+  @FormInput({
+    type: 'number',
+    displayName: `${LOCALE.MAX_FILE_SIZE as string} (${LOCALE.BYTES as string})`
+  })
   @IsOptional()
   @Transform(normalizeNumber)
   @KIsNumber('MAX_FILE_SIZE')
@@ -128,6 +186,9 @@ export class BoardUpdateForm {
    * `true` - full wakaba markdown opportunities are enabled <br>
    * `false` - only replies (`>>123`), citations (`> test`) and links will be formated. <br>
    */
+  @FormCheckbox({
+    displayName: `<abbr title="${LOCALE.ALLOW_MARKDOWN_ABBR as string}">${LOCALE.ALLOW_MARKDOWN as string}</abbr>`
+  })
   @IsOptional()
   @Transform(normalizeBooleanCheckbox)
   @KIsBoolean('ALLOW_MARKDOWN')
@@ -136,6 +197,7 @@ export class BoardUpdateForm {
   /**
    * Allow tripcode parsing
    */
+  @FormCheckbox({ displayName: LOCALE.ALLOW_TRIPCODES as string })
   @IsOptional()
   @Transform(normalizeBooleanCheckbox)
   @KIsBoolean('ALLOW_TRIPCODES')
@@ -144,6 +206,10 @@ export class BoardUpdateForm {
   /**
    * The maximum number of threads that can be on the board at the same time
    */
+  @FormInput({
+    type: 'number',
+    displayName: LOCALE.MAX_THREADS_ON_BOARD as string
+  })
   @IsOptional()
   @Transform(normalizeNumber)
   @KIsNumber('MAX_THREADS_ON_BOARD')
@@ -153,6 +219,10 @@ export class BoardUpdateForm {
   /**
    * Number of posts after which the thread will not rise
    */
+  @FormInput({
+    type: 'number',
+    displayName: LOCALE.BUMP_LIMIT as string
+  })
   @IsOptional()
   @Transform(normalizeNumber)
   @KIsNumber('BUMP_LIMIT')
@@ -162,6 +232,10 @@ export class BoardUpdateForm {
   /**
    * Maximal size of Name, Email and subject fields
    */
+  @FormInput({
+    type: 'number',
+    displayName: `<abbr title="${LOCALE.MAX_STRING_FIELD_SIZE_ABBR as string}">${LOCALE.MAX_STRING_FIELD_SIZE as string}</abbr>`
+  })
   @IsOptional()
   @Transform(normalizeNumber)
   @KIsNumber('MAX_STRING_FIELD_SIZE')
@@ -172,6 +246,10 @@ export class BoardUpdateForm {
   /**
    * Maximal size of Comment field
    */
+  @FormInput({
+    type: 'number',
+    displayName: LOCALE.MAX_COMMENT_SIZE as string
+  })
   @IsOptional()
   @Transform(normalizeNumber)
   @KIsNumber('MAX_COMMENT_SIZE')
@@ -181,6 +259,7 @@ export class BoardUpdateForm {
   /**
    * Default poster name
    */
+  @FormInput({ type: 'text', displayName: LOCALE.DEFAULT_POSTER_NAME as string, size: 28 })
   @IsOptional()
   @KIsString('DEFAULT_POSTER_NAME')
   @KLength('DEFAULT_POSTER_NAME', 1, 256)
@@ -189,6 +268,7 @@ export class BoardUpdateForm {
   /**
    * Default moderator name
    */
+  @FormInput({ type: 'text', displayName: LOCALE.DEFAULT_MODERATOR_NAME as string, size: 28 })
   @IsOptional()
   @KIsString('DEFAULT_MODERATOR_NAME')
   @KLength('DEFAULT_MODERATOR_NAME', 1, 256)
@@ -197,6 +277,7 @@ export class BoardUpdateForm {
   /**
    * Enable captcha
    */
+  @FormCheckbox({ displayName: LOCALE.ENABLE_CAPTCHA as string })
   @IsOptional()
   @Transform(normalizeBooleanCheckbox)
   @KIsBoolean('ENABLE_CAPTCHA')
@@ -205,6 +286,7 @@ export class BoardUpdateForm {
   /**
    * Set case sensitivity for captcha
    */
+  @FormCheckbox({ displayName: LOCALE.IS_CAPTCHA_CASE_SENSITIVE as string })
   @IsOptional()
   @Transform(normalizeBooleanCheckbox)
   @KIsBoolean('IS_CAPTCHA_CASE_SENSITIVE')
@@ -213,6 +295,10 @@ export class BoardUpdateForm {
   /**
    * List of supported file types for current board (MIME)
    */
+  @FormCheckboxList({
+    displayName: LOCALE.ALLOWED_FILE_TYPES as string,
+    values: allowedFileTypes
+  })
   @IsOptional()
   @Transform(normalizeStringArray)
   @KIsArray('ALLOWED_FILE_TYPES')
@@ -222,6 +308,7 @@ export class BoardUpdateForm {
   /**
    * HTML fragment with board rules
    */
+  @FormTextarea({ displayName: LOCALE.RULES as string, rows: 6, cols: 60 })
   @IsOptional()
   @KIsString('RULES')
   rules: string;

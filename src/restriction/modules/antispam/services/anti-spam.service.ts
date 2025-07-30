@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { LOCALE } from '@locale/locale';
+import { SiteContextProvider } from '@library/providers';
 
 /** Base template for a posting form  */
 interface PostingForm {
@@ -10,36 +11,46 @@ interface PostingForm {
 }
 
 /**
- * Service for spam protection
+ * Service for spam protection.
+ * Uses regular expressions from site context to validate user-submitted fields.
  */
 @Injectable()
 export class AntiSpamService {
-  /**
-   * Check if the spam is contained in Name, Email, Subject and Comment fields
-   * If spam is detected, throws 400.
-   * @param form Posting form
-   * @param isAdmin Check if poster is administrator or moderator
-   */
-  public checkSpam<T extends PostingForm>(form: T, isAdmin: boolean): void {
-    if (!isAdmin) {
-      const spamExpressions: string[] = global.spamExpressions;
+  private compiledSpamRegexes: RegExp[];
 
-      for (const exp of spamExpressions) {
-        this.testRegExp(exp, form.name);
-        this.testRegExp(exp, form.email);
-        this.testRegExp(exp, form.subject);
-        this.testRegExp(exp, form.comment);
-      }
-    }
+  constructor(private readonly siteContext: SiteContextProvider) {
+    this.compileSpamRegexes();
   }
 
-  /** Tests regexp. If matched, throw 400 */
-  private testRegExp(pattern: string, input?: string): void {
-    const regex = new RegExp(pattern, 'ig');
+  /**
+   * Get spam base from memory and compile it to regexp array
+   */
+  public compileSpamRegexes(): void {
+    this.compiledSpamRegexes = ((this.siteContext.getSpamExpressions() || []) as string[]).map(
+      pattern => new RegExp(pattern, 'i')
+    );
+  }
 
-    if (input) {
-      if (regex.test(input)) {
-        throw new BadRequestException((LOCALE['INPUT_CONTAINS_SPAM'] as CallableFunction)(pattern));
+  /**
+   * Checks the form fields for spam based on predefined regex patterns.
+   * Throws an exception if a spam pattern is found in any field (for non-admins).
+   * @param form The posting form to check
+   * @param isAdmin Whether the user is an admin and should bypass the spam check
+   */
+  public checkSpam<T extends PostingForm>(form: T, isAdmin: boolean): void {
+    if (isAdmin) {
+      return;
+    }
+
+    const fieldsToCheck = [form.name, form.email, form.subject, form.comment];
+
+    for (const regex of this.compiledSpamRegexes) {
+      for (const field of fieldsToCheck) {
+        if (field) {
+          if (regex.test(field)) {
+            throw new BadRequestException((LOCALE['INPUT_CONTAINS_SPAM'] as CallableFunction)(regex.source));
+          }
+        }
       }
     }
   }

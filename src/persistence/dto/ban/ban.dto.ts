@@ -34,12 +34,26 @@ export class BanDto {
    */
   user?: UserDto | null;
 
-  constructor(id: string, createdAt: Date, ip: string, till: Date, reason: string, user: UserDto | null) {
+  /**
+   * URL of board. If it is `null`, user will be banned everywhere
+   */
+  boardUrl: string | null;
+
+  constructor(
+    id: string,
+    createdAt: Date,
+    ip: string,
+    till: Date,
+    reason: string,
+    user: UserDto | null,
+    boardUrl: string | null
+  ) {
     this.id = id;
     this.createdAt = createdAt;
     this.ip = ip;
     this.till = till;
     this.reason = reason;
     this.user = user;
+    this.boardUrl = boardUrl;
   }
 }

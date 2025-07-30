@@ -1,171 +1,105 @@
 import { Injectable } from '@nestjs/common';
-import { Comment, AttachedFile } from '@prisma/client';
-import { CommentDto, AttachedFileDto } from '@persistence/dto/comment/common';
-import { PrismaService } from '@persistence/lib';
+import { AttachedFile, Board, Comment } from '@prisma/client';
+import { AttachedFileDto, CommentDto } from '@persistence/dto/comment/common';
 import { ThreadCollapsedDto } from '@persistence/dto/comment/collapsed';
-import { Page } from '@persistence/lib/page';
 import { Constants } from '@library/constants';
-import { reverse } from 'lodash';
 import { AttachedFileModerationDto, CommentModerationDto } from '@persistence/dto/comment/moderation';
-import { BoardShortDto } from '@persistence/dto/board';
 
 /**
  * Mappings for `Comment` model
  */
 @Injectable()
 export class CommentMapper {
-  constructor(private readonly prisma: PrismaService) {}
+  public toDto(comment: Comment, replies: Comment[] = []): CommentDto {
+    return {
+      id: comment.id,
+      num: comment.num,
+      createdAt: comment.createdAt,
+      isAdmin: comment.isAdmin,
+      name: comment.name,
+      tripcode: comment.tripcode,
+      subject: comment.subject,
+      email: comment.email,
+      comment: comment.comment,
+      hasSage: comment.hasSage,
+      attachedFile: this.mapAttachedFile(comment['attachedFile'] as AttachedFile),
+      children: replies.map(reply => this.toDto(reply))
+    };
+  }
 
   /**
-   * Async map page of comments as board page with thread preview
-   * @param page Page of `Comment` (opening post) model
+   * Map model to collapsed DTO
+   * @param comment Prisma `Comment` model
    */
-  public async mapBoardPage(page: Page<Comment>): Promise<Page<ThreadCollapsedDto>> {
-    const mappedPage = new Page<ThreadCollapsedDto>();
-    mappedPage.content = [];
-    mappedPage.current = page.current;
-    mappedPage.total = page.total;
-    mappedPage.previous = page.previous;
-    mappedPage.next = page.next;
+  public toCollapsedDto(comment: Comment): ThreadCollapsedDto {
+    const omitted = this.mapOmittedPosts(comment);
 
-    const newContent: ThreadCollapsedDto[] = [];
+    let children = comment['children'] as Comment[];
 
-    for (const c of page.content) {
-      newContent.push(await this.openingPostToCollapsedThread(c));
+    if (children.length > Constants.DEFAULT_LAST_REPLIES_COUNT) {
+      children = children.slice(-Constants.DEFAULT_LAST_REPLIES_COUNT);
     }
-
-    mappedPage.content = newContent;
-
-    return mappedPage;
-  }
-
-  /**
-   * Map `Comment` to `CommentDto`
-   * @param model `Comment` Prisma model
-   * @param attachedFile `Comment`'s `AttachedFile` model
-   * @param children `Comment`'s replies
-   */
-  public toDto(model: Comment, attachedFile: AttachedFile | null, children: Comment[]): CommentDto {
-    const childrenDto: CommentDto[] = [];
-
-    if (children.length > 0) {
-      children.forEach(child => {
-        childrenDto.push(this.toDto(child, child['attachedFile'], []));
-      });
-    }
-
-    const attachedFileDto = this.attachedFileToDto(attachedFile);
-
-    return new CommentDto(
-      model.num,
-      model.createdAt,
-      model.isAdmin,
-      model.name,
-      model.email,
-      model.tripcode,
-      model.subject,
-      model.comment,
-      model.hasSage,
-      attachedFileDto,
-      childrenDto
-    );
-  }
-
-  /**
-   * Map `AttachedFile` to DTO
-   * @param model `AttachedFile` model
-   */
-  public attachedFileToDto(model: AttachedFile | null): AttachedFileDto | null {
-    if (!model) {
-      return null;
-    }
-
-    return new AttachedFileDto(
-      model.name,
-      model.size,
-      model.width,
-      model.height,
-      model.mime,
-      model.isImage,
-      model.thumbnail,
-      model.thumbnailWidth,
-      model.thumbnailHeight
-    );
-  }
-
-  /**
-   * Map `Comment` to moderation DTO
-   * @param model `Comment` model
-   * @param board Board short DTO
-   */
-  public toModerationDto(board: BoardShortDto, model: Comment): CommentModerationDto {
-    const attachedFile = this.attachedFileToModerationDto(board, model['attachedFile']);
-
-    const parentNum = model['parent'] ? (model['parent'].num as bigint) : model.num;
-
-    return new CommentModerationDto(
-      model.id,
-      model.ip,
-      model.num,
-      parentNum,
-      board.url,
-      model.createdAt,
-      model.name,
-      model.email,
-      model.subject,
-      model.comment,
-      attachedFile
-    );
-  }
-
-  /**
-   * Map `AttachedFile` to moderation DTO
-   * @param model `AttachedFile` model
-   * @param board Board short DTO
-   */
-  public attachedFileToModerationDto(
-    board: BoardShortDto,
-    model: AttachedFile | null
-  ): AttachedFileModerationDto | null {
-    if (!model) {
-      return null;
-    }
-
-    return new AttachedFileModerationDto(
-      model.id,
-      board.url,
-      model.name,
-      model.thumbnail,
-      model.thumbnailWidth,
-      model.thumbnailHeight,
-      model.isImage,
-      model.mime
-    );
-  }
-
-  /**
-   * Map comment (opening post) as thread preview and enrich post by last replies
-   */
-  private async openingPostToCollapsedThread(comment: Comment): Promise<ThreadCollapsedDto> {
-    const lastReplies = await this.prisma.comment.findMany({
-      where: { parentId: comment.id },
-      orderBy: [{ createdAt: 'desc' }],
-      include: { attachedFile: true },
-      take: Constants.DEFAULT_LAST_REPLIES_COUNT
-    });
-
-    const lastFiles = lastReplies.filter(r => r.attachedFile).length;
-
-    const allRepliesCount = await this.prisma.comment.count({ where: { parentId: comment.id } });
-
-    const allFilesCount = await this.prisma.comment.count({
-      where: { parentId: comment.id, NOT: { attachedFileId: null } }
-    });
 
     return {
-      thread: this.toDto(comment, comment['attachedFile'], reverse(lastReplies)),
-      omittedPosts: allRepliesCount - lastReplies.length,
-      omittedFiles: allFilesCount - lastFiles
+      thread: this.toDto(comment, children),
+      ...omitted
+    };
+  }
+
+  /**
+   * Map model to moderation DTO
+   * @param comment Prisma `Comment` model
+   */
+  public toModerationDto(comment: Comment): CommentModerationDto {
+    const parent = comment['parent'] as Comment | null;
+    const attachedFile = comment['attachedFile'] as AttachedFile | null;
+    const board = comment['board'] as Board;
+
+    return {
+      ...comment,
+      parentNum: parent ? parent.num : comment.num,
+      attachedFile: this.mapAttachedFileModeration(attachedFile),
+      boardUrl: board.url
+    };
+  }
+
+  private mapOmittedPosts(comment: Comment): Pick<ThreadCollapsedDto, 'omittedPosts' | 'omittedFiles'> {
+    const children = comment['children'] as Comment[];
+
+    if (children.length > Constants.DEFAULT_LAST_REPLIES_COUNT) {
+      const omittedPosts = children.slice(0, children.length - Constants.DEFAULT_LAST_REPLIES_COUNT);
+      const omittedFilesCount = omittedPosts.filter(p => p.attachedFileId).length;
+
+      return { omittedFiles: omittedFilesCount, omittedPosts: omittedPosts.length };
+    }
+
+    return { omittedPosts: 0, omittedFiles: 0 };
+  }
+
+  /**
+   * Map attached file model to common dto
+   */
+  private mapAttachedFile(model: AttachedFile | null): AttachedFileDto | null {
+    if (!model) {
+      return null;
+    }
+
+    return { ...model };
+  }
+
+  /**
+   * Map attached file model to moderation dto
+   */
+  private mapAttachedFileModeration(model: AttachedFile | null): AttachedFileModerationDto | null {
+    if (!model) {
+      return null;
+    }
+
+    const board = model['board'] as Board;
+
+    return {
+      ...model,
+      boardUrl: board.url
     };
   }
 }

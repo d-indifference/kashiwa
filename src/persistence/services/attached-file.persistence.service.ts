@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@persistence/lib';
-import { AttachedFile } from '@prisma/client';
-import { FilesystemOperator } from '@library/filesystem';
-import { Constants } from '@library/constants';
 import { PinoLogger } from 'nestjs-pino';
+import { FileSystemProvider } from '@library/providers';
+import { AttachedFile } from '@prisma/client';
+import { Constants } from '@library/constants';
 
 /**
  * Database queries for `Comment` model
@@ -12,6 +12,7 @@ import { PinoLogger } from 'nestjs-pino';
 export class AttachedFilePersistenceService {
   constructor(
     private readonly prisma: PrismaService,
+    private readonly fileSystem: FileSystemProvider,
     private readonly logger: PinoLogger
   ) {
     this.logger.setContext(AttachedFilePersistenceService.name);
@@ -28,86 +29,98 @@ export class AttachedFilePersistenceService {
       include: { comments: { include: { board: true } } }
     });
 
-    if (!entity) {
-      return null;
-    }
-
-    return entity;
+    return entity ?? null;
   }
 
   /**
-   * Remove `AttachedFile` by ID with files on disk
-   * @param id `AttachedFile` ID
+   * Clear file on board by comment nums and password.
+   * @param url Board URL
+   * @param nums List of comment nums
+   * @param password User's password
    */
-  public async removeById(id: string): Promise<void> {
-    this.logger.info({ id }, 'removeById');
+  public async clearByPassword(url: string, nums: bigint[], password: string): Promise<void> {
+    this.logger.info({ url, password, nums }, 'clearByPassword');
 
-    const file = await this.prisma.attachedFile.findFirst({ where: { id } });
+    await this.prisma.$transaction(async tx => {
+      const updateCandidates = await tx.attachedFile.findMany({
+        where: { comments: { some: { board: { url }, num: { in: nums }, password } } },
+        select: { id: true, name: true, thumbnail: true }
+      });
 
-    if (file) {
-      await this.removeFileFromDisk(file);
-    }
+      const batch = await tx.attachedFile.updateMany({
+        data: { name: 'NO_THUMB', thumbnail: null },
+        where: { id: { in: updateCandidates.map(c => c.id) } }
+      });
 
-    await this.prisma.attachedFile.delete({ where: { id } });
-  }
+      await Promise.all(
+        updateCandidates.map(
+          async c =>
+            await Promise.all([
+              await this.fileSystem.removePath([url, Constants.SRC_DIR, c.name]),
+              await this.fileSystem.removePath([url, Constants.THUMB_DIR, c.thumbnail ?? '0'])
+            ])
+        )
+      );
 
-  /**
-   * User clear file by comment ID
-   * @param commentId Comment ID
-   */
-  public async clearFileByCommentId(commentId: string): Promise<void> {
-    this.logger.info({ commentId }, 'clearFileByCommentId');
-
-    const comment = await this.prisma.comment.findFirst({
-      include: { attachedFile: true, board: true },
-      where: { id: commentId }
+      this.logger.info({ count: batch.count }, '[SUCCESS] clearByPassword');
     });
+  }
 
-    if (comment) {
-      if (comment.attachedFile) {
-        await FilesystemOperator.remove(comment.board.url, Constants.SRC_DIR, comment.attachedFile.name);
-        if (comment.attachedFile.thumbnail) {
-          await FilesystemOperator.remove(comment.board.url, Constants.THUMB_DIR, comment.attachedFile.thumbnail);
+  /**
+   * Clear file on board by comment num
+   * @param url Board URL
+   * @param num Comment number
+   */
+  public async clearFromComment(url: string, num: bigint): Promise<void> {
+    this.logger.info({ url, num }, 'clearFromComment');
+
+    await this.prisma.$transaction(async tx => {
+      const comment = await tx.comment.findFirst({
+        where: { board: { url }, num, NOT: { attachedFile: null } },
+        include: { attachedFile: true }
+      });
+
+      if (comment) {
+        if (comment.attachedFile) {
+          const updated = await tx.attachedFile.update({
+            where: { id: comment.attachedFile?.id },
+            data: { name: 'NO_THUMB', thumbnail: null }
+          });
+          await Promise.all([
+            await this.fileSystem.removePath([url, Constants.SRC_DIR, comment.attachedFile?.name]),
+            await this.fileSystem.removePath([url, Constants.THUMB_DIR, comment.attachedFile?.thumbnail ?? '0'])
+          ]);
+
+          this.logger.info({ id: updated.id }, '[SUCCESS] clearFromComment');
         }
-
-        await this.prisma.attachedFile.update({
-          where: { id: comment.attachedFile.id },
-          data: { name: 'NO_THUMB', thumbnail: null }
-        });
       }
-    }
+    });
   }
 
   /**
-   * Remove orphaned `AttachedFile` from database and from disk
+   * Remove files without comments from board
+   * @param url Board URL
    */
-  public async removeOrphaned(): Promise<void> {
-    this.logger.info('removeOrphaned');
+  public async removeOrphaned(url: string): Promise<void> {
+    this.logger.info({ url }, 'removeOrphaned');
 
-    const orphanedFiles = await this.prisma.attachedFile.findMany({ where: { comments: { none: {} } } });
+    await this.prisma.$transaction(async tx => {
+      const orphaned = await tx.attachedFile.findMany({
+        where: { comments: { none: {} }, board: { url } }
+      });
 
-    for (const file of orphanedFiles) {
-      await this.removeFileFromDisk(file);
-    }
+      await Promise.all(
+        orphaned.map(
+          async file =>
+            await Promise.all([
+              await this.fileSystem.removePath([url, Constants.SRC_DIR, file.name]),
+              await this.fileSystem.removePath([url, Constants.THUMB_DIR, file.thumbnail ?? '0'])
+            ])
+        )
+      );
 
-    await this.prisma.attachedFile.deleteMany({ where: { id: { in: orphanedFiles.map(file => file.id) } } });
-  }
-
-  /**
-   * Remove orphaned `AttachedFile` from disk
-   * @param file `AttachedFile` model
-   */
-  private async removeFileFromDisk(file: AttachedFile): Promise<void> {
-    const boardUrlsResult = await this.prisma.board.findMany({ select: { url: true } });
-
-    const boardUrls = boardUrlsResult.map(val => val.url);
-
-    for (const board of boardUrls) {
-      await FilesystemOperator.remove(board, Constants.SRC_DIR, file.name);
-
-      if (file.thumbnail) {
-        await FilesystemOperator.remove(board, Constants.THUMB_DIR, file.thumbnail);
-      }
-    }
+      const batch = await tx.attachedFile.deleteMany({ where: { id: { in: orphaned.map(o => o.id) } } });
+      this.logger.info({ count: batch.count }, '[SUCCESS] removeOrphaned');
+    });
   }
 }

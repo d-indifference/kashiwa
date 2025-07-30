@@ -1,8 +1,9 @@
 import { MemoryStoredFile } from 'nestjs-form-data';
 import { IsOptional } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { normalizeFormEmptyString } from '@admin/transforms';
+import { normalizeFormEmptyString } from '@library/transforms';
 import { KIsFile, KIsNotEmpty, KIsString, KLength, KMaxFileSize, KMinLength } from '@library/validators';
+import { Constants } from '@library/constants';
 
 /**
  * Form for thread creation
@@ -50,14 +51,14 @@ export class ThreadCreateForm {
   @IsOptional()
   @KIsString('FORM_PASSWORD')
   @KLength('FORM_PASSWORD', 8, 8)
-  password: string = '';
+  password?: string = '';
 
   /**
    * `File` field
    */
   @IsOptional()
   @KIsFile('FORM_FILE')
-  @KMaxFileSize('FORM_FILE', 20e6 - 1)
+  @KMaxFileSize('FORM_FILE', Constants.MAX_VALIDATED_FILE_SIZE)
   @Transform(normalizeFormEmptyString)
   file?: MemoryStoredFile;
 

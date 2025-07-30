@@ -1,44 +1,40 @@
 import { Injectable } from '@nestjs/common';
+import { AttachedFilePersistenceService, BoardPersistenceService } from '@persistence/services';
+import { FormFileProvider } from '@posting/providers';
 import { Prisma } from '@prisma/client';
-import { AttachedFilePersistenceService } from '@persistence/services';
-import { FilesystemOperator, ImageboardFileProvider } from '@library/filesystem';
 import { MemoryStoredFile } from 'nestjs-form-data';
 
 /**
- * Service for `AttachedFile` creation processing
+ * Service for working with attached files
  */
 @Injectable()
 export class AttachedFileService {
   constructor(
     private readonly attachedFilePersistenceService: AttachedFilePersistenceService,
-    private readonly imageboardFileProvider: ImageboardFileProvider
+    private readonly boardPersistenceService: BoardPersistenceService,
+    private readonly formFileProvider: FormFileProvider
   ) {}
 
   /**
-   * Returns `AttachedFileCreationInput` and saves file if file does not exist on board.
-   * If file exists, returns Prisma connection input of file
-   * @param file File data from form
-   * @param board Board URL
+   * Save attached file and get its Prisma creation input
+   * @param file File from form data
+   * @param boardUrl Board URL
    */
-  public async createAttachedFileCreationInput(
+  public async createAttachedFile(
     file: MemoryStoredFile | undefined,
-    board: string
+    boardUrl: string
   ): Promise<Pick<Prisma.CommentCreateInput, 'attachedFile'>> {
-    if (!file) {
-      return {};
-    }
+    if (file) {
+      const md5 = this.formFileProvider.md5(file);
+      const fileByMd5 = await this.attachedFilePersistenceService.findFileByMd5(md5, boardUrl);
 
-    const md5 = FilesystemOperator.md5(file.buffer);
+      if (fileByMd5) {
+        return { attachedFile: { connect: { id: fileByMd5.id } } };
+      }
 
-    const fileByMd5 = await this.attachedFilePersistenceService.findFileByMd5(md5, board);
+      const board = await this.boardPersistenceService.findByUrl(boardUrl);
 
-    if (fileByMd5) {
-      return { attachedFile: { connect: { id: fileByMd5.id } } };
-    }
-    const newAttachedFile = await this.imageboardFileProvider.saveFile(file, board, md5);
-
-    if (newAttachedFile) {
-      return { attachedFile: { create: newAttachedFile } };
+      return { attachedFile: { create: await this.formFileProvider.saveFile(file, board, md5) } };
     }
 
     return {};

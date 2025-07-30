@@ -1,5 +1,4 @@
 import {
-  Body,
   Controller,
   Get,
   Param,
@@ -16,13 +15,9 @@ import { ModerationService } from '@admin/services';
 import { SessionGuard } from '@admin/guards';
 import { PageRequest } from '@persistence/lib/page';
 import { ISession } from '@admin/interfaces';
-import { ListPage } from '@admin/pages';
-import { BoardShortDto } from '@persistence/dto/board';
-import { CommentModerationDto } from '@persistence/dto/comment/moderation';
-import { formatDateTime } from '@library/page-compiler';
-import { FormDataRequest } from 'nestjs-form-data';
+import { TablePage } from '@admin/pages';
 import { Response } from 'express';
-import { ModerationDeletePostForm } from '@admin/forms/moderation';
+import { ParseBigintPipe } from '@library/pipes';
 
 @Controller('kashiwa/moderation')
 export class ModerationController {
@@ -30,35 +25,48 @@ export class ModerationController {
 
   @Get()
   @UseGuards(SessionGuard)
-  @Render('admin/moderation/admin-moderation-boards-list')
+  @Render('admin/common_table_page')
   public async getBoardsList(
     @Query(new ValidationPipe({ transform: true })) page: PageRequest,
     @Session() session: ISession
-  ): Promise<ListPage<BoardShortDto>> {
-    return await this.moderationService.getBoardsList(page, session);
+  ): Promise<TablePage> {
+    return await this.moderationService.findBoardsForModeration(session, page);
   }
 
-  @Get(':boardId')
+  @Get(':id')
   @UseGuards(SessionGuard)
-  @Render('admin/moderation/admin-moderation-list')
-  public async getCommentsList(
-    @Param('boardId', ParseUUIDPipe) boardId: string,
+  @Render('admin/common_table_page')
+  public async getCommentsForModeration(
+    @Param('id', ParseUUIDPipe) id: string,
     @Query(new ValidationPipe({ transform: true })) page: PageRequest,
     @Session() session: ISession
-  ): Promise<ListPage<CommentModerationDto> & { boardId: string; formatDateTime: (dateTime: Date) => string }> {
-    const pageList = await this.moderationService.getCommentsList(boardId, page, session);
-
-    return { ...pageList, boardId, formatDateTime };
+  ): Promise<TablePage> {
+    return await this.moderationService.findCommentsForModeration(session, id, page);
   }
 
-  @Post('delete-post/:commentId')
+  @Post('delete-post/:url/:num')
   @UseGuards(SessionGuard)
-  @FormDataRequest()
   public async deletePost(
-    @Param('commentId', ParseUUIDPipe) commentId: string,
-    @Body() form: ModerationDeletePostForm,
+    @Param('url') url: string,
+    @Param('num', ParseBigintPipe) num: bigint,
     @Res() res: Response
   ): Promise<void> {
-    await this.moderationService.deletePost(commentId, form, res);
+    await this.moderationService.deleteComment(url, num, res);
+  }
+
+  @Post('delete-file/:url/:num')
+  @UseGuards(SessionGuard)
+  public async deleteFile(
+    @Param('url') url: string,
+    @Param('num', ParseBigintPipe) num: bigint,
+    @Res() res: Response
+  ): Promise<void> {
+    await this.moderationService.clearFile(url, num, res);
+  }
+
+  @Post('delete-by-ip/:url/:ip')
+  @UseGuards(SessionGuard)
+  public async deleteByIp(@Param('url') url: string, @Param('ip') ip: string, @Res() res: Response): Promise<void> {
+    await this.moderationService.deleteAllByIp(url, ip, res);
   }
 }

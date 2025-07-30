@@ -1,0 +1,18 @@
+include ./form_components
+
+
+mixin ThreadForm()
+    table
+        tbody
+            if !board.boardSettings.strictAnonymity
+                +FormInputText(LOCALE.FORM_NAME, 'name', 28)
+                +FormInputText(LOCALE.FORM_EMAIL, 'email', 28)
+            +FormSubject()
+            +FormTextarea(LOCALE.FORM_COMMENT, 'comment', 6, 60)
+            if board.boardSettings.threadFileAttachmentMode !== 'FORBIDDEN'
+                +FormFile()
+            if board.boardSettings.enableCaptcha
+                +FormCaptcha()
+            +FormPassword()
+            +FormRules(board.boardSettings.threadFileAttachmentMode)
+    hr

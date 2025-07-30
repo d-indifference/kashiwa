@@ -9,12 +9,13 @@ import {
   CommentPersistenceService,
   BanPersistenceService
 } from '@persistence/services';
+import { LibraryModule } from '@library/library.module';
 
 /**
  * Module for Prisma queries
  */
 @Module({
-  imports: [ConfigModule],
+  imports: [ConfigModule, LibraryModule],
   providers: [
     PrismaService,
     UserMapper,

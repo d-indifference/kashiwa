@@ -1,0 +1,37 @@
+mixin HeadAttributes(title)
+    link(rel='shortcut icon' type='image/x-icon' href='/favicon.ico')
+    link(rel='stylesheet' type='text/css' href='/css/global.css')
+    link(rel='stylesheet' type='text/css' href='/css/futaba.css' title='Futaba')
+    link(rel='alternate stylesheet' type='text/css' href='/css/photon.css' title='Photon' disabled=true)
+    link(rel='alternate stylesheet' type='text/css' href='/css/burichan.css' title='Burichan' disabled=true)
+
+    title
+        | #{title} - #{SITE_SETTINGS().siteName}
+
+    script(src='/js/jquery-1.4.min.js')
+    script(src='/js/kashiwa.js')
+
+    script.
+      var styleCookie = 'kashiwa_style';
+      var nameCookie = 'kashiwa_name';
+      var emailCookie = 'kashiwa_email'
+      var passwordCookie = 'kashiwa_pass';
+
+    script.
+        window.onload = function() {
+            setStyle(styleCookie);
+            setNameFromCookies(nameCookie, 'postform');
+            setEmailFromCookies(emailCookie, 'postform');
+
+            var match;
+
+            if (match = /#i([0-9]+)/.exec(document.location.toString())) {
+                if (!document.forms.postform.comment.value) {
+                    insert('postform', '>>' + match[1]);
+                }
+            }
+
+            if (match = /#([0-9]+)/.exec(document.location.toString())) {
+                highlightPost(match[1]);
+            }
+        }

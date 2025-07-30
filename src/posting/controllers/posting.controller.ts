@@ -3,12 +3,16 @@ import { FormDataRequest } from 'nestjs-form-data';
 import { ReplyCreateForm, ThreadCreateForm } from '@posting/forms';
 import { Response } from 'express';
 import { RealIP } from 'nestjs-real-ip';
-import { PostingService } from '@posting/services';
 import { ISession } from '@admin/interfaces';
+import { CommentCreateService } from '@posting/services';
+import { RestrictionService, RestrictionType } from '@restriction/services';
 
 @Controller('kashiwa/post')
 export class PostingController {
-  constructor(private readonly postingService: PostingService) {}
+  constructor(
+    private readonly commentCreateService: CommentCreateService,
+    private readonly restrictionService: RestrictionService
+  ) {}
 
   @Post(':url')
   @FormDataRequest()
@@ -19,7 +23,8 @@ export class PostingController {
     @RealIP() ip: string,
     @Session() session: ISession
   ): Promise<void> {
-    await this.postingService.createThread(url, form, ip, res, Boolean(session.payload));
+    await this.restrictionService.checkRestrictions(RestrictionType.THREAD, ip, url, form, Boolean(session.payload));
+    await this.commentCreateService.createThread(url, form, ip, res, Boolean(session.payload));
   }
 
   @Post(':url/:num')
@@ -32,6 +37,7 @@ export class PostingController {
     @RealIP() ip: string,
     @Session() session: ISession
   ): Promise<void> {
-    await this.postingService.createReply(url, BigInt(num), form, ip, res, Boolean(session.payload));
+    await this.restrictionService.checkRestrictions(RestrictionType.REPLY, ip, url, form, Boolean(session.payload));
+    await this.commentCreateService.createReply(url, BigInt(num), form, ip, res, Boolean(session.payload));
   }
 }

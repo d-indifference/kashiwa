@@ -1,78 +1,104 @@
 import { Injectable } from '@nestjs/common';
+import { TableConstructor } from '@admin/lib';
 import { BoardShortDto } from '@persistence/dto/board';
 import {
   AttachedFilePersistenceService,
   BoardPersistenceService,
   CommentPersistenceService
 } from '@persistence/services';
-import { ListPage } from '@admin/pages';
+import { LOCALE } from '@locale/locale';
+import { TablePage } from '@admin/pages';
 import { PageRequest } from '@persistence/lib/page';
 import { ISession } from '@admin/interfaces';
 import { CommentModerationDto } from '@persistence/dto/comment/moderation';
-import { ModerationDeletePostForm } from '@admin/forms/moderation';
+import { moderationBoardTableConstructor, moderationCommentsTableConstructor } from '@admin/misc';
 import { Response } from 'express';
-import { BoardService } from '@admin/services/board.service';
+import { CachingProvider } from '@caching/providers';
 
 /**
- * Service for moderation
+ * Service for moderation operations
  */
 @Injectable()
 export class ModerationService {
+  private readonly boardTableConstructor: TableConstructor<BoardShortDto>;
+
+  private readonly commentsTableConstructor: TableConstructor<CommentModerationDto>;
+
   constructor(
     private readonly boardPersistenceService: BoardPersistenceService,
     private readonly commentPersistenceService: CommentPersistenceService,
     private readonly attachedFilePersistenceService: AttachedFilePersistenceService,
-    private readonly boardService: BoardService
-  ) {}
-
-  /**
-   * Get list of boards
-   * @param page Page request
-   * @param session Session object
-   */
-  public async getBoardsList(page: PageRequest, session: ISession): Promise<ListPage<BoardShortDto>> {
-    const boards = await this.boardPersistenceService.findAll(page);
-
-    return new ListPage(session, boards);
+    private readonly cachingProvider: CachingProvider
+  ) {
+    this.boardTableConstructor = moderationBoardTableConstructor;
+    this.commentsTableConstructor = moderationCommentsTableConstructor;
   }
 
   /**
-   * Get list of comments on board for moderation
-   * @param boardId Board ID
+   * Get page of boards
    * @param page Page request
-   * @param session Session payload
+   * @param session Session data
    */
-  public async getCommentsList(
-    boardId: string,
-    page: PageRequest,
-    session: ISession
-  ): Promise<ListPage<CommentModerationDto>> {
-    const comments = await this.commentPersistenceService.findForModeration(boardId, page);
-
-    return new ListPage(session, comments);
+  public async findBoardsForModeration(session: ISession, page: PageRequest): Promise<TablePage> {
+    const content = await this.boardPersistenceService.findAll(page);
+    const table = this.boardTableConstructor.fromPage(content, '/kashiwa/moderation', true);
+    return new TablePage(table, session, {
+      pageTitle: LOCALE.MODERATION_PANEL as string,
+      pageSubtitle: LOCALE.CHOOSE_A_BOARD as string
+    });
   }
 
   /**
-   * Delete post by selected option
-   * @param commentId Comment ID
-   * @param form Form with deletion options
+   * Get page of comments
+   * @param session id
+   * @param id Board ID
+   * @param page Page request object
+   */
+  public async findCommentsForModeration(session: ISession, id: string, page: PageRequest): Promise<TablePage> {
+    const comments = await this.commentPersistenceService.findManyForModeration(id, page);
+    const table = this.commentsTableConstructor.fromPage(comments, `/kashiwa/moderation/${id}`, true);
+    return new TablePage(table, session, {
+      pageTitle: LOCALE.MODERATION_PANEL as string,
+      pageSubtitle: LOCALE.COMMENTS_MODERATION as string
+    });
+  }
+
+  /**
+   * Delete comment by board URL and post number
+   * @param url Board URL
+   * @param num Post number
    * @param res `Express.js` response
    */
-  public async deletePost(commentId: string, form: ModerationDeletePostForm, res: Response): Promise<void> {
-    if (form.post) {
-      await this.commentPersistenceService.removeCommentById(commentId);
-    }
+  public async deleteComment(url: string, num: bigint, res: Response): Promise<void> {
+    await this.commentPersistenceService.remove(url, num);
+    await this.cachingProvider.fullyReloadCache(url);
+    const board = await this.boardPersistenceService.findByUrl(url);
+    res.redirect(`/kashiwa/moderation/${board.id}`);
+  }
 
-    if (form.file) {
-      await this.attachedFilePersistenceService.clearFileByCommentId(commentId);
-    }
+  /**
+   * Clear file of comment by board URL and post number
+   * @param url Board URL
+   * @param num Post number
+   * @param res `Express.js` response
+   */
+  public async clearFile(url: string, num: bigint, res: Response): Promise<void> {
+    await this.attachedFilePersistenceService.clearFromComment(url, num);
+    await this.cachingProvider.fullyReloadCache(url);
+    const board = await this.boardPersistenceService.findByUrl(url);
+    res.redirect(`/kashiwa/moderation/${board.id}`);
+  }
 
-    if (form.allByIp) {
-      await this.commentPersistenceService.removeAllCommentsByIp(form.boardId, form.ip);
-    }
-
-    await this.boardService.updateBoardCache(form.boardId);
-
-    res.redirect(form.redirect);
+  /**
+   * Delete all comments by poster's IP
+   * @param url Board URL
+   * @param ip Poster's IP
+   * @param res `Express.js` response
+   */
+  public async deleteAllByIp(url: string, ip: string, res: Response): Promise<void> {
+    await this.commentPersistenceService.removeByIp(url, ip);
+    await this.cachingProvider.fullyReloadCache(url);
+    const board = await this.boardPersistenceService.findByUrl(url);
+    res.redirect(`/kashiwa/moderation/${board.id}`);
   }
 }

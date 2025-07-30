@@ -1,0 +1,20 @@
+extends ../layouts/common_layout
+include ../components/admin_bar
+include ../components/admin_links
+
+block content
+    div.adminbar
+        +ManagementAdminBar(session.payload.role)
+
+    div.logo #{SITE_SETTINGS().siteName}
+    hr
+    +AdminLinks(session.payload.role)
+    | [
+    a(href=commons.goBack)= LOCALE.GO_BACK
+    | ]
+    div.theader= commons.pageSubtitle
+
+    div.postarea
+        | !{form}
+
+    block other_forms

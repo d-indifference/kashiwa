@@ -1,13 +1,13 @@
 import { Body, Controller, Get, Post, Render, Res, Session, UseGuards, ValidationPipe } from '@nestjs/common';
-import { Roles } from '@admin/decorators';
+import { Roles } from '../decorators';
 import { UserRole } from '@prisma/client';
-import { SessionGuard } from '@admin/guards';
-import { ISession } from '@admin/interfaces';
-import { FormPage } from '@admin/pages';
-import { GlobalSettingsService } from '@admin/services';
-import { GlobalSettingsForm } from '@admin/forms/global-settings';
 import { FormDataRequest } from 'nestjs-form-data';
 import { Response } from 'express';
+import { SessionGuard } from '@admin/guards';
+import { ISession } from '@admin/interfaces';
+import { RenderableSessionFormPage } from '@admin/lib';
+import { GlobalSettingsForm } from '@admin/forms';
+import { GlobalSettingsService } from '@admin/services';
 
 @Controller('kashiwa/global-settings')
 export class GlobalSettingsController {
@@ -16,8 +16,8 @@ export class GlobalSettingsController {
   @Get()
   @Roles(UserRole.ADMINISTRATOR)
   @UseGuards(SessionGuard)
-  @Render('admin/global-settings/admin-global-settings-form')
-  public getGlobalSettingsForm(@Session() session: ISession): FormPage<GlobalSettingsForm> {
+  @Render('admin/common_form_page')
+  public getGlobalSettingsForm(@Session() session: ISession): RenderableSessionFormPage {
     return this.globalSettingsService.getGlobalSettings(session);
   }
 
@@ -29,6 +29,6 @@ export class GlobalSettingsController {
     @Body(new ValidationPipe({ transform: true })) form: GlobalSettingsForm,
     @Res() res: Response
   ): Promise<void> {
-    return await this.globalSettingsService.saveGlobalSettings(form, res);
+    await this.globalSettingsService.saveGlobalSettings(form, res);
   }
 }

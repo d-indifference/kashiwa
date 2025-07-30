@@ -1,61 +1,47 @@
-include _inc/thread/_reply
-include _inc/thread/_post
-include _inc/thread/_form
-include _inc/thread/_user_delete
-include _inc/thread/_footer
-include _inc/thread/_head
-include _inc/thread/_styles
-include _inc/thread/_top_bar
+extends layouts/reply_layout
+include components/admin_bar
+include components/form/reply_form
+include components/post/thread
+include components/user_delete
 
-html(lang=LOCALE.HTML_LANG)
-    +Head(_CONTENT.board.name)
-    body.replypage
-        div.adminbar
-            +Styles
-            +TopBar
-            | [
-            a(href='/kashiwa')= LOCALE.MANAGEMENT
-            | ]
-            | [
-            a(href='/front')= LOCALE.MAIN_PAGE
-            | ]
-        div.logo
-            div.banner
-                img(src=getRandomBanner() alt='banner')
-            | #{_CONTENT.board.name} - #{SITE_SETTINGS().siteName}
-        div.sublogo
-            | #{SITE_SETTINGS().siteSlogan}
-        hr
-        | [
-        a(href=`/${_CONTENT.board.url}/kashiwa.html`)= LOCALE.GO_BACK
-        | ]
-        div.theader Reply
 
-        div.postarea
-            form#postform(action=`/kashiwa/post/${_CONTENT.board.url}/${_CONTENT.openingPost.num}` method='post' enctype='multipart/form-data')
-                +Form(_CONTENT.board, true, _CONTENT.captcha)
+mixin PageHeader()
+    div.logo
+        div.banner
+            img(src=getRandomBanner() alt='banner')
+        | #{SITE_SETTINGS().siteName}
+    div.sublogo= SITE_SETTINGS().siteSlogan
+    hr
+    | [
+    a(href=`/${board.url}/kashiwa.html`)= LOCALE.GO_BACK
+    | ]
+    div.theader
+        | #{LOCALE.POST_REPLY}
 
-        form#delform(action=`/kashiwa/delete/${_CONTENT.board.url}/${_CONTENT.openingPost.num}` method='post')
-            +Post(_CONTENT.board, _CONTENT.openingPost, true)
 
-            each reply in _CONTENT.replies
-              +Reply(_CONTENT.board, _CONTENT.openingPost, reply, true)
 
-            br(clear='left')
+mixin PostArea()
+    div.postarea
+        if board.boardSettings.allowPosting
+            form#postform(action=`/kashiwa/post/${board.url}/${thread.num}` method='post' enctype='multipart/form-data')
+                +ReplyForm()
             hr
-            +UserDelete
-        script.
-            setDelPass(passwordCookie)
-        br(clear='all')
 
-        div.adminbar
-            +Styles
-            +TopBar
-            | [
-            a(href='/kashiwa')= LOCALE.MANAGEMENT
-            | ]
-            | [
-            a(href='/front')= LOCALE.MAIN_PAGE
-            | ]
 
-        +Footer
+mixin DelForm()
+    form#delform(action=`/kashiwa/delete/${board.url}/${thread.num}` method='post')
+        +Thread(board, thread)
+        +UserDelete()
+    script.
+      setDelPass(passwordCookie)
+
+
+block content
+    +AdminBar()
+    +PageHeader()
+    +PostArea()
+    +DelForm()
+    br(clear='all')
+    +AdminBar()
+
+

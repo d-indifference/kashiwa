@@ -1,6 +1,6 @@
 import { IsOptional } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { normalizeBooleanCheckbox, normalizeFormEmptyString } from '@admin/transforms';
+import { normalizeBooleanCheckbox, normalizeFormEmptyString } from '@library/transforms';
 import { MemoryStoredFile } from 'nestjs-form-data';
 import { KIsBoolean, KIsFile, KIsNotEmpty, KIsString, KLength, KMaxFileSize, KMinLength } from '@library/validators';
 

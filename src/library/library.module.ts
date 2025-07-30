@@ -1,13 +1,16 @@
 import { Module } from '@nestjs/common';
-import { BoardPageCompilerService, ThreadPageCompilerService } from 'src/library/page-compiler';
-import { ImageboardFileProvider } from '@library/filesystem';
-import { ThreadMapper } from '@library/mappers';
+import {
+  FileSystemProvider,
+  InMemoryCacheProvider,
+  IpBlacklistProvider,
+  SiteContextProvider
+} from '@library/providers';
 
 /**
  * Module for library / shared functionality & utils
  */
 @Module({
-  providers: [ImageboardFileProvider, ThreadPageCompilerService, ThreadMapper, BoardPageCompilerService],
-  exports: [ImageboardFileProvider, ThreadPageCompilerService, ThreadMapper, BoardPageCompilerService]
+  providers: [FileSystemProvider, IpBlacklistProvider, InMemoryCacheProvider, SiteContextProvider],
+  exports: [FileSystemProvider, IpBlacklistProvider, InMemoryCacheProvider, SiteContextProvider]
 })
 export class LibraryModule {}

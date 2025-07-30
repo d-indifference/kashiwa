@@ -3,7 +3,7 @@ import { PrismaService } from '@persistence/lib';
 import { BanMapper } from '@persistence/mappers';
 import { Page, PageRequest } from '@persistence/lib/page';
 import { BanCreateDto, BanDto } from '@persistence/dto/ban';
-import { Ban, Prisma } from '@prisma/client';
+import { Ban, Prisma, User } from '@prisma/client';
 import { PinoLogger } from 'nestjs-pino';
 
 /**
@@ -29,9 +29,9 @@ export class BanPersistenceService {
       Prisma.BanWhereInput,
       Prisma.BanOrderByWithAggregationInput,
       Prisma.BanInclude
-    >(this.prisma, 'ban', page, {}, { createdAt: 'desc' }, { user: true });
+    >(this.prisma, 'ban', page, {}, { createdAt: 'desc' }, { user: true, board: true });
 
-    return entities.map(entity => this.banMapper.toDto(entity, entity['user']));
+    return entities.map(entity => this.banMapper.toDto(entity, entity['user'] as User));
   }
 
   /**
@@ -42,7 +42,7 @@ export class BanPersistenceService {
     const lastBan = await this.prisma.ban.findFirst({
       where: { ip },
       orderBy: { createdAt: 'desc' },
-      include: { user: true }
+      include: { user: true, board: true }
     });
 
     if (!lastBan) {
@@ -70,7 +70,7 @@ export class BanPersistenceService {
 
     const createInput = this.banMapper.create(userId, dto);
 
-    const newBan = await this.prisma.ban.create({ data: createInput, include: { user: true } });
+    const newBan = await this.prisma.ban.create({ data: createInput, include: { user: true, board: true } });
 
     await this.deleteOldBans();
 
@@ -84,14 +84,17 @@ export class BanPersistenceService {
   public async remove(id: string): Promise<void> {
     this.logger.info({ id }, 'remove');
 
-    await this.prisma.ban.delete({ where: { id } });
+    const batch = await this.prisma.ban.delete({ where: { id } });
     await this.deleteOldBans();
+    this.logger.info({ id: batch.id }, '[SUCCESS] remove');
   }
 
   /**
    * Deletion of old bans
    */
-  private async deleteOldBans(): Promise<void> {
-    await this.prisma.ban.deleteMany({ where: { till: { lt: new Date() } } });
+  public async deleteOldBans(): Promise<void> {
+    this.logger.info('deleteOldBans');
+    const batch = await this.prisma.ban.deleteMany({ where: { till: { lt: new Date() } } });
+    this.logger.info({ count: batch.count }, '[SUCCESS] deleteOldBans');
   }
 }

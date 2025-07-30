@@ -1,3 +1,3 @@
-export * from './posting.service';
+export * from './comment.create.service';
 export * from './attached-file.service';
-export * from './deletion.service';
+export * from './comment.delete.service';

@@ -1,0 +1,125 @@
+mixin NoThumb()
+    div.nothumb= LOCALE.POST_NO_FILE
+
+
+mixin FileSize(_board, _comment)
+    span.filesize
+        = LOCALE.POST_FILE
+        =' '
+        a(target='_blank' href=`/${_board.url}/src/${_comment.attachedFile.name}`) #{_comment.attachedFile.name}
+        =' '
+        | (
+        em
+            | #{fileSize(_comment.attachedFile.size)}
+            if _comment.attachedFile.isImage
+                = ", "
+                | #{_comment.attachedFile.width}x#{_comment.attachedFile.height}
+        | )
+        =' '
+        if _comment.attachedFile.isImage
+            if _comment.attachedFile.width > 200 && _comment.attachedFile.height > 200
+                span.thumbnailmsg= LOCALE.POST_THUMBNAIL_MSG
+        br
+
+
+mixin Thumbnail(_board, _comment)
+    a(target='_blank' href=`/${_board.url}/src/${_comment.attachedFile.name}`)
+        if _comment.attachedFile.isImage
+            img.thumb(
+                src=`/${_board.url}/thumb/${_comment.attachedFile.thumbnail}`
+                width=_comment.attachedFile.thumbnailWidth
+                height=_comment.attachedFile.thumbnailHeight
+                alt=_comment.attachedFile.size
+            )
+        else
+            img.thumb(src=`/img/file.png` width=86 height=86 alt=_comment.attachedFile.size)
+
+
+mixin AttachedFile(_board, _comment)
+    if _comment.attachedFile.name === 'NO_THUMB'
+      +NoThumb()
+    else
+        +FileSize(_board, _comment)
+        +Thumbnail(_board, _comment)
+
+
+mixin CommentLabel(_board, _comment, _is_reply)
+    a(name=_comment.num.toString())
+    label
+        input(type='checkbox' name='delete' value=_comment.num.toString())
+        =' '
+        if _comment.hasSage
+            span.sage= LOCALE.POST_SAGE_SYMBOL
+        if _comment.isAdmin
+            span.adminPost(title=LOCALE.POST_BY_ADMIN)= LOCALE.POST_ADMIN_SYMBOL
+        =' '
+        if _is_reply
+            span.replytitle=_comment.subject
+        else
+            span.filetitle=_comment.subject
+        =' '
+        if _comment.email
+            span.commentpostername
+                a(href=`mailto:${_comment.email}`)= _comment.name
+        else
+            span.commentpostername= _comment.name
+        =' '
+        if _comment.tripcode
+            span.postertrip
+                | !#{_comment.tripcode}
+        =' '
+        | #{formatDateTime(_comment.createdAt)}
+        =' '
+
+
+mixin ThreadPreviewRefLink(_board, _comment)
+    span.reflink
+        a(href=`/${_board.url}/res/${_comment.num.toString()}.html#i${_comment.num.toString()}`) No. #{_comment.num.toString()}
+        | &nbsp;
+
+
+mixin ReplyPreviewRefLink(_board, _opening_post, _comment)
+    span.reflink
+        a(href=`/${_board.url}/res/${_opening_post.num.toString()}.html#i${_comment.num.toString()}`) No. #{_comment.num.toString()}
+        | &nbsp;
+
+
+mixin ThreadRefLink(_board, _comment)
+    span.reflink
+        a(href=`javascript:insert('postform', '>>${_comment.num.toString()}')`) No. #{_comment.num.toString()}
+        | &nbsp;
+
+
+mixin ReplyRefLink(_board, _comment)
+    span.reflink
+        a(href=`javascript:insert('postform', '>>${_comment.num.toString()}')`) No. #{_comment.num.toString()}
+        | &nbsp;
+
+
+mixin ReplyToThread(_board, _comment)
+    span.replytothread
+        | [
+        a(href=`/${_board.url}/res/${_comment.num.toString()}.html`)= LOCALE.POST_REPLY
+        | ]
+
+
+mixin ThreadCommentPreview(_board, _comment)
+    blockquote !{truncateText(_comment.comment, _board.url, _comment.num, _comment.num)}
+
+
+mixin ReplyCommentPreview(_comment, _board, _opening_post)
+    blockquote !{truncateText(_comment.comment, _board.url, _opening_post.num, _comment.num)}
+
+
+mixin CommentFull(_comment)
+    blockquote !{_comment.comment}
+
+
+mixin OmittedPosts(_omitted_posts, _omitted_files)
+    if _omitted_posts > 0
+        if _omitted_files > 0
+            span.omittedposts
+                | #{LOCALE.OMITTED_POSTS_FILES(_omitted_posts, _omitted_files)}
+        else
+            span.omittedposts
+                | #{LOCALE.OMITTED_POSTS(_omitted_posts)}

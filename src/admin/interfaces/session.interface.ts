@@ -1,5 +1,5 @@
 import { Cookie } from 'express-session';
-import { ISessionPayload } from '@admin/interfaces/session-payload.interface';
+import { ISessionPayload } from './session-payload.interface';
 
 /**
  * `express-session` object with authentication payload

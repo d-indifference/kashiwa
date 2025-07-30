@@ -2,6 +2,7 @@ import { ArgumentsHost, Catch, ExceptionFilter as IExceptionFilter, HttpExceptio
 import { PinoLogger } from 'nestjs-pino';
 import { LOCALE } from '@locale/locale';
 import { Request, Response } from 'express';
+import { ErrorPage } from '@library/misc';
 
 @Catch()
 export class ExceptionFilter implements IExceptionFilter {
@@ -33,7 +34,7 @@ export class ExceptionFilter implements IExceptionFilter {
 
     this.logException(exception, request);
 
-    response.status(statusCode.valueOf()).render('error', { statusCode, message });
+    response.status(statusCode.valueOf()).render('error', new ErrorPage(LOCALE.ERROR as string, message));
   }
 
   /**

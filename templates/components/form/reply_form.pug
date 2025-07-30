@@ -1,0 +1,26 @@
+include ./form_components
+
+
+mixin FormSageOption()
+    td.postblock= LOCALE.FORM_OPTIONS
+        td
+            label
+                input(type='checkbox' name='sage')
+                = LOCALE.FORM_DONT_HIT
+
+
+mixin ReplyForm()
+    table
+        tbody
+            if !board.boardSettings.strictAnonymity
+                +FormInputText(LOCALE.FORM_NAME, 'name', 28)
+                +FormInputText(LOCALE.FORM_EMAIL, 'email', 28)
+            +FormSubject()
+            +FormTextarea(LOCALE.FORM_COMMENT, 'comment', 6, 60)
+            if board.boardSettings.replyFileAttachmentMode !== 'FORBIDDEN'
+                +FormFile()
+            if board.boardSettings.enableCaptcha
+                +FormCaptcha()
+            +FormPassword()
+            +FormSageOption()
+            +FormRules(board.boardSettings.replyFileAttachmentMode)

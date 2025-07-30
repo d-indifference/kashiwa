@@ -1,18 +1,10 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
+import { NestjsFormDataModule } from 'nestjs-form-data';
+import { nestjsFormDataConfig } from '@config/nestjs-form-data.config';
 import { LibraryModule } from '@library/library.module';
-import {
-  AuthController,
-  BanController,
-  BoardController,
-  DashboardController,
-  DumpController,
-  GlobalSettingsController,
-  IpFilterController,
-  ModerationController,
-  SpamController,
-  StaffController
-} from '@admin/controllers';
 import { PersistenceModule } from '@persistence/persistence.module';
+import { PrismaService } from '@persistence/lib';
+import { ProtectSignInMiddleware, ProtectSignUpMiddleware, RedirectForSignInMiddleware } from '@admin/middlewares';
 import {
   AuthService,
   BanService,
@@ -22,50 +14,70 @@ import {
   GlobalSettingsService,
   IpFilterService,
   ModerationService,
-  SpamService,
+  SpamListService,
   StaffService
 } from '@admin/services';
-import { NestjsFormDataModule } from 'nestjs-form-data';
-import { PrismaService } from '@persistence/lib';
-import { nestjsFormDataConfig } from '@config/nestjs-form-data.config';
-import { CaptchaModule } from '@captcha/captcha.module';
-import { PostingModule } from '@posting/posting.module';
+import {
+  AuthController,
+  DashboardController,
+  GlobalSettingsController,
+  SpamListController,
+  IpFilterController,
+  DumpController,
+  StaffController,
+  BoardController,
+  BanController,
+  ModerationController
+} from '@admin/controllers';
+import { DashboardUtilsProvider, DatabaseDumpingUtilsProvider } from '@admin/providers';
+import { ScheduleModule } from '@nestjs/schedule';
+import { CachingModule } from '@caching/caching.module';
+import { AntiSpamModule } from '@restriction/modules/antispam/anti-spam.module';
 
 /**
- * Module for administration / moderation panel
+ * Module for administration panel
  */
 @Module({
   imports: [
     NestjsFormDataModule.config(nestjsFormDataConfig),
+    ScheduleModule.forRoot(),
     LibraryModule,
     PersistenceModule,
-    CaptchaModule,
-    PostingModule
+    CachingModule,
+    AntiSpamModule
   ],
   providers: [
     PrismaService,
     AuthService,
     DashboardService,
+    DashboardUtilsProvider,
+    GlobalSettingsService,
+    SpamListService,
+    IpFilterService,
+    DumpService,
+    DatabaseDumpingUtilsProvider,
     StaffService,
     BoardService,
-    ModerationService,
-    SpamService,
-    IpFilterService,
     BanService,
-    GlobalSettingsService,
-    DumpService
+    ModerationService
   ],
   controllers: [
     AuthController,
     DashboardController,
+    GlobalSettingsController,
+    SpamListController,
+    IpFilterController,
+    DumpController,
     StaffController,
     BoardController,
-    ModerationController,
-    SpamController,
-    IpFilterController,
     BanController,
-    GlobalSettingsController,
-    DumpController
+    ModerationController
   ]
 })
-export class AdminModule {}
+export class AdminModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(ProtectSignUpMiddleware).forRoutes({ path: '/kashiwa/auth/sign-up', method: RequestMethod.ALL });
+    consumer.apply(ProtectSignInMiddleware).forRoutes({ path: '/kashiwa/auth/sign-in', method: RequestMethod.ALL });
+    consumer.apply(RedirectForSignInMiddleware).forRoutes({ path: '*', method: RequestMethod.ALL });
+  }
+}

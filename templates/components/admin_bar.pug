@@ -1,0 +1,60 @@
+mixin AdminBarStyles
+    | [
+    a(href='javascript:changeStyle(\'Futaba\', \'kashiwa_style\')') Futaba
+    | ]
+    | [
+    a(href='javascript:changeStyle(\'Photon\', \'kashiwa_style\')') Photon
+    | ]
+    | [
+    a(href='javascript:changeStyle(\'Burichan\', \'kashiwa_style\')') Burichan
+    | ]
+    =' - '
+
+
+mixin AdminBarBoardList()
+    | !{SITE_SETTINGS().boardList}
+
+
+
+mixin AdminBarMainLinks()
+    | [
+    a(href='/kashiwa')= LOCALE.MANAGEMENT
+    | ]
+    | [
+    a(href='/front')= LOCALE.MAIN_PAGE
+    | ]
+
+
+mixin AdminBarManagementLinks(role)
+    b [#{ role }]
+    =' '
+    | [
+    a(href='/front')
+        | #{LOCALE.GO_TO_SITE}
+    | ]
+    | [
+    a(href='/kashiwa/staff/my')
+        | #{LOCALE.EDIT_PROFILE}
+    | ]
+    =' '
+
+
+mixin AdminBarManagementSignOut()
+    form(action='/kashiwa/auth/sign-out' method='post' style='display: inline;')
+        input(type='submit' value=LOCALE.SIGN_OUT)
+    style
+        | .admin-info-panel {} .admin-info-panel a {text-decoration: underline;}
+
+
+mixin AdminBar()
+    div.adminbar
+        +AdminBarStyles
+        +AdminBarBoardList
+        +AdminBarMainLinks
+
+
+mixin ManagementAdminBar(role)
+    div.adminbar
+        +AdminBarStyles
+        +AdminBarManagementLinks(role)
+        +AdminBarManagementSignOut

@@ -1,0 +1,35 @@
+include ./post_components
+include ./reply
+
+
+mixin ThreadPreview(_board, _comment, _omitted_posts, _omitted_files)
+    div(id=`thread-${_comment.num.toString()}`)
+        if _comment.attachedFile
+            +AttachedFile(_board, _comment)
+        +CommentLabel(_board, _comment, false)
+        +ThreadPreviewRefLink(_board, _comment)
+        +ReplyToThread(_board, _comment)
+        +ThreadCommentPreview(_board, _comment)
+        +OmittedPosts(_omitted_posts, _omitted_files)
+
+        for reply in _comment.children
+            +ReplyPreview(_board, _comment, reply)
+
+    br(clear='left')
+    hr
+
+
+mixin Thread(_board, _comment)
+    div(id=`thread-${_comment.num.toString()}`)
+        if _comment.attachedFile
+            +AttachedFile(_board, _comment)
+        +CommentLabel(_board, _comment, false)
+        +ThreadRefLink(_board, _comment)
+        +CommentFull(_comment)
+
+        for reply in _comment.children
+            +Reply(_board, _comment, reply)
+
+    br(clear='left')
+    hr
+

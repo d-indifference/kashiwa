@@ -1,27 +1,26 @@
-import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
-import { PrismaService } from '@persistence/lib';
-import { DashboardPage } from '@admin/pages/dashboard';
-import { ISession } from '@admin/interfaces';
-import { FilesystemOperator } from '@library/filesystem';
-import { Prisma } from '@prisma/client';
-import * as path from 'node:path';
-import * as process from 'node:process';
-import * as fs from 'fs/promises';
-import * as os from 'node:os';
-import { Request } from 'express';
-import { exec } from 'child_process';
+import { Injectable } from '@nestjs/common';
 import { BoardPersistenceService, CommentPersistenceService } from '@persistence/services';
+import * as process from 'node:process';
+import * as os from 'node:os';
+import * as path from 'node:path';
 import { LOCALE } from '@locale/locale';
+import { UserRole } from '@prisma/client';
+import { Request } from 'express';
+import { DashboardUtilsProvider } from '@admin/providers';
+import { DashboardPage } from '@admin/pages';
+import { ISession } from '@admin/interfaces';
+import { FileSystemProvider } from '@library/providers';
 
 /**
- * Service for site dashboard page
+ * Service for rendering the dashboard page
  */
 @Injectable()
 export class DashboardService {
   constructor(
-    private readonly prisma: PrismaService,
     private readonly boardPersistenceService: BoardPersistenceService,
-    private readonly commentPersistenceService: CommentPersistenceService
+    private readonly commentPersistenceService: CommentPersistenceService,
+    private readonly utils: DashboardUtilsProvider,
+    private readonly fileSystem: FileSystemProvider
   ) {}
 
   /**
@@ -30,71 +29,90 @@ export class DashboardService {
    * @param session Session data
    */
   public async getDashboardPage(req: Request, session: ISession): Promise<DashboardPage> {
-    const totalBoards = await this.boardPersistenceService.countAll();
-    const totalComments = await this.commentPersistenceService.countAll();
-    const diskSpaceUsed = await FilesystemOperator.dirSize();
-    const postgresVersion = await this.getPostgresVersion();
-    const { dependencies, devDependencies } = await this.getDependencies();
+    const statsFromDb = await this.getStatsFromDb();
+    const diskSpaceUsed = await this.getDiskSpaceUsed();
+    const processInfo = this.getProcessInfo();
+    const osInfo = this.getOsInfo();
     const port = this.getPort(req);
-    const imageMagickVersion = await this.getImageMagickVersion();
-    const pgDumpVersion = await this.getPgDumpVersion();
-    const zipVersion = await this.getZipVersion();
+    const dependencies = await this.getDependencies();
+    const postgresVersion = await this.utils.getPostgresVersion();
+    const imageMagickVersion = await this.utils.getImageMagickVersion();
+    const pgDumpVersion = await this.utils.getPgDumpVersion();
+    const zipVersion = await this.utils.getZipVersion();
 
-    return new DashboardPage(
-      process.env.npm_package_version ?? 'unknown version',
-      session,
-      totalBoards,
-      totalComments,
-      diskSpaceUsed,
-      os.uptime(),
-      os.cpus(),
-      {
-        total: os.totalmem(),
-        free: os.freemem()
+    return {
+      commons: {
+        pageTitle: LOCALE['MANAGEMENT'] as string,
+        pageSubtitle:
+          session.payload.role === UserRole.MODERATOR
+            ? (LOCALE['MODERATION_PANEL'] as string)
+            : (LOCALE['DASHBOARD'] as string)
       },
+      session,
+      ...statsFromDb,
+      ...processInfo,
+      ...osInfo,
+      ...dependencies,
       port,
-      process.debugPort,
-      os.hostname(),
-      process.versions,
       postgresVersion,
-      pgDumpVersion,
       imageMagickVersion,
+      pgDumpVersion,
       zipVersion,
-      dependencies,
-      devDependencies
-    );
+      diskSpaceUsed
+    };
   }
 
   /**
-   * Get current application port
+   * Get info about count of boards and comments
    */
-  private getPort(req: Request): number | undefined {
-    if (req.headers.host) {
-      return parseInt(req.headers.host.split(':')[1]);
-    }
-
-    return undefined;
+  private async getStatsFromDb(): Promise<Pick<DashboardPage, 'totalComments' | 'totalBoards'>> {
+    const [totalBoards, totalComments] = await Promise.all([
+      this.boardPersistenceService.countAll(),
+      this.commentPersistenceService.countAll()
+    ]);
+    return { totalBoards, totalComments };
   }
 
   /**
-   * Select Postgres version
+   * Get info about size of application volume
    */
-  private async getPostgresVersion(): Promise<string> {
-    const postgresVersionQuery = (await this.prisma.$queryRaw(Prisma.sql`SELECT VERSION();`)) as Record<
-      string,
-      string
-    >[];
-
-    return postgresVersionQuery[0]['version'];
+  private async getDiskSpaceUsed(): Promise<number> {
+    return await this.fileSystem.dirSize([]);
   }
 
   /**
-   * Get dependencies list from `package.json`
+   * Get info from `node:process`
+   */
+  private getProcessInfo(): Pick<DashboardPage, 'engineVersion' | 'debugPort' | 'processVersions'> {
+    return {
+      engineVersion: process.env.npm_package_version as string,
+      debugPort: process.debugPort,
+      processVersions: process.versions
+    };
+  }
+
+  /**
+   * Get info from `node:os`
+   */
+  private getOsInfo(): Pick<DashboardPage, 'uptime' | 'cpus' | 'memory' | 'host'> {
+    const total = os.totalmem();
+    const free = os.freemem();
+
+    return {
+      uptime: os.uptime(),
+      cpus: os.cpus(),
+      memory: { total, free, inUsage: total - free },
+      host: os.hostname()
+    };
+  }
+
+  /**
+   * Get info from `package.json`
    */
   private async getDependencies(): Promise<Pick<DashboardPage, 'dependencies' | 'devDependencies'>> {
     const pathToPackageJson = path.join(process.cwd(), 'package.json');
 
-    const buffer = await fs.readFile(pathToPackageJson, { encoding: 'utf-8' });
+    const buffer = await this.fileSystem.readTextFileOutOfVolume(pathToPackageJson);
     const content: Record<string, unknown> = JSON.parse(buffer);
 
     return {
@@ -104,48 +122,10 @@ export class DashboardService {
   }
 
   /**
-   * Get and parse Imagemagick version
+   * Get application port
    */
-  private getImageMagickVersion(): Promise<string> {
-    return new Promise(resolve => {
-      exec('convert --version', (error, stdout, stderr) => {
-        if (error) {
-          const message = `${LOCALE['FAILED_IMAGEMAGICK_VERSION'] as string}: ${stderr || error.message}`;
-          Logger.error(message, 'DashboardService');
-          throw new InternalServerErrorException(message);
-        }
-        const versionLine = stdout.split('\n')[0];
-        const versionNumber = versionLine.split(': ')[1].replace('https://imagemagick.org', '');
-        resolve(versionNumber);
-      });
-    });
-  }
-
-  private getPgDumpVersion(): Promise<string> {
-    return new Promise(resolve => {
-      exec('pg_dump --version', (error, stdout, stderr) => {
-        if (error) {
-          const message = `${LOCALE['FAILED_PG_DUMP_VERSION'] as string}: ${stderr || error.message}`;
-          Logger.error(message, 'DashboardService');
-          throw new InternalServerErrorException(message);
-        }
-        resolve(stdout);
-      });
-    });
-  }
-
-  private getZipVersion(): Promise<string> {
-    return new Promise(resolve => {
-      exec('zip --version', (error, stdout, stderr) => {
-        if (error) {
-          const message = `${LOCALE['FAILED_ZIP_VERSION'] as string}: ${stderr || error.message}`;
-          Logger.error(message, 'DashboardService');
-          throw new InternalServerErrorException(message);
-        }
-
-        const match = stdout.match(/This is Zip\s+([\d.]+)/i);
-        resolve(match ? match[1] : 'unknown version');
-      });
-    });
+  private getPort(req: Request): number | undefined {
+    const port = req.headers.host?.split(':')[1];
+    return port && !isNaN(Number(port)) ? parseInt(port) : undefined;
   }
 }

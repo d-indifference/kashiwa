@@ -59,11 +59,7 @@ export class UserPersistenceService {
   public async findByIdStrict(id: string): Promise<User | null> {
     const user = await this.prisma.user.findFirst({ where: { id } });
 
-    if (!user) {
-      return null;
-    }
-
-    return user;
+    return user ?? null;
   }
 
   /**
@@ -73,7 +69,7 @@ export class UserPersistenceService {
   public async create(dto: UserCreateDto): Promise<UserDto> {
     this.logger.info(dto, 'create');
 
-    await this.checkUniqueUser(dto);
+    await this.checkUniqueUserOnCreate(dto);
 
     const input = await this.userMapper.create(dto);
 
@@ -105,7 +101,8 @@ export class UserPersistenceService {
   public async remove(id: string): Promise<void> {
     this.logger.info({ id }, 'remove');
 
-    await this.prisma.user.delete({ where: { id } });
+    const batch = await this.prisma.user.delete({ where: { id } });
+    this.logger.info({ id: batch.id }, '[SUCCESS] remove');
   }
 
   /**
@@ -134,9 +131,9 @@ export class UserPersistenceService {
   }
 
   /**
-   * Check if username is unique
+   * Check if username is unique on creation
    */
-  private async checkUniqueUser(dto: UserCreateDto): Promise<void> {
+  private async checkUniqueUserOnCreate(dto: UserCreateDto): Promise<void> {
     const entity = await this.prisma.user.findFirst({ where: { username: dto.username } });
 
     if (entity) {

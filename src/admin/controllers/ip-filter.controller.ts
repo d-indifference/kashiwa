@@ -1,13 +1,13 @@
-import { Body, Controller, Get, Post, Render, Res, Session, UseGuards, ValidationPipe } from '@nestjs/common';
 import { ISession } from '@admin/interfaces';
-import { SessionPage } from '@admin/pages';
-import { Roles } from '@admin/decorators';
-import { UserRole } from '@prisma/client';
-import { SessionGuard } from '@admin/guards';
 import { IpFilterService } from '@admin/services';
+import { Body, Controller, Get, Post, Render, Res, Session, UseGuards, ValidationPipe } from '@nestjs/common';
+import { RenderableSessionFormPage } from '@admin/lib';
+import { UserRole } from '@prisma/client';
+import { Roles } from '@admin/decorators';
+import { SessionGuard } from '@admin/guards';
 import { FormDataRequest } from 'nestjs-form-data';
+import { IpFilterForm } from '@admin/forms';
 import { Response } from 'express';
-import { IpFilterForm } from '@admin/forms/ip-filter';
 
 @Controller('kashiwa/ip-filter')
 export class IpFilterController {
@@ -16,9 +16,9 @@ export class IpFilterController {
   @Get()
   @Roles(UserRole.ADMINISTRATOR)
   @UseGuards(SessionGuard)
-  @Render('admin/ip-filter/admin-ip-filter-form')
-  public getIpFilterListForm(@Session() session: ISession): SessionPage {
-    return this.ipFilterService.renderFormContent(session);
+  @Render('admin/common_form_page')
+  public async getIpFilterListForm(@Session() session: ISession): Promise<RenderableSessionFormPage> {
+    return await this.ipFilterService.renderFormContent(session);
   }
 
   @Post()

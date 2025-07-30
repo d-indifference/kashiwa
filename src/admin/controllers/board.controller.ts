@@ -1,3 +1,6 @@
+import { Roles } from '@admin/decorators';
+import { SessionGuard } from '@admin/guards';
+import { BoardService } from '@admin/services';
 import {
   Body,
   Controller,
@@ -12,19 +15,39 @@ import {
   UseGuards,
   ValidationPipe
 } from '@nestjs/common';
-import { SessionGuard } from '@admin/guards';
-import { Roles } from '@admin/decorators';
-import { UserRole } from '@prisma/client';
+import { FileAttachmentMode, UserRole } from '@prisma/client';
 import { PageRequest } from '@persistence/lib/page';
 import { ISession } from '@admin/interfaces';
-import { FormPage, ListPage } from '@admin/pages';
-import { BoardCreateForm } from '@admin/forms/board/board.create.form';
+import { TablePage } from '@admin/pages';
+import { FormPage, RenderableSessionFormPage } from '@admin/lib';
+import { BoardCreateForm, BoardUpdateForm } from '@admin/forms/board';
+import { LOCALE } from '@locale/locale';
+import { Constants } from '@library/constants';
 import { FormDataRequest } from 'nestjs-form-data';
 import { Response } from 'express';
-import { getSupportedFileTypes } from '@admin/lib/helpers';
-import { BoardService } from '@admin/services';
-import { BoardShortDto } from '@persistence/dto/board';
-import { BoardUpdateForm } from '@admin/forms/board';
+
+const getDefaultNewBoardForm = (): BoardCreateForm => {
+  const form = new BoardCreateForm();
+  form.allowPosting = true;
+  form.threadFileAttachmentMode = FileAttachmentMode.OPTIONAL;
+  form.replyFileAttachmentMode = FileAttachmentMode.OPTIONAL;
+  form.delayAfterThread = 30;
+  form.delayAfterReply = 15;
+  form.minFileSize = 1;
+  form.maxFileSize = 3145728;
+  form.allowMarkdown = true;
+  form.allowTripcodes = true;
+  form.maxThreadsOnBoard = 100;
+  form.bumpLimit = 250;
+  form.maxStringFieldSize = 100;
+  form.maxCommentSize = 1000;
+  form.defaultPosterName = LOCALE.ANONYMOUS as string;
+  form.defaultModeratorName = LOCALE.MODERATOR as string;
+  form.allowedFileTypes = Constants.SUPPORTED_FILE_TYPES.filter(t => t.startsWith('image/'));
+  form.rules = LOCALE.RULES_DEFAULT as string;
+
+  return form;
+};
 
 @Controller('kashiwa/board')
 export class BoardController {
@@ -33,31 +56,37 @@ export class BoardController {
   @Get()
   @Roles(UserRole.ADMINISTRATOR)
   @UseGuards(SessionGuard)
-  @Render('admin/board/admin-board-list')
+  @Render('admin/common_table_page')
   public async getBoardList(
     @Query(new ValidationPipe({ transform: true })) page: PageRequest,
     @Session() session: ISession
-  ): Promise<ListPage<BoardShortDto>> {
+  ): Promise<TablePage> {
     return await this.boardService.findAll(session, page);
   }
 
   @Get('new')
   @Roles(UserRole.ADMINISTRATOR)
   @UseGuards(SessionGuard)
-  @Render('admin/board/admin-board-form')
-  public getBoardForm(@Session() session: ISession): FormPage<{ getSupportedFileTypes: () => string[][] }> {
-    return new FormPage(session, 'CREATE', { getSupportedFileTypes });
+  @Render('admin/common_form_page')
+  public getBoardForm(@Session() session: ISession): RenderableSessionFormPage {
+    const form = getDefaultNewBoardForm();
+
+    return FormPage.toSessionTemplateContent(session, form, {
+      pageTitle: LOCALE.BOARDS as string,
+      pageSubtitle: LOCALE.NEW_BOARD as string,
+      goBack: '/kashiwa/board'
+    });
   }
 
   @Get('edit/:id')
   @Roles(UserRole.ADMINISTRATOR)
   @UseGuards(SessionGuard)
-  @Render('admin/board/admin-board-form')
+  @Render('admin/board_form_page')
   public async getEditBoardForm(
     @Session() session: ISession,
     @Param('id', ParseUUIDPipe) id: string
-  ): Promise<FormPage<BoardUpdateForm & { getSupportedFileTypes: () => string[][] }>> {
-    return await this.boardService.getForUpdate(session, id);
+  ): Promise<RenderableSessionFormPage & { boardId: string }> {
+    return { ...(await this.boardService.getForUpdate(session, id)), boardId: id };
   }
 
   @Post('new')
@@ -85,15 +114,15 @@ export class BoardController {
   @Post('reload/:id')
   @Roles(UserRole.ADMINISTRATOR)
   @UseGuards(SessionGuard)
-  public async reloadBoard(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response): Promise<void> {
-    await this.boardService.reloadBoard(id, res);
+  public async reloadBoardCache(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response): Promise<void> {
+    await this.boardService.reloadBoardCache(id, res);
   }
 
   @Post('clear/:id')
   @Roles(UserRole.ADMINISTRATOR)
   @UseGuards(SessionGuard)
-  public async clearBoardCache(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response): Promise<void> {
-    await this.boardService.clearBoardCache(id, res);
+  public async clearBoard(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response): Promise<void> {
+    await this.boardService.clearBoard(id, res);
   }
 
   @Post('delete/:id')

@@ -1,0 +1,16 @@
+extends ../layouts/common_layout
+include ../components/admin_bar
+
+block content
+    div.adminbar
+        +AdminBarMainLinks
+
+    div.logo #{SITE_SETTINGS().siteName}
+    hr
+    | [
+    a(href=commons.goBack)= LOCALE.GO_BACK
+    | ]
+    div.theader= commons.pageSubtitle
+
+    div.postarea
+        | !{form}

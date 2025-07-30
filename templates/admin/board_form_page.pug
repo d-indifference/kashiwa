@@ -1,0 +1,13 @@
+extends ./common_form_page
+
+block other_forms
+    div(align='center')
+        form(method='post' action=`/kashiwa/board/reload/${boardId}`)
+            input(type='Submit' value=LOCALE.RELOAD_BOARD_CACHE)
+    hr
+    div(align='center')
+        form(method='post' action=`/kashiwa/board/clear/${boardId}`)
+            input(type='Submit' value=LOCALE.CLEAR_BOARD_CACHE)
+    div(align='center')
+        form(method='post' action=`/kashiwa/board/delete/${boardId}`)
+            input(type='Submit' value=LOCALE.DELETE_THIS_BOARD)
