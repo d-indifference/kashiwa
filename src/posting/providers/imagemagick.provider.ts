@@ -72,8 +72,8 @@ export class ImagemagickProvider {
         tnHeight = Constants.DEFAULT_THUMBNAIL_SIDE;
         tnWidth = Math.floor((tnHeight * srcWidth) / srcHeight);
       } else {
-        tnWidth = 200;
-        tnHeight = 200;
+        tnWidth = Constants.DEFAULT_THUMBNAIL_SIDE;
+        tnHeight = Constants.DEFAULT_THUMBNAIL_SIDE;
       }
     }
 
