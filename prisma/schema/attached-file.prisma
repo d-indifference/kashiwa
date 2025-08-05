@@ -6,6 +6,7 @@ model AttachedFile {
   height          Int?    @db.Integer
   mime            String  @db.VarChar(128)
   isImage         Boolean @map("is_image") @db.Boolean
+  isVideo         Boolean @default(false) @map("is_video") @db.Boolean
   md5             String  @db.VarChar(256)
   thumbnail       String? @db.VarChar(128)
   thumbnailWidth  Int?    @map("thumbnail_width") @db.Integer

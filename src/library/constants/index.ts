@@ -70,7 +70,16 @@ export class Constants {
     'image/gif',
     'image/svg+xml',
     'image/webp',
-    'application/x-bittorrent'
+    'video/mp4',
+    'video/webm',
+    'audio/aac',
+    'audio/x-m4a',
+    'audio/mpeg',
+    'audio/ogg',
+    'audio/flac',
+    'application/x-bittorrent',
+    'application/x-shockwave-flash',
+    'application/x-7z-compressed'
   ];
 
   /** Preview replies count of board page */

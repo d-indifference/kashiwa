@@ -36,10 +36,12 @@ export class FormFileProvider {
    */
   public async saveFile(file: MemoryStoredFile, board: BoardDto, md5: string): Promise<Prisma.AttachedFileCreateInput> {
     const [dest, name] = await this.saveFileToSrc(file, board.url);
-    const isImage = this.isImage(file);
+    const isImage = this.isMedia(file, 'image');
+    const isVideo = this.isMedia(file, 'video');
 
     const result: Prisma.AttachedFileCreateInput = {
       isImage,
+      isVideo,
       mime: file.mimeType,
       name,
       size: file.size,
@@ -84,10 +86,10 @@ export class FormFileProvider {
   }
 
   /**
-   * Check if file is an image
+   * Check if file is an image or video
    */
-  private isImage(file: MemoryStoredFile): boolean {
-    return file.mimeType.split('/')[0] === 'image';
+  private isMedia(file: MemoryStoredFile, mimePrefix: 'image' | 'video'): boolean {
+    return file.mimeType.split('/')[0] === mimePrefix;
   }
 
   /**
