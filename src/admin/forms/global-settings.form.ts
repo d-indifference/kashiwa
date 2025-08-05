@@ -82,6 +82,6 @@ export class GlobalSettingsForm {
     newForm.rulesPage = form.rulesPage;
     newForm.menuFrame = form.menuFrame;
 
-    return form;
+    return newForm;
   }
 }
