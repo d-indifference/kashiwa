@@ -22,17 +22,41 @@ mixin FileSize(_board, _comment)
         br
 
 
+mixin NonMediaFile(_attachedFile)
+    if _attachedFile.mime === 'application/x-bittorrent'
+        img.thumb(src=`/img/torrent.png` width=86 height=86 alt=_attachedFile.size)
+    else if _attachedFile.mime === 'application/x-shockwave-flash'
+        img.thumb(src=`/img/flash.png` width=86 height=86 alt=_attachedFile.size)
+    else if _attachedFile.mime === 'application/x-7z-compressed'
+        img.thumb(src=`/img/archive-7z.png` width=86 height=86 alt=_attachedFile.size)
+    else if _attachedFile.mime.startsWith('audio/')
+        img.thumb(src=`/img/audio.png` width=86 height=86 alt=_attachedFile.size)
+    else
+        img.thumb(src=`/img/file.png` width=86 height=86 alt=_comment.attachedFile.size)
+
+
 mixin Thumbnail(_board, _comment)
-    a(target='_blank' href=`/${_board.url}/src/${_comment.attachedFile.name}`)
-        if _comment.attachedFile.isImage
+    if _comment.attachedFile.isImage
+        a(target='_blank' href=`/${_board.url}/src/${_comment.attachedFile.name}`)
             img.thumb(
                 src=`/${_board.url}/thumb/${_comment.attachedFile.thumbnail}`
                 width=_comment.attachedFile.thumbnailWidth
                 height=_comment.attachedFile.thumbnailHeight
                 alt=_comment.attachedFile.size
             )
-        else
-            img.thumb(src=`/img/file.png` width=86 height=86 alt=_comment.attachedFile.size)
+    else if _comment.attachedFile.isVideo
+        video.video-thumb(
+                controls
+                loop
+                muted
+                poster='/img/video.png'
+                preload='none'
+                src=`/${_board.url}/src/${_comment.attachedFile.name}`
+                onplay=`handleVideoPlaying(this, '${LOCALE.CLOSE_VIDEO}')`
+            )
+            a(href=`/${_board.url}/src/${_comment.attachedFile.name}` target='_blank')= LOCALE.DOWNLOAD_VIDEO_HERE
+    else
+        +NonMediaFile(_comment.attachedFile)
 
 
 mixin AttachedFile(_board, _comment)

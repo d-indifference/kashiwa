@@ -26,6 +26,12 @@ form {
   margin: 2px 20px
 }
 
+.video-thumb {
+  border: none;
+  float: left;
+  margin: 2px 20px
+}
+
 .nothumb {
   float: left;
   background: #eee;

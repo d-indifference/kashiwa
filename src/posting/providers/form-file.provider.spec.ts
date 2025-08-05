@@ -66,6 +66,7 @@ describe('FormFileProvider', () => {
 
       expect(result).toEqual({
         isImage: true,
+        isVideo: false,
         mime: 'image/png',
         name: '123456789.png',
         size: 123,
@@ -82,7 +83,35 @@ describe('FormFileProvider', () => {
       expect(imagemagickMock.thumbnailImage).toHaveBeenCalledWith(dest[0], dest[1], { width: 300, height: 300 });
     });
 
-    it('should save non-image file and set correct mime', async () => {
+    it('should save video file', async () => {
+      const file = {
+        mimeType: 'video/webm',
+        extension: 'webm',
+        size: 123,
+        buffer: Buffer.from('webm')
+      } as any;
+      const board = { id: 1, url: 'b' } as any;
+      const md5 = 'mockmd5';
+
+      const dest = ['/b/src', '123456789.webm'];
+      jest.spyOn(provider as any, 'saveFileToSrc').mockResolvedValue(dest);
+
+      (mime.lookup as jest.Mock).mockReturnValue('video/webm');
+
+      const result = await provider.saveFile(file, board, md5);
+
+      expect(result).toEqual({
+        isImage: false,
+        isVideo: true,
+        mime: 'video/webm',
+        name: '123456789.webm',
+        size: 123,
+        md5,
+        board: { connect: { id: board.id } }
+      });
+    });
+
+    it('should save non-media file and set correct mime', async () => {
       const file = {
         mimeType: 'application/pdf',
         extension: 'pdf',
@@ -100,6 +129,7 @@ describe('FormFileProvider', () => {
       const result = await provider.saveFile(file, board, md5);
 
       expect(result.isImage).toBe(false);
+      expect(result.isVideo).toBe(false);
       expect(result.mime).toBe('application/pdf');
       expect(result.name).toBe('987654321.pdf');
       expect(result.size).toBe(55);
@@ -152,14 +182,18 @@ describe('FormFileProvider', () => {
     });
   });
 
-  describe('isImage', () => {
+  describe('isMedia', () => {
     it('should return true for image mime', () => {
       const file = { mimeType: 'image/jpeg' } as any;
-      expect((provider as any).isImage(file)).toBe(true);
+      expect((provider as any).isMedia(file, 'image')).toBe(true);
     });
-    it('should return false for non-image mime', () => {
+    it('should return true for video mime', () => {
+      const file = { mimeType: 'video/webm' } as any;
+      expect((provider as any).isMedia(file, 'video')).toBe(true);
+    });
+    it('should return false for non-image and non-video mime', () => {
       const file = { mimeType: 'audio/mp3' } as any;
-      expect((provider as any).isImage(file)).toBe(false);
+      expect((provider as any).isMedia(file, 'image')).toBe(false);
     });
   });
 

@@ -1,12 +1,19 @@
-import { Controller, Get, Param, Res, StreamableFile } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Param, Res, StreamableFile } from '@nestjs/common';
 import { FileSystemProvider } from '@library/providers';
 import { Response } from 'express';
 import * as fsExtra from 'fs-extra';
 import { Constants } from '@library/constants';
+import { PinoLogger } from 'nestjs-pino';
+import { LOCALE } from '@locale/locale';
 
 @Controller()
 export class ForumController {
-  constructor(private readonly fileSystem: FileSystemProvider) {}
+  constructor(
+    private readonly fileSystem: FileSystemProvider,
+    private readonly logger: PinoLogger
+  ) {
+    this.logger.setContext(ForumController.name);
+  }
 
   @Get(`:url/${Constants.RES_DIR}/:page`)
   public getThread(
@@ -58,6 +65,22 @@ export class ForumController {
     res.set({
       'Content-Type': mime
     });
+
+    stream.on('error', err => {
+      this.logger.error({ ...err }, 'File reading error');
+      if (!res.headersSent) {
+        res.status(HttpStatus.INTERNAL_SERVER_ERROR).end(LOCALE.FILE_READING_ERROR as string);
+      } else {
+        res.destroy(err);
+      }
+    });
+
+    res.on('close', () => {
+      if (!stream.destroyed) {
+        stream.destroy();
+      }
+    });
+
     return new StreamableFile(stream);
   }
 }
