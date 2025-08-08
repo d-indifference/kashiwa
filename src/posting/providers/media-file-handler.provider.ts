@@ -30,7 +30,7 @@ export class MediaFileHandlerProvider {
    * @param file Source file name
    * @param dimensions Source file dimensions
    */
-  public async thumbnailImage(
+  public async createThumbnail(
     strategy: IMediaFileHandlerStrategy,
     isVideo: boolean,
     dest: string,

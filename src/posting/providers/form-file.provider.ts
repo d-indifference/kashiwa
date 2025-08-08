@@ -126,7 +126,7 @@ export class FormFileProvider {
     dest: string,
     file: string
   ): Promise<void> {
-    const { thumbnail, thumbnailWidth, thumbnailHeight } = await this.mediaFileHandlerProvider.thumbnailImage(
+    const { thumbnail, thumbnailWidth, thumbnailHeight } = await this.mediaFileHandlerProvider.createThumbnail(
       strategy,
       strategy instanceof FfmpegStrategy,
       dest,
