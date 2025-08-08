@@ -128,6 +128,26 @@ describe('CommentPersistenceService', () => {
     });
   });
 
+  describe('findManyForCatalog', () => {
+    it('should return page of comment DTOs ordered by `createdAt`', async () => {
+      jest.spyOn(Page, 'ofFilter').mockResolvedValueOnce(pageInstance);
+      commentMapperMock.toDto.mockImplementation(() => ({ createdAt: new Date(), lastHit: new Date() }));
+      const result = await service.findManyForCatalog('boardId', 'createdAt', { page: 1, limit: 10 });
+      expect(result.content.length).toEqual(2);
+      expect(Object.hasOwn(result.content[0], 'createdAt')).toBeTruthy();
+      expect(Object.hasOwn(result.content[0], 'lastHit')).toBeTruthy();
+    });
+
+    it('should return page of comment DTOs ordered by `lastHit`', async () => {
+      jest.spyOn(Page, 'ofFilter').mockResolvedValueOnce(pageInstance);
+      commentMapperMock.toDto.mockImplementation(() => ({ createdAt: new Date(), lastHit: new Date() }));
+      const result = await service.findManyForCatalog('boardId', 'lastHit', { page: 1, limit: 10 });
+      expect(result.content.length).toEqual(2);
+      expect(Object.hasOwn(result.content[0], 'createdAt')).toBeTruthy();
+      expect(Object.hasOwn(result.content[0], 'lastHit')).toBeTruthy();
+    });
+  });
+
   describe('findThread', () => {
     it('should throw if not found', async () => {
       prismaMock.comment.findFirst.mockResolvedValueOnce(null);

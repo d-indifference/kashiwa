@@ -244,7 +244,10 @@ export const locale: Record<string, LocaleArgument> = {
   IP_BLACK_LIST_NOT_FOUND: 'Ip blacklist does not found',
   DOWNLOAD_VIDEO_HERE: 'Download video here',
   FILE_READING_ERROR: 'File reading error',
-  CLOSE_VIDEO: 'Close video'
+  CLOSE_VIDEO: 'Close video',
+  LIMIT: 'Limit',
+  PAGE: 'Page',
+  ORDER_BY: 'Order by'
 };
 
 export const localeValidators: Record<string, (...args: unknown[]) => string> = {

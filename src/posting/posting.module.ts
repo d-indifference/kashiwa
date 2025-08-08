@@ -4,7 +4,7 @@ import { PersistenceModule } from '@persistence/persistence.module';
 import { NestjsFormDataModule } from 'nestjs-form-data';
 import { nestjsFormDataConfig } from '@config/nestjs-form-data.config';
 import { FormFileProvider, MediaFileHandlerProvider, WakabaMarkdownProvider } from '@posting/providers';
-import { AttachedFileService, CommentCreateService, CommentDeleteService } from '@posting/services';
+import { AttachedFileService, CatalogService, CommentCreateService, CommentDeleteService } from '@posting/services';
 import { DeletionController, ForumController, PostingController } from '@posting/controllers';
 import { CachingModule } from '@caching/caching.module';
 import { RestrictionModule } from '@restriction/restriction.module';
@@ -26,7 +26,8 @@ import { RestrictionModule } from '@restriction/restriction.module';
     MediaFileHandlerProvider,
     CommentCreateService,
     AttachedFileService,
-    CommentDeleteService
+    CommentDeleteService,
+    CatalogService
   ],
   controllers: [PostingController, DeletionController, ForumController]
 })

@@ -100,6 +100,28 @@ export class CommentPersistenceService {
     return comments.map(c => this.commentMapper.toModerationDto(c));
   }
 
+  public async findManyForCatalog(
+    url: string,
+    orderByField: 'createdAt' | 'lastHit',
+    page: PageRequest
+  ): Promise<Page<CommentDto>> {
+    const comments = await Page.ofFilter<
+      Comment,
+      Prisma.CommentWhereInput,
+      Prisma.CommentOrderByWithAggregationInput,
+      Prisma.CommentInclude
+    >(
+      this.prisma,
+      'comment',
+      page,
+      { board: { url }, NOT: { lastHit: null } },
+      { [orderByField]: 'desc' },
+      { attachedFile: { include: { board: true } } }
+    );
+
+    return comments.map(c => this.commentMapper.toDto(c));
+  }
+
   /**
    * Find full thread by board URL and thread number. If not found, throws 404.
    * @param url Board URL

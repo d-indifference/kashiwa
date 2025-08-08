@@ -25,7 +25,10 @@ mixin PostArea()
         if board.boardSettings.allowPosting
             form#postform(action=`/kashiwa/post/${board.url}/${thread.num}` method='post' enctype='multipart/form-data')
                 +ReplyForm()
-            hr
+    ='['
+    a(href=`/${board.url}/catalog`) Catalog
+    =']'
+    hr
 
 
 mixin DelForm()
@@ -41,6 +44,9 @@ block content
     +PageHeader()
     +PostArea()
     +DelForm()
+    ='['
+    a(href=`/${board.url}/catalog`) Catalog
+    =']'
     br(clear='all')
     +AdminBar()
 

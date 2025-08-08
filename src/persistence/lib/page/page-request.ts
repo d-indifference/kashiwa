@@ -14,7 +14,7 @@ export class PageRequest {
    * The current page number (zero-based)
    */
   @IsOptional()
-  @KIsNumber('page')
+  @KIsNumber('PAGE')
   @Transform(normalizePositiveInteger)
   page: number = 0;
 
@@ -23,7 +23,7 @@ export class PageRequest {
    * Optional. Defaults to `Constants.DEFAULT_PAGE_SIZE`.
    */
   @IsOptional()
-  @KIsNumber('limit')
+  @KIsNumber('LIMIT')
   @Transform(normalizePositiveInteger)
   limit: number = Constants.DEFAULT_PAGE_SIZE;
 

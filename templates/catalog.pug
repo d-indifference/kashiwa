@@ -1,0 +1,72 @@
+extends layouts/footered_layout
+include components/admin_bar
+include components/post/post_components
+
+
+mixin PageHeader()
+    div.logo
+        div.banner
+            img(src=getRandomBanner() alt='banner')
+        | #{SITE_SETTINGS().siteName}
+    div.sublogo= SITE_SETTINGS().siteSlogan
+    hr
+    | [
+    a(href=`/${board.url}/kashiwa.html`)= LOCALE.GO_BACK
+    | ]
+    div.theader
+        | #{commons.pageSubtitle}
+
+
+block content
+    +AdminBar()
+    +PageHeader()
+
+    style.
+        .thumb {
+            float: none !important;
+        }
+
+        .video-thumb {
+            float: none !important;
+        }
+
+
+    for thread in page.content
+
+      div(align='center')
+        if thread.attachedFile
+          +Thumbnail(board, thread)
+
+        h3 #{thread.subject}
+        blockquote !{truncateText(thread.comment, board.url, thread.num, thread.num)}
+        b= `${thread.num.toString()}`
+        br
+
+        ='['
+        a(href=`/${board.url}/res/${thread.num}.html`) #{LOCALE.POST_REPLY}
+        =']'
+
+        hr
+
+    div(align="center")
+        if page.previous !== null
+            a(href=`/${board.url}/catalog?page=${page.previous}`) ←
+
+        | &nbsp;<
+
+        each i in [...Array(page.total).keys()]
+            if i === page.current
+                | [#{i}]
+            else
+                | [
+                a(href=`${linkToEntities}?page=${i}`)= i
+                | ]
+
+        | >&nbsp;
+
+        if page.next !== null
+            a(href=`/${board.url}/catalog?page=${page.next}`) →
+        br
+
+    +AdminBar()
+
