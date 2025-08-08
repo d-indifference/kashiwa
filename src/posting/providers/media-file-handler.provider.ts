@@ -1,43 +1,38 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import * as im from 'imagemagick';
 import * as path from 'node:path';
 import { Constants } from '@library/constants';
 import { AttachedFile } from '@prisma/client';
+import { IMediaFileHandlerStrategy } from '@posting/strategies';
 
 /**
- * Provider for imagemagick operations
+ * Provider for media file operations
  */
 @Injectable()
-export class ImagemagickProvider {
+export class MediaFileHandlerProvider {
   /**
    * Calculate image dimensions
+   * @param strategy File processing strategy
    * @param fileRelativePath Relative path to file
    */
-  public async getImageDimensions(fileRelativePath: string[]): Promise<Pick<AttachedFile, 'width' | 'height'>> {
+  public async getDimensions(
+    strategy: IMediaFileHandlerStrategy,
+    fileRelativePath: string[]
+  ): Promise<Pick<AttachedFile, 'width' | 'height'>> {
     const filePath = path.join(Constants.Paths.APP_VOLUME, ...fileRelativePath);
-    const output = await new Promise<string>((resolve, reject) => {
-      im.identify(['-format', '%wx%h', filePath], (err, result) => {
-        if (err) {
-          return reject(err);
-        }
-        resolve(result);
-      });
-    });
-
-    const [w, h] = output.trim().split('x').map(Number);
-    if (isNaN(w) || isNaN(h)) {
-      throw new Error(`Invalid dimensions: ${output}`);
-    }
-    return { width: w, height: h };
+    return await strategy.getDimensions(filePath);
   }
 
   /**
    * Make the image thumbnail
+   * @param strategy File processing strategy
+   * @param isVideo Is source file a video
    * @param dest Source file directory
    * @param file Source file name
    * @param dimensions Source file dimensions
    */
-  public thumbnailImage(
+  public async thumbnailImage(
+    strategy: IMediaFileHandlerStrategy,
+    isVideo: boolean,
     dest: string,
     file: string,
     dimensions: Pick<AttachedFile, 'width' | 'height'>
@@ -55,12 +50,13 @@ export class ImagemagickProvider {
 
     const filePath = path.join(Constants.Paths.APP_VOLUME, dest, file);
     const [filename, ext] = file.split('.');
+    const thumbExt = isVideo ? 'png' : ext;
     const boardUrl = dest.split(path.sep)[0];
 
     let tnWidth: number = srcWidth;
     let tnHeight: number = srcHeight;
 
-    const thumbName = `${filename}s.${ext}`;
+    const thumbName = `${filename}s.${thumbExt}`;
     const thumbDir = path.join(Constants.Paths.APP_VOLUME, boardUrl, Constants.THUMB_DIR);
     const thumbPath = path.join(thumbDir, thumbName);
 
@@ -77,16 +73,8 @@ export class ImagemagickProvider {
       }
     }
 
-    return new Promise((resolve, reject) => {
-      im.convert(
-        [filePath, '-coalesce', '-resize', `${tnWidth}x${tnHeight}`, '-layers', 'optimize', '-loop', '0', thumbPath],
-        err => {
-          if (err) {
-            reject(err);
-          }
-          resolve({ thumbnail: thumbName, thumbnailWidth: tnWidth, thumbnailHeight: tnHeight });
-        }
-      );
-    });
+    await strategy.createThumbnail(filePath, thumbPath, tnWidth, tnHeight);
+
+    return { thumbnail: thumbName, thumbnailWidth: tnWidth, thumbnailHeight: tnHeight };
   }
 }

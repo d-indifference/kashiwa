@@ -1,14 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { MemoryStoredFile } from 'nestjs-form-data';
 import { FileSystemProvider } from '@library/providers';
 import { DateTime } from 'luxon';
 import { Constants } from '@library/constants';
 import * as path from 'node:path';
-import { ImagemagickProvider } from '@posting/providers/imagemagick.provider';
+import { MediaFileHandlerProvider } from '@posting/providers/media-file-handler.provider';
 import * as crypto from 'node:crypto';
 import * as mime from 'mime-types';
 import { BoardDto } from '@persistence/dto/board';
+import { FfmpegStrategy, ImagemagickStrategy, IMediaFileHandlerStrategy } from '@posting/strategies';
 
 /**
  * Provider for form file operations
@@ -17,7 +18,7 @@ import { BoardDto } from '@persistence/dto/board';
 export class FormFileProvider {
   constructor(
     private readonly fileSystem: FileSystemProvider,
-    private readonly imagemagickProvider: ImagemagickProvider
+    private readonly mediaFileHandlerProvider: MediaFileHandlerProvider
   ) {}
 
   /**
@@ -49,12 +50,22 @@ export class FormFileProvider {
       board: { connect: { id: board.id } }
     };
 
-    if (isImage) {
-      await this.toImageDimensions(result, dest, name);
-      await this.toImageThumbnail(result, dest, name);
-    } else {
+    if (!isImage && !isVideo) {
       const nonImageMime = mime.lookup(name);
       result.mime = nonImageMime !== false ? nonImageMime : file.mimeType;
+    } else {
+      let currentStrategy: IMediaFileHandlerStrategy;
+
+      if (isImage) {
+        currentStrategy = new ImagemagickStrategy();
+      } else if (isVideo) {
+        currentStrategy = new FfmpegStrategy();
+      } else {
+        throw new InternalServerErrorException('File processing strategy is not implemented');
+      }
+
+      await this.toMediaDimensions(currentStrategy, result, dest, name);
+      await this.toMediaThumbnail(currentStrategy, result, dest, name);
     }
 
     return result;
@@ -95,8 +106,13 @@ export class FormFileProvider {
   /**
    * Get source file dimensions and set them to creation input
    */
-  private async toImageDimensions(input: Prisma.AttachedFileCreateInput, dest: string, name: string): Promise<void> {
-    const { width, height } = await this.imagemagickProvider.getImageDimensions([dest, name]);
+  private async toMediaDimensions(
+    strategy: IMediaFileHandlerStrategy,
+    input: Prisma.AttachedFileCreateInput,
+    dest: string,
+    name: string
+  ): Promise<void> {
+    const { width, height } = await this.mediaFileHandlerProvider.getDimensions(strategy, [dest, name]);
     input.width = width;
     input.height = height;
   }
@@ -104,11 +120,22 @@ export class FormFileProvider {
   /**
    * Make an image thumbnail and set its data to creation input
    */
-  private async toImageThumbnail(input: Prisma.AttachedFileCreateInput, dest: string, file: string): Promise<void> {
-    const { thumbnail, thumbnailWidth, thumbnailHeight } = await this.imagemagickProvider.thumbnailImage(dest, file, {
-      width: input.width ?? -1,
-      height: input.height ?? -1
-    });
+  private async toMediaThumbnail(
+    strategy: IMediaFileHandlerStrategy,
+    input: Prisma.AttachedFileCreateInput,
+    dest: string,
+    file: string
+  ): Promise<void> {
+    const { thumbnail, thumbnailWidth, thumbnailHeight } = await this.mediaFileHandlerProvider.thumbnailImage(
+      strategy,
+      strategy instanceof FfmpegStrategy,
+      dest,
+      file,
+      {
+        width: input.width ?? -1,
+        height: input.height ?? -1
+      }
+    );
 
     input.thumbnail = thumbnail;
     input.thumbnailWidth = thumbnailWidth;
