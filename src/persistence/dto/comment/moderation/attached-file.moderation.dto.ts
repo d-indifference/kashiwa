@@ -38,6 +38,11 @@ export class AttachedFileModerationDto {
   isImage: boolean;
 
   /**
+   * Check if file is a video
+   */
+  isVideo: boolean;
+
+  /**
    * File MIME type
    */
   mime: string;
@@ -50,6 +55,7 @@ export class AttachedFileModerationDto {
     thumbnailWidth: number | null,
     thumbnailHeight: number | null,
     isImage: boolean,
+    isVideo: boolean,
     mime: string
   ) {
     this.id = id;
@@ -59,6 +65,7 @@ export class AttachedFileModerationDto {
     this.thumbnailWidth = thumbnailWidth;
     this.thumbnailHeight = thumbnailHeight;
     this.isImage = isImage;
+    this.isVideo = isVideo;
     this.mime = mime;
   }
 }
