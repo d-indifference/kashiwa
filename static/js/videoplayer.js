@@ -1,10 +1,15 @@
-const handleVideoPlaying = (video, locale) => {
-  const closeButton = document.createElement('button');
-  closeButton.innerText = locale;
-  closeButton.type = 'button';
-  closeButton.addEventListener('click', () => { closeVideo(video, closeButton) });
+const handleVideoPlaying = (video, locale, postNum) => {
+  const buttonName = `btn-${postNum}`;
 
-  video.parentNode.insertBefore(closeButton, video);
+  if (document.getElementsByName(buttonName).length === 0) {
+    const closeButton = document.createElement('button');
+    closeButton.name = buttonName;
+    closeButton.innerText = locale;
+    closeButton.type = 'button';
+    closeButton.addEventListener('click', () => { closeVideo(video, closeButton) });
+
+    video.parentNode.insertBefore(closeButton, video);
+  }
 };
 
 const closeVideo = (video, closeButton) => {

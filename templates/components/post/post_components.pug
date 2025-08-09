@@ -16,7 +16,7 @@ mixin FileSize(_board, _comment)
                 | #{_comment.attachedFile.width}x#{_comment.attachedFile.height}
         | )
         =' '
-        if _comment.attachedFile.isImage
+        if _comment.attachedFile.isImage || _comment.attachedFile.isVideo
             if _comment.attachedFile.width > 200 && _comment.attachedFile.height > 200
                 span.thumbnailmsg= LOCALE.POST_THUMBNAIL_MSG
         br
@@ -49,10 +49,10 @@ mixin Thumbnail(_board, _comment)
                 controls
                 loop
                 muted
-                poster='/img/video.png'
+                poster=`/${_board.url}/thumb/${_comment.attachedFile.thumbnail}`
                 preload='none'
                 src=`/${_board.url}/src/${_comment.attachedFile.name}`
-                onplay=`handleVideoPlaying(this, '${LOCALE.CLOSE_VIDEO}')`
+                onplay=`handleVideoPlaying(this, '${LOCALE.CLOSE_VIDEO}', '${_comment.num.toString()}')`
             )
             a(href=`/${_board.url}/src/${_comment.attachedFile.name}` target='_blank')= LOCALE.DOWNLOAD_VIDEO_HERE
     else

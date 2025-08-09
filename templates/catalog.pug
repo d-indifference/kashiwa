@@ -1,0 +1,85 @@
+extends layouts/footered_layout
+include components/admin_bar
+include components/post/post_components
+
+
+mixin PageHeader()
+    div.logo
+        div.banner
+            img(src=getRandomBanner() alt='banner')
+        | #{SITE_SETTINGS().siteName}
+    div.sublogo= SITE_SETTINGS().siteSlogan
+    hr
+    | [
+    a(href=`/${board.url}/kashiwa.html`)= LOCALE.GO_BACK
+    | ]
+    div.theader
+        | #{commons.pageSubtitle}
+
+
+block content
+    +AdminBar()
+    +PageHeader()
+
+    style.
+        .thumb {
+            float: none !important;
+        }
+
+        .video-thumb {
+            float: none !important;
+        }
+
+
+    div(align='center')
+        form(method='get' action=`/${board.url}/catalog?page=${page.current}&orderBy=${orderBy}`)
+            select(name='orderBy')
+                if orderBy === 'createdAt'
+                    option(value='createdAt' selected) #{LOCALE.CREATED_AT}
+                else
+                    option(value='createdAt') #{LOCALE.CREATED_AT}
+                if orderBy === 'lastHit'
+                    option(value='lastHit' selected) #{LOCALE.LAST_HIT}
+                else
+                    option(value='lastHit') #{LOCALE.LAST_HIT}
+            input(type='submit' value=LOCALE.APPLY_SORTING)
+
+
+    for thread in page.content
+      div(align='center')
+        if thread.attachedFile
+          +Thumbnail(board, thread)
+
+        h3 #{thread.subject}
+        blockquote !{truncateText(thread.comment, board.url, thread.num, thread.num)}
+        b= `${thread.num.toString()}`
+        br
+
+        ='['
+        a(href=`/${board.url}/res/${thread.num}.html`) #{LOCALE.POST_REPLY}
+        =']'
+
+        hr
+
+    div.catalog-pagination(align="center")
+        if page.previous !== null
+            a(href=`/${board.url}/catalog?page=${page.previous}&orderBy=${orderBy}`) ←
+
+        | &nbsp;<
+
+        each i in [...Array(page.total).keys()]
+            if i === page.current
+                | [#{i}]
+            else
+                | [
+                a(href=`/${board.url}/catalog?page=${i}&orderBy=${orderBy}`)= i
+                | ]
+
+        | >&nbsp;
+
+        if page.next !== null
+            a(href=`/${board.url}/catalog?page=${page.next}&orderBy=${orderBy}`) →
+        br
+
+    +AdminBar()
+

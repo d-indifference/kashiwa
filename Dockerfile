@@ -2,6 +2,7 @@ FROM node:23.11.0-bullseye-slim
 
 RUN apt-get update && apt-get install -y \
     imagemagick \
+    ffmpeg \
     zip \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*

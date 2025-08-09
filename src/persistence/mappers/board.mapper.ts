@@ -70,7 +70,7 @@ export class BoardMapper {
           defaultModeratorName: dto.defaultModeratorName ?? undefined,
           enableCaptcha: dto.enableCaptcha ?? undefined,
           isCaptchaCaseSensitive: dto.isCaptchaCaseSensitive ?? undefined,
-          allowedFileTypes: dto.allowedFileTypes ? JSON.stringify(dto.allowedFileTypes) : undefined,
+          allowedFileTypes: dto.allowedFileTypes ? JSON.stringify(dto.allowedFileTypes) : [],
           rules: dto.rules ?? undefined
         }
       }
@@ -128,6 +128,10 @@ export class BoardMapper {
   }
 
   private mapStringArray(strArrayJson: Prisma.JsonValue): string[] {
+    if (Array.isArray(strArrayJson)) {
+      return strArrayJson as string[];
+    }
+
     const jsonStr = strArrayJson as string;
     const clearedStr = jsonStr.replace('[', '').replace(']', '').replaceAll('"', '');
 

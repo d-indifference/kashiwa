@@ -1,18 +1,54 @@
-import { Controller, Get, HttpStatus, Param, Res, StreamableFile } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Param, Query, Render, Res, StreamableFile, ValidationPipe } from '@nestjs/common';
 import { FileSystemProvider } from '@library/providers';
 import { Response } from 'express';
 import * as fsExtra from 'fs-extra';
 import { Constants } from '@library/constants';
 import { PinoLogger } from 'nestjs-pino';
 import { LOCALE } from '@locale/locale';
+import { CatalogService } from '@posting/services';
+import { CatalogPage } from '@posting/pages';
+import { KIsIn, KIsNumber, KIsString } from '@library/validators';
+import { IsOptional } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { normalizePositiveInteger } from '@persistence/lib/transforms';
+
+class CatalogQuery {
+  @IsOptional()
+  @KIsNumber('PAGE')
+  @Transform(normalizePositiveInteger)
+  page: number = 0;
+
+  @IsOptional()
+  @KIsNumber('LIMIT')
+  @Transform(normalizePositiveInteger)
+  limit: number = 50;
+
+  @IsOptional()
+  @KIsString('ORDER_BY')
+  @KIsIn('ORDER_BY', ['createdAt', 'lastHit'])
+  orderBy: 'createdAt' | 'lastHit' | undefined;
+}
 
 @Controller()
 export class ForumController {
   constructor(
+    private readonly catalogService: CatalogService,
     private readonly fileSystem: FileSystemProvider,
     private readonly logger: PinoLogger
   ) {
     this.logger.setContext(ForumController.name);
+  }
+
+  @Get(':url/catalog')
+  @Render('catalog')
+  public async getCatalogPage(
+    @Param('url') url: string,
+    @Query(new ValidationPipe({ transform: true })) query: CatalogQuery
+  ): Promise<CatalogPage> {
+    return await this.catalogService.getCatalogPage(url, query.orderBy ?? 'lastHit', {
+      page: query.page,
+      limit: query.limit
+    });
   }
 
   @Get(`:url/${Constants.RES_DIR}/:page`)

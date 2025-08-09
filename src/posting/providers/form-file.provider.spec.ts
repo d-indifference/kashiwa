@@ -1,226 +1,121 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
-import { FormFileProvider } from './form-file.provider';
-import { FileSystemProvider } from '@library/providers';
-import { ImagemagickProvider } from '@posting/providers/imagemagick.provider';
-import { Constants } from '@library/constants';
-import { DateTime } from 'luxon';
-import * as crypto from 'node:crypto';
-import * as mime from 'mime-types';
+import { MediaFileHandlerProvider } from './media-file-handler.provider';
+import { InternalServerErrorException } from '@nestjs/common';
+import * as path from 'node:path';
+import * as process from 'node:process';
 
-jest.mock('mime-types', () => ({
-  lookup: jest.fn()
-}));
+const Constants = {
+  Paths: {
+    APP_VOLUME: path.join(process.cwd(), 'volumes', 'application.kashiwa')
+  },
+  THUMB_DIR: 'thumb',
+  DEFAULT_THUMBNAIL_SIDE: 100
+};
 
-describe('FormFileProvider', () => {
-  let fileSystemMock: jest.Mocked<FileSystemProvider>;
-  let imagemagickMock: jest.Mocked<ImagemagickProvider>;
-  let provider: FormFileProvider;
+describe('MediaFileHandlerProvider', () => {
+  let provider: MediaFileHandlerProvider;
+  let strategy: any;
 
   beforeEach(() => {
-    fileSystemMock = {
-      writeBinaryFile: jest.fn()
-    } as any;
+    provider = new MediaFileHandlerProvider();
+    (provider as any).Constants = Constants;
 
-    imagemagickMock = {
-      getImageDimensions: jest.fn(),
-      thumbnailImage: jest.fn()
-    } as any;
-
-    provider = new FormFileProvider(fileSystemMock, imagemagickMock);
+    strategy = {
+      getDimensions: jest.fn(),
+      createThumbnail: jest.fn()
+    };
   });
 
-  describe('md5', () => {
-    it('should return md5 hash of buffer', () => {
-      const file = { buffer: Buffer.from('hello') } as any;
-      const hash = provider.md5(file);
-      const expected = crypto.createHash('md5').update(file.buffer).digest('hex');
-      expect(hash).toBe(expected);
+  describe('getDimensions', () => {
+    it('should call strategy.getDimensions with correct full path and return its result', async () => {
+      const fileRelativePath = ['board1', 'file.jpg'];
+      const expectedPath = path.join(Constants.Paths.APP_VOLUME, ...fileRelativePath);
+      const dimensions = { width: 123, height: 456 };
+
+      strategy.getDimensions.mockResolvedValue(dimensions);
+
+      const result = await provider.getDimensions(strategy, fileRelativePath);
+
+      expect(strategy.getDimensions).toHaveBeenCalledWith(expectedPath);
+      expect(result).toBe(dimensions);
     });
   });
 
-  describe('saveFile', () => {
-    it('should save image file and set image metadata', async () => {
-      // Mock data
-      const file = {
-        mimeType: 'image/png',
-        extension: 'png',
-        size: 123,
-        buffer: Buffer.from('img')
-      } as any;
-      const board = { id: 1, url: 'b' } as any;
-      const md5 = 'mockmd5';
+  describe('thumbnailImage', () => {
+    const dest = 'board1/src';
+    const file = '123456789.jpg';
 
-      // Mock saveFileToSrc
-      const dest = ['/b/src', '123456789.png'];
-      jest.spyOn(provider as any, 'saveFileToSrc').mockResolvedValue(dest);
+    it('should throw InternalServerErrorException if no width and height', async () => {
+      await expect(
+        provider.createThumbnail(strategy, false, dest, file, { width: undefined, height: undefined } as any)
+      ).rejects.toThrow(InternalServerErrorException);
 
-      // Mock imagemagick
-      imagemagickMock.getImageDimensions.mockResolvedValue({ width: 300, height: 300 });
-      imagemagickMock.thumbnailImage.mockResolvedValue({
-        thumbnail: '123456789s.png',
-        thumbnailWidth: 200,
-        thumbnailHeight: 200
-      });
+      await expect(
+        provider.createThumbnail(strategy, false, dest, file, { width: null, height: null } as any)
+      ).rejects.toThrow(InternalServerErrorException);
+    });
 
-      const result = await provider.saveFile(file, board, md5);
+    it('should calculate thumbnail size and call strategy.createThumbnail with correct args (image)', async () => {
+      const dimensions = { width: 400, height: 300 };
+
+      const filePath = path.join(Constants.Paths.APP_VOLUME, dest, file);
+      const [filename, ext] = file.split('.');
+      const thumbName = `${filename}s.${ext}`;
+      const boardUrl = dest.split(path.sep)[0]; // board1
+      const thumbDir = path.join(Constants.Paths.APP_VOLUME, boardUrl, Constants.THUMB_DIR);
+      const thumbPath = path.join(thumbDir, thumbName);
+
+      await provider.createThumbnail(strategy, false, dest, file, dimensions);
+
+      expect(strategy.createThumbnail).toHaveBeenCalledWith(filePath, thumbPath, 200, 150);
+    });
+
+    it('should calculate thumbnail size and call strategy.createThumbnail with correct args (video)', async () => {
+      const dimensions = { width: 400, height: 300 };
+      const isVideo = true;
+
+      const filePath = path.join(Constants.Paths.APP_VOLUME, dest, file);
+      const [filename] = file.split('.');
+      const thumbExt = 'png';
+      const thumbName = `${filename}s.${thumbExt}`;
+      const boardUrl = dest.split(path.sep)[0];
+      const thumbDir = path.join(Constants.Paths.APP_VOLUME, boardUrl, Constants.THUMB_DIR);
+      const thumbPath = path.join(thumbDir, thumbName);
+
+      await provider.createThumbnail(strategy, isVideo, dest, file, dimensions);
+
+      expect(strategy.createThumbnail).toHaveBeenCalledWith(filePath, thumbPath, 200, 150);
+    });
+
+    it('should handle equal width and height', async () => {
+      const dimensions = { width: 400, height: 400 };
+      const isVideo = false;
+
+      const filePath = path.join(Constants.Paths.APP_VOLUME, dest, file);
+      const [filename, ext] = file.split('.');
+      const thumbName = `${filename}s.${ext}`;
+      const boardUrl = dest.split(path.sep)[0];
+      const thumbDir = path.join(Constants.Paths.APP_VOLUME, boardUrl, Constants.THUMB_DIR);
+      const thumbPath = path.join(thumbDir, thumbName);
+
+      await provider.createThumbnail(strategy, isVideo, dest, file, dimensions);
+
+      expect(strategy.createThumbnail).toHaveBeenCalledWith(filePath, thumbPath, 200, 200);
+    });
+
+    it('should return thumbnail info', async () => {
+      const dimensions = { width: 400, height: 300 };
+      strategy.createThumbnail.mockResolvedValue(undefined);
+
+      const result = await provider.createThumbnail(strategy, false, dest, file, dimensions);
 
       expect(result).toEqual({
-        isImage: true,
-        isVideo: false,
-        mime: 'image/png',
-        name: '123456789.png',
-        size: 123,
-        md5,
-        board: { connect: { id: board.id } },
-        width: 300,
-        height: 300,
-        thumbnail: '123456789s.png',
+        thumbnail: 'images.jpgs.jpg'
+          .replace('images.jpgs.jpg', '123456789s.jpg')
+          .replace(/images.jpgs.jpg/, '123456789s.jpg')
+          .replace('images.jpgs.jpg', '123456789s.jpg'),
         thumbnailWidth: 200,
-        thumbnailHeight: 200
+        thumbnailHeight: 150
       });
-
-      expect(imagemagickMock.getImageDimensions).toHaveBeenCalledWith(dest);
-      expect(imagemagickMock.thumbnailImage).toHaveBeenCalledWith(dest[0], dest[1], { width: 300, height: 300 });
-    });
-
-    it('should save video file', async () => {
-      const file = {
-        mimeType: 'video/webm',
-        extension: 'webm',
-        size: 123,
-        buffer: Buffer.from('webm')
-      } as any;
-      const board = { id: 1, url: 'b' } as any;
-      const md5 = 'mockmd5';
-
-      const dest = ['/b/src', '123456789.webm'];
-      jest.spyOn(provider as any, 'saveFileToSrc').mockResolvedValue(dest);
-
-      (mime.lookup as jest.Mock).mockReturnValue('video/webm');
-
-      const result = await provider.saveFile(file, board, md5);
-
-      expect(result).toEqual({
-        isImage: false,
-        isVideo: true,
-        mime: 'video/webm',
-        name: '123456789.webm',
-        size: 123,
-        md5,
-        board: { connect: { id: board.id } }
-      });
-    });
-
-    it('should save non-media file and set correct mime', async () => {
-      const file = {
-        mimeType: 'application/pdf',
-        extension: 'pdf',
-        size: 55,
-        buffer: Buffer.from('filedata')
-      } as any;
-      const board = { id: 2, url: 'a' } as any;
-      const md5 = 'md5val';
-
-      const dest = ['a/src', '987654321.pdf'];
-      jest.spyOn(provider as any, 'saveFileToSrc').mockResolvedValue(dest);
-
-      (mime.lookup as jest.Mock).mockReturnValue('application/pdf');
-
-      const result = await provider.saveFile(file, board, md5);
-
-      expect(result.isImage).toBe(false);
-      expect(result.isVideo).toBe(false);
-      expect(result.mime).toBe('application/pdf');
-      expect(result.name).toBe('987654321.pdf');
-      expect(result.size).toBe(55);
-      expect(result.md5).toBe(md5);
-      expect(result.board).toEqual({ connect: { id: board.id } });
-      // Should not set image properties
-      expect(result.width).toBeUndefined();
-      expect(result.thumbnail).toBeUndefined();
-    });
-
-    it('should fallback to original mime if lookup returns false', async () => {
-      const file = {
-        mimeType: 'custom/mime',
-        extension: 'bin',
-        size: 1,
-        buffer: Buffer.from('x')
-      } as any;
-      const board = { id: 3, url: 'c' } as any;
-      const md5 = 'somehash';
-
-      const dest = ['/c/src', '010101.bin'];
-      jest.spyOn(provider as any, 'saveFileToSrc').mockResolvedValue(dest);
-
-      (mime.lookup as jest.Mock).mockReturnValue(false);
-
-      const result = await provider.saveFile(file, board, md5);
-
-      expect(result.mime).toBe('custom/mime');
-    });
-  });
-
-  describe('getTimestampFilename', () => {
-    it('should return current timestamp as string', () => {
-      const spy = jest.spyOn(DateTime, 'now').mockReturnValue({
-        toMillis: () => 12345
-      } as any);
-      const filename = (provider as any).getTimestampFilename();
-      expect(filename).toBe('12345');
-      spy.mockRestore();
-    });
-  });
-
-  describe('getFileDestination', () => {
-    it('should return correct destination and filename', () => {
-      const file = { extension: 'jpg' } as any;
-      const url = '/board';
-      jest.spyOn(provider as any, 'getTimestampFilename').mockReturnValue('999999');
-      const result = (provider as any).getFileDestination(file, url);
-      expect(result).toEqual([`${url}${require('node:path').sep}${Constants.SRC_DIR}`, '999999.jpg']);
-    });
-  });
-
-  describe('isMedia', () => {
-    it('should return true for image mime', () => {
-      const file = { mimeType: 'image/jpeg' } as any;
-      expect((provider as any).isMedia(file, 'image')).toBe(true);
-    });
-    it('should return true for video mime', () => {
-      const file = { mimeType: 'video/webm' } as any;
-      expect((provider as any).isMedia(file, 'video')).toBe(true);
-    });
-    it('should return false for non-image and non-video mime', () => {
-      const file = { mimeType: 'audio/mp3' } as any;
-      expect((provider as any).isMedia(file, 'image')).toBe(false);
-    });
-  });
-
-  describe('toImageDimensions', () => {
-    it('should set width and height from imagemagick', async () => {
-      const input: any = {};
-      imagemagickMock.getImageDimensions.mockResolvedValue({ width: 12, height: 34 });
-      await (provider as any).toImageDimensions(input, 'dest', 'file.png');
-      expect(input.width).toBe(12);
-      expect(input.height).toBe(34);
-      expect(imagemagickMock.getImageDimensions).toHaveBeenCalledWith(['dest', 'file.png']);
-    });
-  });
-
-  describe('toImageThumbnail', () => {
-    it('should set thumbnail data from imagemagick', async () => {
-      const input: any = { width: 2, height: 3 };
-      imagemagickMock.thumbnailImage.mockResolvedValue({
-        thumbnail: '1234567890s.png',
-        thumbnailWidth: 1,
-        thumbnailHeight: 2
-      });
-      await (provider as any).toImageThumbnail(input, 'dest', '1234567890s.png');
-      expect(input.thumbnail).toEqual('1234567890s.png');
-      expect(input.thumbnailWidth).toBe(1);
-      expect(input.thumbnailHeight).toBe(2);
-      expect(imagemagickMock.thumbnailImage).toHaveBeenCalledWith('dest', '1234567890s.png', { width: 2, height: 3 });
     });
   });
 });

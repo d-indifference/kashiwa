@@ -12,7 +12,7 @@ import { PinoLogger, Logger } from 'nestjs-pino';
 import { Logger as NestLogger } from '@nestjs/common';
 import { ExceptionFilter } from '@library/filters';
 import { loggerConfig } from '@config/logger.config';
-import { applicationVersion, fileSize, getRandomBanner } from '@library/helpers';
+import { applicationVersion, fileSize, getRandomBanner, truncateText } from '@library/helpers';
 import {
   FileSystemProvider,
   GlobalSettingsProvider,
@@ -48,6 +48,7 @@ const bootstrap = async (): Promise<void> => {
   app.setLocal('getRandomBanner', getRandomBanner);
   app.setLocal('applicationVersion', applicationVersion);
   app.setLocal('fileSize', fileSize);
+  app.setLocal('truncateText', truncateText);
 
   const ipBlacklistProvider = app.get(IpBlacklistProvider);
   const ipFilterGuard = new IpFilterGuard(fileSystem, ipBlacklistProvider, siteContext);

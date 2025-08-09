@@ -16,6 +16,24 @@ const mapAttachedFileHtml = (file: AttachedFileModerationDto): string => {
       <img alt="${file.mime}" class="thumb" width="${file.thumbnailWidth}" height="${file.thumbnailHeight}" src="/${file.boardUrl}/${Constants.THUMB_DIR}/${file.thumbnail}">
       </a>
       `;
+  } else if (file.isVideo) {
+    if (file.name === 'NO_THUMB') {
+      return `<div class="nothumb">${LOCALE.POST_NO_FILE as string}</div>`;
+    }
+    return `
+      <video 
+        class="video-thumb" 
+        preload="none" 
+        controls 
+        loop 
+        muted 
+        poster="/${file.boardUrl}/${Constants.THUMB_DIR}/${file.thumbnail}"
+        src="/${file.boardUrl}/${Constants.SRC_DIR}/${file.name}"
+        onplay="handleVideoPlaying(this, '${LOCALE.CLOSE_VIDEO as string}', '${file.id}')"
+       >
+      <a href="/${file.boardUrl}/${Constants.SRC_DIR}/${file.name}">${LOCALE.DOWNLOAD_VIDEO_HERE as string}</a>
+      </video>
+      `;
   }
   return `
       <a href="/${file.boardUrl}/${Constants.SRC_DIR}/${file.name}" target="_blank">${file.name}</a>
