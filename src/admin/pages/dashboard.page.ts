@@ -39,6 +39,8 @@ export class DashboardPage extends SessionPage {
 
   imageMagickVersion: string;
 
+  ffMpegVersion: string;
+
   zipVersion: string;
 
   dependencies: Record<string, string>;
@@ -65,6 +67,7 @@ export class DashboardPage extends SessionPage {
     postgresVersion: string,
     pgDumpVersion: string,
     imageMagickVersion: string,
+    ffMpegVersion: string,
     zipVersion: string,
     dependencies: Record<string, string>,
     devDependencies: Record<string, string>
@@ -84,6 +87,7 @@ export class DashboardPage extends SessionPage {
     this.postgresVersion = postgresVersion;
     this.pgDumpVersion = pgDumpVersion;
     this.imageMagickVersion = imageMagickVersion;
+    this.ffMpegVersion = ffMpegVersion;
     this.zipVersion = zipVersion;
     this.dependencies = dependencies;
     this.devDependencies = devDependencies;

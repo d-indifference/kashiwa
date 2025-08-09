@@ -32,6 +32,16 @@ export class DashboardUtilsProvider {
   }
 
   /**
+   * Returns a version of FfMpeg
+   */
+  public async getFfMpegVersion(): Promise<string> {
+    return await this.getToolVersion('ffmpeg -version', 'FAILED_FFMPEG_VERSION', stdout => {
+      const versionMatch = stdout.match(/ffmpeg version (\S+)/);
+      return versionMatch !== null ? versionMatch[1] : 'unknown';
+    });
+  }
+
+  /**
    * Returns a version of `pg_dump`
    */
   public async getPgDumpVersion(): Promise<string> {

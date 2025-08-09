@@ -4,7 +4,7 @@ import { Page } from '@persistence/lib/page';
 import { CommentDto } from '@persistence/dto/comment/common';
 
 /**
- * Board renderable page
+ * Catalog renderable page
  */
 export class CatalogPage extends CommonPage {
   /**
@@ -12,5 +12,13 @@ export class CatalogPage extends CommonPage {
    */
   board: BoardDto;
 
+  /**
+   * Page content
+   */
   page: Page<CommentDto>;
+
+  /**
+   * Field for catalog ordering
+   */
+  orderBy: 'createdAt' | 'lastHit';
 }

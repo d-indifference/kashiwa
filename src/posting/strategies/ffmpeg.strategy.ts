@@ -2,6 +2,7 @@ import { IMediaFileHandlerStrategy } from '@posting/strategies/media-file-handle
 import { exec, PromiseWithChild } from 'child_process';
 import { promisify } from 'node:util';
 import { InternalServerErrorException } from '@nestjs/common';
+import { LOCALE } from '@locale/locale';
 
 /**
  * Strategy for processing videos by `ffmpeg`
@@ -22,7 +23,7 @@ export class FfmpegStrategy implements IMediaFileHandlerStrategy {
 
     const [w, h] = stdout.trim().split(',').map(Number);
     if (isNaN(w) || isNaN(h)) {
-      throw new Error(`Invalid dimensions: ${stdout}`);
+      throw new Error(`${LOCALE.INVALID_DIMENSIONS as string}: ${stdout}`);
     }
     return { width: w, height: h };
   }

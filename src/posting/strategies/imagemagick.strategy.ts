@@ -1,6 +1,7 @@
 import { IMediaFileHandlerStrategy } from '@posting/strategies/media-file-handler.strategy.interface';
 import * as im from 'imagemagick';
 import { InternalServerErrorException } from '@nestjs/common';
+import { LOCALE } from '@locale/locale';
 
 /**
  * Strategy for processing images by `imagemagick`
@@ -22,7 +23,7 @@ export class ImagemagickStrategy implements IMediaFileHandlerStrategy {
 
     const [w, h] = output.trim().split('x').map(Number);
     if (isNaN(w) || isNaN(h)) {
-      throw new Error(`Invalid dimensions: ${output}`);
+      throw new Error(`${LOCALE.INVALID_DIMENSIONS as string}: ${output}`);
     }
 
     return { width: w, height: h };

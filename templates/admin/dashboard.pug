@@ -91,7 +91,7 @@ mixin DashboardNodeJS()
 mixin DashboardToolDetail(tool_name, link, version)
     h3= tool_name
     p
-        a(href=link target='_blank') PostgreSQL
+        a(href=link target='_blank') #{tool_name}
         = LOCALE.VERSION
         b #{version}
 
@@ -100,6 +100,7 @@ mixin DashboardToolDetails()
     +DashboardToolDetail('PostgreSQL', 'https://www.postgresql.org/', postgresVersion)
     +DashboardToolDetail('PgDump', 'https://www.postgresql.org/docs/current/app-pgdump.html', pgDumpVersion)
     +DashboardToolDetail('ImageMagick', 'https://imagemagick.org/index.php', imageMagickVersion)
+    +DashboardToolDetail('FFMPEG', 'https://ffmpeg.org', ffMpegVersion)
     +DashboardToolDetail('Zip', 'https://manpages.ubuntu.com/manpages/noble/man1/zip.1.html', zipVersion)
 
 

@@ -31,8 +31,21 @@ block content
         }
 
 
-    for thread in page.content
+    div(align='center')
+        form(method='get' action=`/${board.url}/catalog?page=${page.current}&orderBy=${orderBy}`)
+            select(name='orderBy')
+                if orderBy === 'createdAt'
+                    option(value='createdAt' selected) #{LOCALE.CREATED_AT}
+                else
+                    option(value='createdAt') #{LOCALE.CREATED_AT}
+                if orderBy === 'lastHit'
+                    option(value='lastHit' selected) #{LOCALE.LAST_HIT}
+                else
+                    option(value='lastHit') #{LOCALE.LAST_HIT}
+            input(type='submit' value=LOCALE.APPLY_SORTING)
 
+
+    for thread in page.content
       div(align='center')
         if thread.attachedFile
           +Thumbnail(board, thread)
@@ -48,9 +61,9 @@ block content
 
         hr
 
-    div(align="center")
+    div.catalog-pagination(align="center")
         if page.previous !== null
-            a(href=`/${board.url}/catalog?page=${page.previous}`) ←
+            a(href=`/${board.url}/catalog?page=${page.previous}&orderBy=${orderBy}`) ←
 
         | &nbsp;<
 
@@ -59,13 +72,13 @@ block content
                 | [#{i}]
             else
                 | [
-                a(href=`${linkToEntities}?page=${i}`)= i
+                a(href=`/${board.url}/catalog?page=${i}&orderBy=${orderBy}`)= i
                 | ]
 
         | >&nbsp;
 
         if page.next !== null
-            a(href=`/${board.url}/catalog?page=${page.next}`) →
+            a(href=`/${board.url}/catalog?page=${page.next}&orderBy=${orderBy}`) →
         br
 
     +AdminBar()

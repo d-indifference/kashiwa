@@ -194,6 +194,7 @@ export const locale: Record<string, LocaleArgument> = {
     'You don&apos;t need to sign up a new account<br>[<a href="/kashiwa">To management panel</a>]',
   ALREADY_SIGNED_IN: 'You are already signed in<br>[<a href="/kashiwa">To management panel</a>]',
   FAILED_IMAGEMAGICK_VERSION: 'Failed to get ImageMagick version',
+  FAILED_FFMPEG_VERSION: 'Failed to get FfMpeg version',
   FAILED_PG_DUMP_VERSION: 'Failed to get PgDump version',
   FAILED_ZIP_VERSION: 'Failed to get Zip version',
   FILE_WAS_NOT_FOUND: 'File was not found',
@@ -247,7 +248,11 @@ export const locale: Record<string, LocaleArgument> = {
   CLOSE_VIDEO: 'Close video',
   LIMIT: 'Limit',
   PAGE: 'Page',
-  ORDER_BY: 'Order by'
+  ORDER_BY: 'Order by',
+  LAST_HIT: 'Last hit',
+  CATALOG: 'Catalog',
+  INVALID_DIMENSIONS: 'Invalid dimensions',
+  APPLY_SORTING: 'Apply sorting'
 };
 
 export const localeValidators: Record<string, (...args: unknown[]) => string> = {

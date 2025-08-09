@@ -22,6 +22,7 @@ describe('DashboardService', () => {
     utils = {
       getPostgresVersion: jest.fn(),
       getImageMagickVersion: jest.fn(),
+      getFfMpegVersion: jest.fn(),
       getPgDumpVersion: jest.fn(),
       getZipVersion: jest.fn()
     } as any;
@@ -46,6 +47,7 @@ describe('DashboardService', () => {
     );
     utils.getPostgresVersion.mockResolvedValue('PostgreSQL 15.0');
     utils.getImageMagickVersion.mockResolvedValue('7.1.0-19');
+    utils.getFfMpegVersion.mockResolvedValue('7.1.0-19');
     utils.getPgDumpVersion.mockResolvedValue('pg_dump (PostgreSQL) 15.0');
     utils.getZipVersion.mockResolvedValue('3.0');
 
@@ -69,6 +71,7 @@ describe('DashboardService', () => {
     expect(result.devDependencies).toEqual({ jest: '^29.0.0' });
     expect(result.postgresVersion).toBe('PostgreSQL 15.0');
     expect(result.imageMagickVersion).toBe('7.1.0-19');
+    expect(result.ffMpegVersion).toBe('7.1.0-19');
     expect(result.pgDumpVersion).toBe('pg_dump (PostgreSQL) 15.0');
     expect(result.zipVersion).toBe('3.0');
     expect(result.engineVersion).toBe('1.2.3');
@@ -89,6 +92,7 @@ describe('DashboardService', () => {
     fileSystem.readTextFileOutOfVolume.mockResolvedValue(JSON.stringify({ dependencies: {}, devDependencies: {} }));
     utils.getPostgresVersion.mockResolvedValue('v');
     utils.getImageMagickVersion.mockResolvedValue('v');
+    utils.getFfMpegVersion.mockResolvedValue('v');
     utils.getPgDumpVersion.mockResolvedValue('v');
     utils.getZipVersion.mockResolvedValue('v');
     jest.spyOn(process, 'cwd').mockReturnValue('/fake');

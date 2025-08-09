@@ -37,6 +37,7 @@ export class DashboardService {
     const dependencies = await this.getDependencies();
     const postgresVersion = await this.utils.getPostgresVersion();
     const imageMagickVersion = await this.utils.getImageMagickVersion();
+    const ffMpegVersion = await this.utils.getFfMpegVersion();
     const pgDumpVersion = await this.utils.getPgDumpVersion();
     const zipVersion = await this.utils.getZipVersion();
 
@@ -56,6 +57,7 @@ export class DashboardService {
       port,
       postgresVersion,
       imageMagickVersion,
+      ffMpegVersion,
       pgDumpVersion,
       zipVersion,
       diskSpaceUsed
