@@ -12,6 +12,7 @@ module.exports = {
   ],
   moduleNameMapper: {
     '^@admin/(.*)$': '<rootDir>/src/admin/$1',
+    '^@api/(.*)$': '<rootDir>/src/api/$1',
     '^@caching/(.*)$': '<rootDir>/src/caching/$1',
     '^@captcha/(.*)$': '<rootDir>/src/captcha/$1',
     '^@config/(.*)$': '<rootDir>/src/config/$1',

@@ -14,9 +14,6 @@ export class Constants {
     /** `templates` directory (*.pug) */
     public static STATIC = path.join(process.cwd(), 'static');
 
-    /** application volume */
-    public static APP_VOLUME = path.join(process.cwd(), 'volumes', 'application.kashiwa');
-
     /** `.presets` directory */
     public static PRESETS = path.join(process.cwd(), '.presets');
   };
@@ -49,7 +46,7 @@ export class Constants {
   public static DEFAULT_THUMBNAIL_SIDE = 200;
 
   /** Potential reserved board URLs */
-  public static RESERVED_BOARD_URLS = ['img', 'css', 'js', 'icons', 'kashiwa', 'front', 'frame', 'faq', 'rules'];
+  public static RESERVED_BOARD_URLS = ['img', 'css', 'js', 'icons', 'kashiwa', 'front', 'frame', 'faq', 'rules', 'api'];
 
   /** Default string file size format */
   public static FILE_SIZE_FORMAT: 'si' | 'iec' | 'jedec' = 'jedec';
@@ -99,6 +96,9 @@ export class Constants {
 
   /** Cron expression of ban rotation interval */
   public static BAN_ROTATION_INTERVAL = CronExpression.EVERY_HOUR;
+
+  /** Cron expression of cached by the API posts rotation interval */
+  public static POST_CLEARING_INTERVAL = CronExpression.EVERY_MINUTE;
 
   /** Maximum validated file size in bytes */
   public static MAX_VALIDATED_FILE_SIZE = 20e6 - 1;

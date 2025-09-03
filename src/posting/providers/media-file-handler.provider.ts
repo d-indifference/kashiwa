@@ -3,12 +3,15 @@ import * as path from 'node:path';
 import { Constants } from '@library/constants';
 import { AttachedFile } from '@prisma/client';
 import { IMediaFileHandlerStrategy } from '@posting/strategies';
+import { ConfigService } from '@nestjs/config';
 
 /**
  * Provider for media file operations
  */
 @Injectable()
 export class MediaFileHandlerProvider {
+  constructor(private readonly config: ConfigService) {}
+
   /**
    * Calculate image dimensions
    * @param strategy File processing strategy
@@ -18,7 +21,7 @@ export class MediaFileHandlerProvider {
     strategy: IMediaFileHandlerStrategy,
     fileRelativePath: string[]
   ): Promise<Pick<AttachedFile, 'width' | 'height'>> {
-    const filePath = path.join(Constants.Paths.APP_VOLUME, ...fileRelativePath);
+    const filePath = path.join(this.getVolume(), ...fileRelativePath);
     return await strategy.getDimensions(filePath);
   }
 
@@ -48,7 +51,7 @@ export class MediaFileHandlerProvider {
     const srcWidth = dimensions.width ?? -1;
     const srcHeight = dimensions.height ?? -1;
 
-    const filePath = path.join(Constants.Paths.APP_VOLUME, dest, file);
+    const filePath = path.join(this.getVolume(), dest, file);
     const [filename, ext] = file.split('.');
     const thumbExt = isVideo ? 'png' : ext;
     const boardUrl = dest.split(path.sep)[0];
@@ -57,10 +60,10 @@ export class MediaFileHandlerProvider {
     let tnHeight: number = srcHeight;
 
     const thumbName = `${filename}s.${thumbExt}`;
-    const thumbDir = path.join(Constants.Paths.APP_VOLUME, boardUrl, Constants.THUMB_DIR);
+    const thumbDir = path.join(this.getVolume(), boardUrl, Constants.THUMB_DIR);
     const thumbPath = path.join(thumbDir, thumbName);
 
-    if (srcWidth > Constants.DEFAULT_THUMBNAIL_SIDE && srcHeight > Constants.DEFAULT_THUMBNAIL_SIDE) {
+    if (srcWidth > Constants.DEFAULT_THUMBNAIL_SIDE || srcHeight > Constants.DEFAULT_THUMBNAIL_SIDE) {
       if (srcWidth > srcHeight) {
         tnWidth = Constants.DEFAULT_THUMBNAIL_SIDE;
         tnHeight = Math.floor((tnWidth * srcHeight) / srcWidth);
@@ -76,5 +79,12 @@ export class MediaFileHandlerProvider {
     await strategy.createThumbnail(filePath, thumbPath, tnWidth, tnHeight);
 
     return { thumbnail: thumbName, thumbnailWidth: tnWidth, thumbnailHeight: tnHeight };
+  }
+
+  /**
+   * Returns the volume path from config file
+   */
+  private getVolume(): string {
+    return this.config.getOrThrow<string>('file-storage.path');
   }
 }

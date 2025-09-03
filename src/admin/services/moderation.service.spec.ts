@@ -13,6 +13,7 @@ import { UserRole } from '@prisma/client';
 import { BoardDto, BoardShortDto } from '@persistence/dto/board';
 import { CommentModerationDto } from '@persistence/dto/comment/moderation';
 import { Response } from 'express';
+import { InMemoryCacheProvider } from '@library/providers';
 
 describe('ModerationService', () => {
   let service: ModerationService;
@@ -20,6 +21,7 @@ describe('ModerationService', () => {
   let commentPersistenceService: jest.Mocked<CommentPersistenceService>;
   let attachedFilePersistenceService: jest.Mocked<AttachedFilePersistenceService>;
   let cachingProvider: jest.Mocked<CachingProvider>;
+  let cache: jest.Mocked<InMemoryCacheProvider>;
   let mockSession: ISession;
   let mockRes: any;
 
@@ -39,11 +41,16 @@ describe('ModerationService', () => {
     cachingProvider = {
       fullyReloadCache: jest.fn()
     } as any;
+    cache = {
+      del: jest.fn(),
+      delKeyStartWith: jest.fn()
+    } as any;
     service = new ModerationService(
       boardPersistenceService,
       commentPersistenceService,
       attachedFilePersistenceService,
-      cachingProvider
+      cachingProvider,
+      cache
     );
     mockSession = { cookie: {} as Cookie, payload: { id: '1', role: UserRole.ADMINISTRATOR } };
     mockRes = { redirect: jest.fn() };

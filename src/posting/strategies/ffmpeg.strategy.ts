@@ -1,8 +1,5 @@
 import { IMediaFileHandlerStrategy } from '@posting/strategies/media-file-handler.strategy.interface';
-import { exec, PromiseWithChild } from 'child_process';
-import { promisify } from 'node:util';
-import { InternalServerErrorException } from '@nestjs/common';
-import { LOCALE } from '@locale/locale';
+import { MediaUtilsWrapper } from '@posting/strategies/media-utils-wrapper';
 
 /**
  * Strategy for processing videos by `ffmpeg`
@@ -13,19 +10,10 @@ export class FfmpegStrategy implements IMediaFileHandlerStrategy {
    * @param filePath Full path to media file
    */
   public async getDimensions(filePath: string): Promise<{ width: number; height: number }> {
-    const { stdout, stderr } = await this.execAsync()(
-      `ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 "${filePath}"`
+    return await MediaUtilsWrapper.getDimensions(
+      `ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 "${filePath}"`,
+      ','
     );
-
-    if (stderr) {
-      throw new InternalServerErrorException(stderr);
-    }
-
-    const [w, h] = stdout.trim().split(',').map(Number);
-    if (isNaN(w) || isNaN(h)) {
-      throw new Error(`${LOCALE.INVALID_DIMENSIONS as string}: ${stdout}`);
-    }
-    return { width: w, height: h };
   }
 
   /**
@@ -36,19 +24,8 @@ export class FfmpegStrategy implements IMediaFileHandlerStrategy {
    * @param tnHeight Thumbnail height
    */
   public async createThumbnail(srcPath: string, thumbPath: string, tnWidth: number, tnHeight: number): Promise<void> {
-    try {
-      await this.execAsync()(
-        `ffmpeg -i "${srcPath}" -vf "scale=${tnWidth}:${tnHeight}:flags=lanczos,format=rgba" -frames:v 1 -pix_fmt rgba "${thumbPath}"`
-      );
-    } catch (e) {
-      throw new InternalServerErrorException(e);
-    }
-  }
-
-  /**
-   * A wrapper for `exec` from `node:child_process`
-   */
-  private execAsync(): (command: string) => PromiseWithChild<{ stdout: string; stderr: string }> {
-    return promisify(exec);
+    await MediaUtilsWrapper.createThumbnail(
+      `ffmpeg -i "${srcPath}" -vf "scale=${tnWidth}:${tnHeight}:flags=lanczos,format=rgba" -frames:v 1 -pix_fmt rgba "${thumbPath}"`
+    );
   }
 }

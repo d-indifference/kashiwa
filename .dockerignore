@@ -2,7 +2,6 @@
 /.idea
 /dist
 /node_modules
-/volumes
 .gitignore
 docker-compose.yml
 LICENSE

@@ -326,4 +326,20 @@ describe('CommentPersistenceService', () => {
       expect(loggerMock.info).toHaveBeenCalledWith({ count: 1 }, '[SUCCESS] remove');
     });
   });
+
+  describe('findPost', () => {
+    it('should throw if not found', async () => {
+      prismaMock.comment.findFirst.mockResolvedValueOnce(null);
+      await expect(service.findPost('url', 9n)).rejects.toThrow(NotFoundException);
+    });
+
+    it('should return mapped dto if found', async () => {
+      const post = { id: 1, board: {}, attachedFile: {} };
+      prismaMock.comment.findFirst.mockResolvedValueOnce(post);
+      commentMapperMock.toDto.mockReturnValueOnce('dto');
+      const result = await service.findPost('url', 9n);
+      expect(result).toBe('dto');
+      expect(commentMapperMock.toDto).toHaveBeenCalledWith(post, []);
+    });
+  });
 });

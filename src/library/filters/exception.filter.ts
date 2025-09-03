@@ -2,7 +2,7 @@ import { ArgumentsHost, Catch, ExceptionFilter as IExceptionFilter, HttpExceptio
 import { PinoLogger } from 'nestjs-pino';
 import { LOCALE } from '@locale/locale';
 import { Request, Response } from 'express';
-import { ErrorPage } from '@library/misc';
+import { ErrorPage, ExceptionLogger } from '@library/misc';
 
 @Catch()
 export class ExceptionFilter implements IExceptionFilter {
@@ -70,44 +70,6 @@ export class ExceptionFilter implements IExceptionFilter {
    * Exception logging depends on exception type
    */
   private logException(exception: unknown, request: Request): void {
-    if (exception instanceof HttpException) {
-      const status = exception.getStatus();
-      if (status >= HttpStatus.BAD_REQUEST.valueOf()) {
-        this.logger.warn({ message: exception.message }, `[${status}] ${exception.name}`);
-      } else {
-        this.logger.error(
-          {
-            method: request.method,
-            url: request.url,
-            status,
-            exception,
-            stack: exception.stack ? exception.stack : undefined
-          },
-          `[${status}] ${exception.name}`
-        );
-      }
-    } else if (exception instanceof Error) {
-      this.logger.error(
-        {
-          method: request.method,
-          url: request.url,
-          status: HttpStatus.INTERNAL_SERVER_ERROR.valueOf(),
-          exception,
-          stack: exception.stack ? exception.stack : undefined
-        },
-        `[${HttpStatus.INTERNAL_SERVER_ERROR.valueOf()}] Internal Server Error`
-      );
-    } else {
-      this.logger.error(
-        {
-          method: request.method,
-          url: request.url,
-          status: HttpStatus.INTERNAL_SERVER_ERROR.valueOf(),
-          exception,
-          stack: exception instanceof Error ? exception.stack : undefined
-        },
-        `[${HttpStatus.INTERNAL_SERVER_ERROR.valueOf()}] Internal Server Error`
-      );
-    }
+    ExceptionLogger.logException(this.logger, exception, request);
   }
 }

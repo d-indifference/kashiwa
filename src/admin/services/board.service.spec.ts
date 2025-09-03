@@ -9,12 +9,14 @@ import { ISession, ISessionPayload } from '@admin/interfaces';
 import { Page, PageRequest } from '@persistence/lib/page';
 import { Board, FileAttachmentMode } from '@prisma/client';
 import { Response } from 'express';
+import { InMemoryCacheProvider } from '@library/providers';
 
 describe('BoardService', () => {
   let service: BoardService;
   let boardPersistenceService: jest.Mocked<BoardPersistenceService>;
   let commentPersistenceService: jest.Mocked<CommentPersistenceService>;
   let cachingProvider: jest.Mocked<CachingProvider>;
+  let cache: jest.Mocked<InMemoryCacheProvider>;
   let mockSession: any;
   let mockRes: any;
 
@@ -37,7 +39,10 @@ describe('BoardService', () => {
       removeCache: jest.fn(),
       clearCache: jest.fn()
     } as any;
-    service = new BoardService(boardPersistenceService, commentPersistenceService, cachingProvider);
+    cache = {
+      delKeyStartWith: jest.fn()
+    } as any;
+    service = new BoardService(boardPersistenceService, commentPersistenceService, cachingProvider, cache);
     mockSession = {
       cookie: {} as Cookie,
       payload: { user: { id: 'user1' } } as unknown as ISessionPayload

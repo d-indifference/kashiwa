@@ -9,7 +9,7 @@ import { Request } from 'express';
 import { DashboardUtilsProvider } from '@admin/providers';
 import { DashboardPage } from '@admin/pages';
 import { ISession } from '@admin/interfaces';
-import { FileSystemProvider } from '@library/providers';
+import { FileSystemProvider, InMemoryCacheProvider } from '@library/providers';
 
 /**
  * Service for rendering the dashboard page
@@ -20,7 +20,8 @@ export class DashboardService {
     private readonly boardPersistenceService: BoardPersistenceService,
     private readonly commentPersistenceService: CommentPersistenceService,
     private readonly utils: DashboardUtilsProvider,
-    private readonly fileSystem: FileSystemProvider
+    private readonly fileSystem: FileSystemProvider,
+    private readonly cache: InMemoryCacheProvider
   ) {}
 
   /**
@@ -86,11 +87,13 @@ export class DashboardService {
    * Get info from `node:process`
    */
   private getProcessInfo(): Pick<DashboardPage, 'engineVersion' | 'debugPort' | 'processVersions'> {
-    return {
-      engineVersion: process.env.npm_package_version as string,
-      debugPort: process.debugPort,
-      processVersions: process.versions
-    };
+    return this.cache.getOrCacheSync('DASHBOARD_PROCESS_VERSIONS', () => {
+      return {
+        engineVersion: process.env.npm_package_version as string,
+        debugPort: process.debugPort,
+        processVersions: process.versions
+      };
+    });
   }
 
   /**
@@ -112,22 +115,26 @@ export class DashboardService {
    * Get info from `package.json`
    */
   private async getDependencies(): Promise<Pick<DashboardPage, 'dependencies' | 'devDependencies'>> {
-    const pathToPackageJson = path.join(process.cwd(), 'package.json');
+    return await this.cache.getOrCache('DASHBOARD_DEPENDENCIES_VERSIONS', async () => {
+      const pathToPackageJson = path.join(process.cwd(), 'package.json');
 
-    const buffer = await this.fileSystem.readTextFileOutOfVolume(pathToPackageJson);
-    const content: Record<string, unknown> = JSON.parse(buffer);
+      const buffer = await this.fileSystem.readTextFileOutOfVolume(pathToPackageJson);
+      const content: Record<string, unknown> = JSON.parse(buffer);
 
-    return {
-      dependencies: content['dependencies'] as Record<string, string>,
-      devDependencies: content['devDependencies'] as Record<string, string>
-    };
+      return {
+        dependencies: content['dependencies'] as Record<string, string>,
+        devDependencies: content['devDependencies'] as Record<string, string>
+      };
+    });
   }
 
   /**
    * Get application port
    */
   private getPort(req: Request): number | undefined {
-    const port = req.headers.host?.split(':')[1];
-    return port && !isNaN(Number(port)) ? parseInt(port) : undefined;
+    return this.cache.getOrCacheSync('DASHBOARD_PORT', () => {
+      const port = req.headers.host?.split(':')[1];
+      return port && !isNaN(Number(port)) ? parseInt(port) : undefined;
+    });
   }
 }

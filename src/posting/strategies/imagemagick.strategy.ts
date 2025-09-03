@@ -1,7 +1,5 @@
 import { IMediaFileHandlerStrategy } from '@posting/strategies/media-file-handler.strategy.interface';
-import * as im from 'imagemagick';
-import { InternalServerErrorException } from '@nestjs/common';
-import { LOCALE } from '@locale/locale';
+import { MediaUtilsWrapper } from '@posting/strategies/media-utils-wrapper';
 
 /**
  * Strategy for processing images by `imagemagick`
@@ -12,21 +10,7 @@ export class ImagemagickStrategy implements IMediaFileHandlerStrategy {
    * @param filePath Full path to media file
    */
   public async getDimensions(filePath: string): Promise<{ width: number; height: number }> {
-    const output = await new Promise<string>((resolve, reject) => {
-      im.identify(['-format', '%wx%h', `${filePath}[0]`], (err, result) => {
-        if (err) {
-          return reject(err);
-        }
-        resolve(result);
-      });
-    });
-
-    const [w, h] = output.trim().split('x').map(Number);
-    if (isNaN(w) || isNaN(h)) {
-      throw new Error(`${LOCALE.INVALID_DIMENSIONS as string}: ${output}`);
-    }
-
-    return { width: w, height: h };
+    return await MediaUtilsWrapper.getDimensions(`identify -format %wx%h "${filePath}"[0]`, 'x');
   }
 
   /**
@@ -36,31 +20,9 @@ export class ImagemagickStrategy implements IMediaFileHandlerStrategy {
    * @param tnWidth Thumbnail width
    * @param tnHeight Thumbnail height
    */
-  public createThumbnail(srcPath: string, thumbPath: string, tnWidth: number, tnHeight: number): Promise<void> {
-    try {
-      return new Promise((resolve, reject) => {
-        im.convert(
-          [
-            srcPath,
-            '-coalesce',
-            '-resize',
-            `${tnWidth}x${tnHeight}`,
-            '-layers',
-            'optimize',
-            '-loop',
-            '0',
-            `${thumbPath}`
-          ],
-          err => {
-            if (err) {
-              reject(err);
-            }
-            resolve();
-          }
-        );
-      });
-    } catch (e) {
-      throw new InternalServerErrorException(e);
-    }
+  public async createThumbnail(srcPath: string, thumbPath: string, tnWidth: number, tnHeight: number): Promise<void> {
+    await MediaUtilsWrapper.createThumbnail(
+      `convert "${srcPath}" -coalesce -resize ${tnWidth}x${tnHeight} -layers optimize -loop 0 "${thumbPath}"`
+    );
   }
 }

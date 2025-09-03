@@ -1,22 +1,28 @@
 import { MediaFileHandlerProvider } from './media-file-handler.provider';
 import { InternalServerErrorException } from '@nestjs/common';
 import * as path from 'node:path';
-import * as process from 'node:process';
+import { ConfigService } from '@nestjs/config';
 
 const Constants = {
-  Paths: {
-    APP_VOLUME: path.join(process.cwd(), 'volumes', 'application.kashiwa')
-  },
   THUMB_DIR: 'thumb',
   DEFAULT_THUMBNAIL_SIDE: 100
 };
 
 describe('MediaFileHandlerProvider', () => {
   let provider: MediaFileHandlerProvider;
+  let config: jest.Mocked<ConfigService>;
   let strategy: any;
 
   beforeEach(() => {
-    provider = new MediaFileHandlerProvider();
+    config = {
+      getOrThrow: jest.fn().mockImplementation((key: string) => {
+        if (key === 'file-storage.path') {
+          return `${path.sep}app${path.sep}volume`;
+        }
+        throw new Error(`Unexpected config key: ${key}`);
+      })
+    } as any;
+    provider = new MediaFileHandlerProvider(config);
     (provider as any).Constants = Constants;
 
     strategy = {
@@ -28,7 +34,7 @@ describe('MediaFileHandlerProvider', () => {
   describe('getDimensions', () => {
     it('should call strategy.getDimensions with correct full path and return its result', async () => {
       const fileRelativePath = ['board1', 'file.jpg'];
-      const expectedPath = path.join(Constants.Paths.APP_VOLUME, ...fileRelativePath);
+      const expectedPath = path.join(`${path.sep}app${path.sep}volume`, ...fileRelativePath);
       const dimensions = { width: 123, height: 456 };
 
       strategy.getDimensions.mockResolvedValue(dimensions);
@@ -57,11 +63,11 @@ describe('MediaFileHandlerProvider', () => {
     it('should calculate thumbnail size and call strategy.createThumbnail with correct args (image)', async () => {
       const dimensions = { width: 400, height: 300 };
 
-      const filePath = path.join(Constants.Paths.APP_VOLUME, dest, file);
+      const filePath = path.join(`${path.sep}app${path.sep}volume`, dest, file);
       const [filename, ext] = file.split('.');
       const thumbName = `${filename}s.${ext}`;
       const boardUrl = dest.split(path.sep)[0]; // board1
-      const thumbDir = path.join(Constants.Paths.APP_VOLUME, boardUrl, Constants.THUMB_DIR);
+      const thumbDir = path.join(`${path.sep}app${path.sep}volume`, boardUrl, Constants.THUMB_DIR);
       const thumbPath = path.join(thumbDir, thumbName);
 
       await provider.createThumbnail(strategy, false, dest, file, dimensions);
@@ -73,12 +79,12 @@ describe('MediaFileHandlerProvider', () => {
       const dimensions = { width: 400, height: 300 };
       const isVideo = true;
 
-      const filePath = path.join(Constants.Paths.APP_VOLUME, dest, file);
+      const filePath = path.join(`${path.sep}app${path.sep}volume`, dest, file);
       const [filename] = file.split('.');
       const thumbExt = 'png';
       const thumbName = `${filename}s.${thumbExt}`;
       const boardUrl = dest.split(path.sep)[0];
-      const thumbDir = path.join(Constants.Paths.APP_VOLUME, boardUrl, Constants.THUMB_DIR);
+      const thumbDir = path.join(`${path.sep}app${path.sep}volume`, boardUrl, Constants.THUMB_DIR);
       const thumbPath = path.join(thumbDir, thumbName);
 
       await provider.createThumbnail(strategy, isVideo, dest, file, dimensions);
@@ -90,11 +96,11 @@ describe('MediaFileHandlerProvider', () => {
       const dimensions = { width: 400, height: 400 };
       const isVideo = false;
 
-      const filePath = path.join(Constants.Paths.APP_VOLUME, dest, file);
+      const filePath = path.join(`${path.sep}app${path.sep}volume`, dest, file);
       const [filename, ext] = file.split('.');
       const thumbName = `${filename}s.${ext}`;
       const boardUrl = dest.split(path.sep)[0];
-      const thumbDir = path.join(Constants.Paths.APP_VOLUME, boardUrl, Constants.THUMB_DIR);
+      const thumbDir = path.join(`${path.sep}app${path.sep}volume`, boardUrl, Constants.THUMB_DIR);
       const thumbPath = path.join(thumbDir, thumbName);
 
       await provider.createThumbnail(strategy, isVideo, dest, file, dimensions);

@@ -9,6 +9,7 @@ import { Constants } from '@library/constants';
 import { BoardDto } from '@persistence/dto/board';
 import { AttachedFileService } from '@posting/services/attached-file.service';
 import { CachingProvider } from '@caching/providers';
+import { InMemoryCacheProvider } from '@library/providers';
 
 /**
  * Service for comment creation
@@ -20,7 +21,8 @@ export class CommentCreateService {
     private readonly commentPersistenceService: CommentPersistenceService,
     private readonly attachedFileService: AttachedFileService,
     private readonly wakabaMarkdown: WakabaMarkdownProvider,
-    private readonly cachingProvider: CachingProvider
+    private readonly cachingProvider: CachingProvider,
+    private readonly cache: InMemoryCacheProvider
   ) {}
 
   /**
@@ -44,6 +46,8 @@ export class CommentCreateService {
 
     await this.deleteOldestPostOnMaxThreadsOnBoard(board);
     await this.cachingProvider.reloadCacheForThread(url, newThread.num);
+
+    this.cache.delKeyStartWith(`api.findThreadsPage:${url}`);
 
     setPostCookies(form, input.password, res);
 
@@ -73,6 +77,8 @@ export class CommentCreateService {
 
     await this.updateLastHit(board, form, parentNum);
     await this.cachingProvider.reloadCacheForThread(url, parentNum);
+    this.cache.del(`api.findThread:${url}:${parentNum}`);
+    this.cache.delKeyStartWith(`api.findThreadsPage:${url}`);
 
     setPostCookies(form, input.password, res);
     res.redirect(`/${url}/res/${parentNum}${Constants.HTML_SUFFIX}#${newReply.num}`);

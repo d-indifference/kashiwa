@@ -1,5 +1,12 @@
+application:
+  name: 'Kashiwa Image Board'
+  description: 'Yet another imageboard implementation API'
+
 http:
   port: 3000
+
+file-storage:
+  path: /var/lib/application.kashiwa/data
 
 secure:
   user:

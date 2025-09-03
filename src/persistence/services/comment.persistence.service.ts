@@ -145,6 +145,27 @@ export class CommentPersistenceService {
   }
 
   /**
+   * Find comment by board URL and thread number. If not found, throws 404.
+   * @param url Board URL
+   * @param num Comment number on board
+   */
+  public async findPost(url: string, num: bigint): Promise<CommentDto> {
+    const post = await this.prisma.comment.findFirst({
+      include: {
+        board: { include: { boardSettings: true } },
+        attachedFile: true
+      },
+      where: { board: { url }, num }
+    });
+
+    if (!post) {
+      throw new NotFoundException((LOCALE['POST_NOT_FOUND'] as CallableFunction)(url, num.toString()));
+    }
+
+    return this.commentMapper.toDto(post, []);
+  }
+
+  /**
    * Find opening post by board URL and thread number. If not found, throws 404.
    * @param url Board URL
    * @param num Thread number on board

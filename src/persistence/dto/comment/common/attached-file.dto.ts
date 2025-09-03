@@ -33,6 +33,11 @@ export class AttachedFileDto {
   isImage: boolean;
 
   /**
+   * Is file a video
+   */
+  isVideo: boolean;
+
+  /**
    * Thumbnail file name (actual for images)
    */
   thumbnail: string | null;
@@ -54,6 +59,7 @@ export class AttachedFileDto {
     height: number | null,
     mime: string,
     isImage: boolean,
+    isVideo: boolean,
     thumbnail: string | null,
     thumbnailWidth: number | null,
     thumbnailHeight: number | null
@@ -64,6 +70,7 @@ export class AttachedFileDto {
     this.height = height;
     this.mime = mime;
     this.isImage = isImage;
+    this.isVideo = isVideo;
     this.thumbnail = thumbnail;
     this.thumbnailWidth = thumbnailWidth;
     this.thumbnailHeight = thumbnailHeight;

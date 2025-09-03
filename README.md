@@ -29,7 +29,10 @@ After saving the source code, do the following:
 
     DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?schema=kashiwa"
 
-    NODE_ENV='production' 
+    KASHIWA_PHYSICS_VOLUME_POSTGRES='/var/lib/postgresql/data' # or you can change it to any other physical location you wish
+    KASHIWA_PHYSICS_VOLUME_APPLICATION='/var/lib/application/data' # or you can change it to any other physical location you wish
+   
+    NODE_ENV='production'
     ```
 4. Edit configurations in the file `configuration.yml` as you wish,
    but we strongly recommend you to change default values by paths `secure.user.salt-rounds` and `secure.session.secret`.

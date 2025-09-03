@@ -11,6 +11,7 @@ import { BoardSettings } from '@prisma/client';
 import { BoardCreateForm, BoardUpdateForm } from '@admin/forms/board';
 import { Response } from 'express';
 import { CachingProvider } from '@caching/providers';
+import { InMemoryCacheProvider } from '@library/providers';
 
 /**
  * Service for working with boards
@@ -22,7 +23,8 @@ export class BoardService {
   constructor(
     private readonly boardPersistenceService: BoardPersistenceService,
     private readonly commentPersistenceService: CommentPersistenceService,
-    private readonly cachingProvider: CachingProvider
+    private readonly cachingProvider: CachingProvider,
+    private readonly cache: InMemoryCacheProvider
   ) {
     this.tableConstructor = new TableConstructor<BoardShortDto>()
       .mappedValue(
@@ -162,6 +164,9 @@ export class BoardService {
     const updatedBoard = await this.boardPersistenceService.update(dto);
     await this.cachingProvider.fullyReloadCache(board.url);
     await this.cachingProvider.renameCache(board.url, updatedBoard.url);
+    this.cache.delKeyStartWith(`api.findThread:${board.url}`);
+    this.cache.delKeyStartWith(`api.findPost:${board.url}`);
+    this.cache.delKeyStartWith(`api.findThreadsPage:${board.url}`);
 
     res.redirect(`/kashiwa/board/edit/${updatedBoard.id}`);
   }
@@ -176,6 +181,9 @@ export class BoardService {
 
     await this.boardPersistenceService.remove(id);
     await this.cachingProvider.removeCache(board.url);
+    this.cache.delKeyStartWith(`api.findThread:${board.url}`);
+    this.cache.delKeyStartWith(`api.findPost:${board.url}`);
+    this.cache.delKeyStartWith(`api.findThreadsPage:${board.url}`);
 
     res.redirect('/kashiwa/board');
   }
@@ -188,6 +196,10 @@ export class BoardService {
   public async reloadBoardCache(id: string, res: Response): Promise<void> {
     const board = await this.boardPersistenceService.findById(id);
     await this.cachingProvider.fullyReloadCache(board.url);
+    this.cache.delKeyStartWith(`api.findThread:${board.url}`);
+    this.cache.delKeyStartWith(`api.findPost:${board.url}`);
+    this.cache.delKeyStartWith(`api.findThreadsPage:${board.url}`);
+
     res.redirect(`/kashiwa/board/edit/${id}`);
   }
 
@@ -202,6 +214,9 @@ export class BoardService {
     await this.commentPersistenceService.removeAllFromBoard(board.url);
     await this.cachingProvider.clearCache(board.url);
     await this.cachingProvider.fullyReloadCache(board.url);
+    this.cache.delKeyStartWith(`api.findThread:${board.url}`);
+    this.cache.delKeyStartWith(`api.findPost:${board.url}`);
+    this.cache.delKeyStartWith(`api.findThreadsPage:${board.url}`);
 
     res.redirect(`/kashiwa/board/edit/${id}`);
   }

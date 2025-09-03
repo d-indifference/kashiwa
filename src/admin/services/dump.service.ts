@@ -12,6 +12,7 @@ import * as path from 'path';
 import * as fs from 'node:fs';
 import * as archiver from 'archiver';
 import { FileSystemProvider } from '@library/providers';
+import { ConfigService } from '@nestjs/config';
 
 /**
  * Service for creating of site contend and database dump archives
@@ -21,7 +22,8 @@ export class DumpService {
   constructor(
     private readonly databaseDumpingUtils: DatabaseDumpingUtilsProvider,
     private readonly fileSystem: FileSystemProvider,
-    private readonly logger: PinoLogger
+    private readonly logger: PinoLogger,
+    private readonly config: ConfigService
   ) {
     this.logger.setContext(DumpService.name);
   }
@@ -50,7 +52,7 @@ export class DumpService {
   public async processDump(form: DumpForm, res: Response): Promise<void> {
     this.logger.info(form, 'processDump');
 
-    const dumpTargetPath = Constants.Paths.APP_VOLUME;
+    const dumpTargetPath = this.config.getOrThrow<string>('file-storage.path');
 
     const sqlDumps = await this.databaseDumpingUtils.dumpSql(form.dbTable);
     const dirDumps = await this.getCacheForArchivation(form);
@@ -74,10 +76,9 @@ export class DumpService {
    * Get full path of cached files for archivation
    */
   private async getCacheForArchivation(form: DumpForm): Promise<string[]> {
+    const volume = this.config.getOrThrow<string>('file-storage.path');
     const entries = await this.fileSystem.readDir(undefined);
-    return entries
-      .filter(entry => this.cacheFilterPredicate(form, entry))
-      .map(entry => path.join(Constants.Paths.APP_VOLUME, entry.name));
+    return entries.filter(entry => this.cacheFilterPredicate(form, entry)).map(entry => path.join(volume, entry.name));
   }
 
   /**

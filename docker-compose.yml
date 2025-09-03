@@ -8,7 +8,7 @@ services:
     ports:
       - '${POSTGRES_PORT}:${POSTGRES_PORT}'
     volumes:
-      - ./volumes/db.kashiwa:/var/lib/postgresql/data
+      - '${KASHIWA_PHYSICS_VOLUME_POSTGRES}:/var/lib/postgresql/data'
       - ./.postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     restart: unless-stopped
     networks:
@@ -17,7 +17,7 @@ services:
   application:
     container_name: application.kashiwa
     hostname: application.kashiwa
-    image: kashiwa:0.7.0-alpha
+    image: kashiwa:0.8.0-alpha
     build:
       context: ./
       dockerfile: Dockerfile
@@ -28,7 +28,7 @@ services:
     ports:
       - '13000:3000'
     volumes:
-      - ./volumes/application.kashiwa:/app/volumes/application.kashiwa
+      - '${KASHIWA_PHYSICS_VOLUME_APPLICATION}:/var/lib/application.kashiwa/data'
     restart: unless-stopped
     networks:
       - kashiwa-network
@@ -36,7 +36,7 @@ services:
   nginx:
     container_name: nginx.kashiwa
     hostname: nginx.kashiwa
-    image: kashiwa-nginx:0.7.0-alpha
+    image: kashiwa-nginx:0.8.0-alpha
     build:
       context: ./nginx
       dockerfile: Dockerfile

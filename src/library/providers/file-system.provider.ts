@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import * as fsExtra from 'fs-extra';
 import * as path from 'path';
-import { Constants } from '@library/constants';
 import { Dirent } from 'fs-extra';
 import getFolderSize from 'get-folder-size';
 import { createReadStream } from 'fs';
 import * as mime from 'mime-types';
 import { LOCALE } from '@locale/locale';
+import { ConfigService } from '@nestjs/config';
 
 const DEFAULT_FILE_ENCODING = 'utf-8';
 
@@ -15,6 +15,8 @@ const DEFAULT_FILE_ENCODING = 'utf-8';
  */
 @Injectable()
 export class FileSystemProvider {
+  constructor(private readonly config: ConfigService) {}
+
   /**
    * Ensures that a directory exists at the given absolute path outside the application volume.
    * Creates the directory if it doesn't exist.
@@ -39,7 +41,8 @@ export class FileSystemProvider {
    * @param relativePath - Optional relative path segments from the application volume root.
    */
   public async readDir(relativePath?: string[]): Promise<Dirent[]> {
-    const dirPathArray: string[] = [Constants.Paths.APP_VOLUME];
+    const volume = this.config.getOrThrow<string>('file-storage.path');
+    const dirPathArray: string[] = [volume];
 
     if (relativePath) {
       dirPathArray.push(...relativePath);
@@ -64,7 +67,7 @@ export class FileSystemProvider {
    * @returns Directory size in bytes.
    */
   public async dirSize(relativePath: string[]): Promise<number> {
-    const dirPath = path.join(Constants.Paths.APP_VOLUME, ...relativePath);
+    const dirPath = path.join(this.getVolume(), ...relativePath);
     return await getFolderSize.loose(dirPath);
   }
 
@@ -174,7 +177,7 @@ export class FileSystemProvider {
    * @throws {NotFoundException} If the file does not exist.
    */
   public streamFile(relativePath: string[]): [fsExtra.ReadStream, string] {
-    const filePath = path.join(Constants.Paths.APP_VOLUME, ...relativePath);
+    const filePath = path.join(this.getVolume(), ...relativePath);
     const fileExists = fsExtra.existsSync(filePath);
 
     if (fileExists) {
@@ -191,6 +194,13 @@ export class FileSystemProvider {
    * Joins a relative path with the application volume base path.
    */
   private joinVolumePath(relativePath: string[]): string {
-    return path.join(Constants.Paths.APP_VOLUME, ...relativePath);
+    return path.join(this.getVolume(), ...relativePath);
+  }
+
+  /**
+   * Returns the volume path from config file
+   */
+  private getVolume(): string {
+    return this.config.getOrThrow<string>('file-storage.path');
   }
 }

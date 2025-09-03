@@ -1,58 +1,60 @@
 import { FfmpegStrategy } from './ffmpeg.strategy';
-import { InternalServerErrorException } from '@nestjs/common';
+import { MediaUtilsWrapper } from '@posting/strategies/media-utils-wrapper';
+
+jest.mock('@posting/strategies/media-utils-wrapper', () => ({
+  MediaUtilsWrapper: {
+    getDimensions: jest.fn(),
+    createThumbnail: jest.fn()
+  }
+}));
 
 describe('FfmpegStrategy', () => {
   let strategy: FfmpegStrategy;
-  let mockExec: jest.Mock;
 
   beforeEach(() => {
     strategy = new FfmpegStrategy();
-    mockExec = jest.fn();
-    jest.spyOn<any, any>(strategy as any, 'execAsync').mockReturnValue(mockExec);
+    jest.clearAllMocks();
   });
 
   describe('getDimensions', () => {
-    it('should return width and height when stdout is valid', async () => {
-      mockExec.mockResolvedValue({ stdout: '1920,1080', stderr: '' });
+    it('should call MediaUtilsWrapper.getDimensions with correct command', async () => {
+      (MediaUtilsWrapper.getDimensions as jest.Mock).mockResolvedValue({ width: 1920, height: 1080 });
 
-      const result = await strategy.getDimensions('/path/video.mp4');
+      const filePath = '/path/to/video.mp4';
+      const result = await strategy.getDimensions(filePath);
 
-      expect(mockExec).toHaveBeenCalledWith(expect.stringContaining('ffprobe -v error -select_streams v:0'));
+      expect(MediaUtilsWrapper.getDimensions).toHaveBeenCalledWith(
+        `ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 "${filePath}"`,
+        ','
+      );
       expect(result).toEqual({ width: 1920, height: 1080 });
     });
 
-    it('should throw InternalServerErrorException if stderr is not empty', async () => {
-      mockExec.mockResolvedValue({ stdout: '', stderr: 'error here' });
+    it('should propagate errors from MediaUtilsWrapper.getDimensions', async () => {
+      (MediaUtilsWrapper.getDimensions as jest.Mock).mockRejectedValue(new Error('ffprobe failed'));
 
-      await expect(strategy.getDimensions('/path/video.mp4')).rejects.toBeInstanceOf(InternalServerErrorException);
-    });
-
-    it('should throw Error if stdout is invalid', async () => {
-      mockExec.mockResolvedValue({ stdout: 'abc,xyz', stderr: '' });
-
-      await expect(strategy.getDimensions('/path/video.mp4')).rejects.toThrow(/Invalid dimensions/);
+      await expect(strategy.getDimensions('/bad/file')).rejects.toThrow('ffprobe failed');
     });
   });
 
   describe('createThumbnail', () => {
-    it('should call ffmpeg with correct params', async () => {
-      mockExec.mockResolvedValue({ stdout: '', stderr: '' });
+    it('should call MediaUtilsWrapper.createThumbnail with correct command', async () => {
+      (MediaUtilsWrapper.createThumbnail as jest.Mock).mockResolvedValue(undefined);
 
-      await strategy.createThumbnail('/path/video.mp4', '/path/thumb.png', 320, 240);
+      const srcPath = '/path/to/video.mp4';
+      const thumbPath = '/path/to/thumb.png';
 
-      expect(mockExec).toHaveBeenCalledWith(
-        expect.stringContaining(
-          'ffmpeg -i "/path/video.mp4" -vf "scale=320:240:flags=lanczos,format=rgba" -frames:v 1 -pix_fmt rgba "/path/thumb.png"'
-        )
+      await strategy.createThumbnail(srcPath, thumbPath, 320, 240);
+
+      expect(MediaUtilsWrapper.createThumbnail).toHaveBeenCalledWith(
+        `ffmpeg -i "${srcPath}" -vf "scale=320:240:flags=lanczos,format=rgba" -frames:v 1 -pix_fmt rgba "${thumbPath}"`
       );
     });
 
-    it('should throw InternalServerErrorException if exec fails', async () => {
-      mockExec.mockRejectedValue(new Error('ffmpeg fail'));
+    it('should propagate errors from MediaUtilsWrapper.createThumbnail', async () => {
+      (MediaUtilsWrapper.createThumbnail as jest.Mock).mockRejectedValue(new Error('ffmpeg failed'));
 
-      await expect(strategy.createThumbnail('/src.mp4', '/thumb.png', 100, 100)).rejects.toBeInstanceOf(
-        InternalServerErrorException
-      );
+      await expect(strategy.createThumbnail('src', 'thumb', 100, 100)).rejects.toThrow('ffmpeg failed');
     });
   });
 });

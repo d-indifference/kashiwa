@@ -17,7 +17,7 @@ mixin FileSize(_board, _comment)
         | )
         =' '
         if _comment.attachedFile.isImage || _comment.attachedFile.isVideo
-            if _comment.attachedFile.width > 200 && _comment.attachedFile.height > 200
+            if _comment.attachedFile.width > 200 || _comment.attachedFile.height > 200
                 span.thumbnailmsg= LOCALE.POST_THUMBNAIL_MSG
         br
 
@@ -98,13 +98,13 @@ mixin CommentLabel(_board, _comment, _is_reply)
 
 mixin ThreadPreviewRefLink(_board, _comment)
     span.reflink
-        a(href=`/${_board.url}/res/${_comment.num.toString()}.html#i${_comment.num.toString()}`) No. #{_comment.num.toString()}
+        a(href=`/${_board.url}/res/${_comment.num.toString()}${HTML_SUFFIX}#i${_comment.num.toString()}`) No. #{_comment.num.toString()}
         | &nbsp;
 
 
 mixin ReplyPreviewRefLink(_board, _opening_post, _comment)
     span.reflink
-        a(href=`/${_board.url}/res/${_opening_post.num.toString()}.html#i${_comment.num.toString()}`) No. #{_comment.num.toString()}
+        a(href=`/${_board.url}/res/${_opening_post.num.toString()}${HTML_SUFFIX}#i${_comment.num.toString()}`) No. #{_comment.num.toString()}
         | &nbsp;
 
 
@@ -123,7 +123,7 @@ mixin ReplyRefLink(_board, _comment)
 mixin ReplyToThread(_board, _comment)
     span.replytothread
         | [
-        a(href=`/${_board.url}/res/${_comment.num.toString()}.html`)= LOCALE.POST_REPLY
+        a(href=`/${_board.url}/res/${_comment.num.toString()}${HTML_SUFFIX}`)= LOCALE.POST_REPLY
         | ]
 
 

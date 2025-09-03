@@ -4,6 +4,7 @@ import { CachingProvider } from '@caching/providers';
 import { CommentDeleteForm } from '@posting/forms';
 import { Response } from 'express';
 import { Constants } from '@library/constants';
+import { InMemoryCacheProvider } from '@library/providers';
 
 /**
  * Service for comment deletion
@@ -13,7 +14,8 @@ export class CommentDeleteService {
   constructor(
     private readonly commentPersistenceService: CommentPersistenceService,
     private readonly attachedFilePersistenceService: AttachedFilePersistenceService,
-    private readonly cachingProvider: CachingProvider
+    private readonly cachingProvider: CachingProvider,
+    private readonly cache: InMemoryCacheProvider
   ) {}
 
   /**
@@ -26,6 +28,10 @@ export class CommentDeleteService {
   public async deleteComment(url: string, form: CommentDeleteForm, res: Response, num?: bigint): Promise<void> {
     await this.processCommentDeletion(url, form);
     await this.cachingProvider.fullyReloadCache(url);
+
+    this.cache.delKeyStartWith(`api.findThread:${url}`);
+    this.cache.delKeyStartWith(`api.findPost:${url}`);
+    this.cache.delKeyStartWith(`api.findThreadsPage:${url}`);
 
     if (num) {
       res.redirect(this.makeRedirectionString(url, form, num));

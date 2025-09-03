@@ -17,9 +17,12 @@ import {
   FileSystemProvider,
   GlobalSettingsProvider,
   IpBlacklistProvider,
-  SiteContextProvider
+  SiteContextProvider,
+  SwaggerSetupProvider
 } from '@library/providers';
 import { AntiSpamService, InitModuleService } from '@restriction/modules/antispam/services';
+import { SwaggerModule } from '@nestjs/swagger';
+import * as process from 'node:process';
 
 const bootstrap = async (): Promise<void> => {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
@@ -34,7 +37,7 @@ const bootstrap = async (): Promise<void> => {
   app.use(cookieParser());
   app.use(session(sessionConfig(config)));
 
-  const fileSystem = new FileSystemProvider();
+  const fileSystem = new FileSystemProvider(config);
   await fileSystem.ensureDir([Constants.SETTINGS_DIR]);
 
   const logger = app.get(Logger);
@@ -49,6 +52,7 @@ const bootstrap = async (): Promise<void> => {
   app.setLocal('applicationVersion', applicationVersion);
   app.setLocal('fileSize', fileSize);
   app.setLocal('truncateText', truncateText);
+  app.setLocal('HTML_SUFFIX', Constants.HTML_SUFFIX);
 
   const ipBlacklistProvider = app.get(IpBlacklistProvider);
   const ipFilterGuard = new IpFilterGuard(fileSystem, ipBlacklistProvider, siteContext);
@@ -68,9 +72,13 @@ const bootstrap = async (): Promise<void> => {
 
   app.useLogger(logger);
 
+  const swaggerUrl = `/api/${process.env.npm_package_version}/docs`;
+  const swaggerSetupProvider = app.get(SwaggerSetupProvider);
+  SwaggerModule.setup(swaggerUrl, app, swaggerSetupProvider.setupDocs(app));
+
   await app.listen(port);
 
-  NestLogger.log(`Application is successfully running on port: ${port}`);
+  NestLogger.log(`Application is successfully running on port: ${port}, swagger: ${swaggerUrl}`);
 };
 
 bootstrap().then();
