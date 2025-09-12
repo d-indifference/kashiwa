@@ -14,6 +14,7 @@ import { CommentModerationDto } from '@persistence/dto/comment/moderation';
 import { moderationBoardTableConstructor, moderationCommentsTableConstructor } from '@admin/misc';
 import { Response } from 'express';
 import { CachingProvider } from '@caching/providers';
+import { InMemoryCacheProvider } from '@library/providers';
 
 /**
  * Service for moderation operations
@@ -28,7 +29,8 @@ export class ModerationService {
     private readonly boardPersistenceService: BoardPersistenceService,
     private readonly commentPersistenceService: CommentPersistenceService,
     private readonly attachedFilePersistenceService: AttachedFilePersistenceService,
-    private readonly cachingProvider: CachingProvider
+    private readonly cachingProvider: CachingProvider,
+    private readonly cache: InMemoryCacheProvider
   ) {
     this.boardTableConstructor = moderationBoardTableConstructor;
     this.commentsTableConstructor = moderationCommentsTableConstructor;
@@ -73,6 +75,10 @@ export class ModerationService {
     await this.commentPersistenceService.remove(url, num);
     await this.cachingProvider.fullyReloadCache(url);
     const board = await this.boardPersistenceService.findByUrl(url);
+    this.cache.del(`api.findThread:${url}:${num}`);
+    this.cache.del(`api.findPost:${url}:${num}`);
+    this.cache.delKeyStartWith(`api.findThreadsPage:${board.url}`);
+
     res.redirect(`/kashiwa/moderation/${board.id}`);
   }
 
@@ -86,6 +92,10 @@ export class ModerationService {
     await this.attachedFilePersistenceService.clearFromComment(url, num);
     await this.cachingProvider.fullyReloadCache(url);
     const board = await this.boardPersistenceService.findByUrl(url);
+    this.cache.del(`api.findThread:${url}:${num}`);
+    this.cache.del(`api.findPost:${url}:${num}`);
+    this.cache.delKeyStartWith(`api.findThreadsPage:${url}`);
+
     res.redirect(`/kashiwa/moderation/${board.id}`);
   }
 
@@ -99,6 +109,10 @@ export class ModerationService {
     await this.commentPersistenceService.removeByIp(url, ip);
     await this.cachingProvider.fullyReloadCache(url);
     const board = await this.boardPersistenceService.findByUrl(url);
+    this.cache.delKeyStartWith(`api.findThread:${url}`);
+    this.cache.delKeyStartWith(`api.findPost:${url}`);
+    this.cache.delKeyStartWith(`api.findThreadsPage:${url}`);
+
     res.redirect(`/kashiwa/moderation/${board.id}`);
   }
 }

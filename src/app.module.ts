@@ -8,6 +8,7 @@ import { LoggerModule } from 'nestjs-pino';
 import { loggerConfig } from '@config/logger.config';
 import { AdminModule } from '@admin/admin.module';
 import { PostingModule } from '@posting/posting.module';
+import { ApiModule } from '@api/api.module';
 
 @Module({
   controllers: [AppController],
@@ -23,6 +24,7 @@ import { PostingModule } from '@posting/posting.module';
     }),
     LoggerModule.forRoot(loggerConfig()),
     LibraryModule,
+    ApiModule,
     AdminModule,
     PostingModule
   ],

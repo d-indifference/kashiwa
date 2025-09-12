@@ -193,3 +193,7 @@ a:hover {
 .adminPost {
   color: darkviolet;
 }
+
+.reply-link-container {
+  background-color: #d6daF0 !important;
+}

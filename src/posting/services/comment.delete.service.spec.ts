@@ -5,6 +5,7 @@ describe('CommentDeleteService', () => {
   let commentPersistenceService: any;
   let attachedFilePersistenceService: any;
   let cachingProvider: any;
+  let cache: any;
   let service: CommentDeleteService;
 
   beforeEach(() => {
@@ -17,7 +18,15 @@ describe('CommentDeleteService', () => {
     cachingProvider = {
       fullyReloadCache: jest.fn()
     };
-    service = new CommentDeleteService(commentPersistenceService, attachedFilePersistenceService, cachingProvider);
+    cache = {
+      delKeyStartWith: jest.fn()
+    };
+    service = new CommentDeleteService(
+      commentPersistenceService,
+      attachedFilePersistenceService,
+      cachingProvider,
+      cache
+    );
     jest.clearAllMocks();
   });
 

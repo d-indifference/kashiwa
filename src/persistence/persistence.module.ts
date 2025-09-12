@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { PrismaService } from '@persistence/lib';
 import { ConfigModule } from '@nestjs/config';
 import { BanMapper, BoardMapper, CommentMapper, UserMapper } from '@persistence/mappers';
@@ -15,7 +15,7 @@ import { LibraryModule } from '@library/library.module';
  * Module for Prisma queries
  */
 @Module({
-  imports: [ConfigModule, LibraryModule],
+  imports: [ConfigModule, forwardRef(() => LibraryModule)],
   providers: [
     PrismaService,
     UserMapper,

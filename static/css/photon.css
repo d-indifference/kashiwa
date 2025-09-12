@@ -200,3 +200,11 @@ table td {
 .adminPost {
   color: darkviolet;
 }
+
+.reply-link-container {
+  background-color: #dddddd !important;
+}
+
+.reply-link-container .reply {
+  border: none;
+}

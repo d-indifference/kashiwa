@@ -126,3 +126,79 @@ function changeStyle(styleTitle, cookieName) {
   setStyleAtMain(cookieName);
   setStyleAtFrame('menu', cookieName);
 }
+
+function processReplyPreview(boardUrl) {
+  $("a.ref").hover(
+    function(e) {
+      var postAddress = $(e.target).attr("class").split(' ')[1].split('|');
+      showReplyPreview(e.pageX, e.pageY, boardUrl, postAddress);
+    },
+    function(e) {
+      $(".reply-link-container").html('').hide();
+    }
+  );
+}
+
+function showReplyPreview(pageX, pageY, boardUrl, postAddress) {
+  var replyLinkContainer = $(".reply-link-container");
+
+  replyLinkContainer.css({
+    'top': pageY + 'px',
+    'left': pageX + 'px'
+    })
+    .show();
+
+  var threadNumber = postAddress[0];
+  var postNumber = postAddress[1];
+
+  $.ajax({
+    url: "/api/v1/" + boardUrl + '/' + postNumber,
+    type: "GET",
+    success: function(result) {
+      replyLinkContainer.html(buildReferenceHtml(boardUrl, threadNumber, postNumber, result));
+    },
+    error: function(xhr) {
+      var response = JSON.parse(xhr.responseText);
+      replyLinkContainer.html('<p>' + response.statusCode + ': ' + response.message + '</p>');
+    }
+  });
+}
+
+function buildReferenceHtml(boardUrl, threadNumber, postNumber, content) {
+  var result = '<table><tbody><tr><td class="reply"><label><span class="replytitle">';
+
+  if (content.subject == null) {
+    result += '';
+  } else {
+    result += content.subject;
+  }
+
+  result += '</span><span class="commentpostername">' + content.name + '</span>&nbsp;'
+    + new Date(content.createdAt).toLocaleString() + '&nbsp;</label><span class="reflink">No. ' + content.num + '</span><br>';
+
+  if (content.attachedFile) {
+    var attachedFile = content.attachedFile;
+    result += '<span class="filesize">File: <a href="#">' + attachedFile.path + '</a>';
+
+    if (attachedFile.width && attachedFile.height) {
+      result += '(<em>' + attachedFile.width + 'x' + attachedFile.height + '</em>)';
+    }
+
+    result += '</span>';
+
+    if (attachedFile.isImage) {
+      result += '<a target="_blank" href="' + attachedFile.path + '"><img class="thumb" src="'+ attachedFile.thumbnailPath + '" alt="'+ attachedFile.size +'" width="'+ attachedFile.thumbnailWidth +'" height="'+ attachedFile.thumbnailHeight +'"></a>';
+    } else if (attachedFile.isVideo) {
+      result += '<a target="_blank" href="' + attachedFile.path + '"><img class="thumb" src="'+ attachedFile.thumbnailPath + '" alt="'+ attachedFile.size +'" width="'+ attachedFile.thumbnailWidth +'" height="'+ attachedFile.thumbnailHeight +'"></a>';
+    } else {
+      result += '<a target="_blank" href="' + attachedFile.path + '"><img class="thumb" src="/img/file.png" alt="'+ attachedFile.size +'" width="86" height="86"></a>';
+    }
+  }
+
+  result += '<blockquote>' + content.comment + '</blockquote>';
+
+  result += '</td></tr></tbody></table>';
+
+  return result;
+}
+

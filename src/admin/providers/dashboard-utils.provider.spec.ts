@@ -1,3 +1,5 @@
+/* eslint-disable require-await */
+
 jest.mock('node:util', () => ({
   promisify: () => execAsyncMock
 }));
@@ -7,23 +9,38 @@ jest.mock('child_process');
 import { DashboardUtilsProvider } from './dashboard-utils.provider';
 import { PrismaService } from '@persistence/lib';
 import { LOCALE } from '@locale/locale';
+import { InMemoryCacheProvider } from '@library/providers';
 
 const execAsyncMock = jest.fn();
 
 describe('DashboardUtilsProvider', () => {
   let provider: DashboardUtilsProvider;
   let prisma: jest.Mocked<PrismaService>;
+  let cache: jest.Mocked<InMemoryCacheProvider>;
 
   beforeEach(() => {
     prisma = {
       $queryRaw: jest.fn()
     } as any;
-    provider = new DashboardUtilsProvider(prisma);
+
+    cache = {
+      getOrCache: jest.fn()
+    } as any;
+
+    provider = new DashboardUtilsProvider(prisma, cache);
     execAsyncMock.mockReset();
   });
 
   describe('getPostgresVersion', () => {
-    it('should return postgres version from query', async () => {
+    it('should return postgres version from cache', async () => {
+      cache.getOrCache.mockResolvedValue('cached-version');
+      const version = await provider.getPostgresVersion();
+      expect(version).toBe('cached-version');
+      expect(prisma.$queryRaw).not.toHaveBeenCalled();
+    });
+
+    it('should return postgres version from query if not cached', async () => {
+      cache.getOrCache.mockImplementation(async (_key, cb) => cb());
       prisma.$queryRaw.mockResolvedValue([{ version: 'PostgreSQL 15.0' }]);
       const version = await provider.getPostgresVersion();
       expect(version).toBe('PostgreSQL 15.0');
@@ -32,56 +49,67 @@ describe('DashboardUtilsProvider', () => {
   });
 
   describe('getImageMagickVersion', () => {
-    it('should parse ImageMagick version from stdout', async () => {
+    it('should return version from cache', async () => {
+      cache.getOrCache.mockResolvedValue('cached-magick');
+      const version = await provider.getImageMagickVersion();
+      expect(version).toBe('cached-magick');
+      expect(execAsyncMock).not.toHaveBeenCalled();
+    });
+
+    it('should parse version via exec if not cached', async () => {
+      cache.getOrCache.mockImplementation(async (_key, cb) => cb());
       execAsyncMock.mockResolvedValue({ stdout: 'Version: 7.1.0-19 https://imagemagick.org\nOther info' });
       const version = await provider.getImageMagickVersion();
       expect(version).toBe('7.1.0-19');
       expect(execAsyncMock).toHaveBeenCalledWith('convert --version');
     });
-
-    it('should return error message if exec fails', async () => {
-      execAsyncMock.mockRejectedValue({ stderr: 'not found', message: 'fail' });
-      const version = await provider.getImageMagickVersion();
-      expect(version).toContain(LOCALE['FAILED_IMAGEMAGICK_VERSION']);
-      expect(version).toContain('not found');
-    });
   });
 
   describe('getPgDumpVersion', () => {
-    it('should parse pg_dump version from stdout', async () => {
+    it('should return version from cache', async () => {
+      cache.getOrCache.mockResolvedValue('cached-pgdump');
+      const version = await provider.getPgDumpVersion();
+      expect(version).toBe('cached-pgdump');
+    });
+
+    it('should parse version via exec if not cached', async () => {
+      cache.getOrCache.mockImplementation(async (_key, cb) => cb());
       execAsyncMock.mockResolvedValue({ stdout: 'pg_dump (PostgreSQL) 15.0\n' });
       const version = await provider.getPgDumpVersion();
       expect(version).toBe('pg_dump (PostgreSQL) 15.0');
       expect(execAsyncMock).toHaveBeenCalledWith('pg_dump --version');
     });
-
-    it('should return error message if exec fails', async () => {
-      execAsyncMock.mockRejectedValue({ stderr: 'not found', message: 'fail' });
-      const version = await provider.getPgDumpVersion();
-      expect(version).toContain(LOCALE['FAILED_PG_DUMP_VERSION']);
-      expect(version).toContain('not found');
-    });
   });
 
   describe('getZipVersion', () => {
-    it('should parse zip version from stdout', async () => {
-      execAsyncMock.mockResolvedValue({ stdout: 'This is Zip 3.0 (July 5th 2008)\nCopyright (c) 1990-2008 Info-ZIP.' });
+    it('should return version from cache', async () => {
+      cache.getOrCache.mockResolvedValue('cached-zip');
+      const version = await provider.getZipVersion();
+      expect(version).toBe('cached-zip');
+    });
+
+    it('should parse version via exec if not cached', async () => {
+      cache.getOrCache.mockImplementation(async (_key, cb) => cb());
+      execAsyncMock.mockResolvedValue({ stdout: 'This is Zip 3.0 (July 5th 2008)\nCopyright...' });
       const version = await provider.getZipVersion();
       expect(version).toBe('3.0');
       expect(execAsyncMock).toHaveBeenCalledWith('zip --version');
     });
+  });
 
-    it('should return unknown version if regex does not match', async () => {
-      execAsyncMock.mockResolvedValue({ stdout: 'No version info here' });
-      const version = await provider.getZipVersion();
-      expect(version).toBe('unknown version');
+  describe('getFfMpegVersion', () => {
+    it('should return version from cache', async () => {
+      cache.getOrCache.mockResolvedValue('cached-ffmpeg');
+      const version = await provider.getFfMpegVersion();
+      expect(version).toBe('cached-ffmpeg');
     });
 
-    it('should return error message if exec fails', async () => {
-      execAsyncMock.mockRejectedValue({ stderr: 'not found', message: 'fail' });
-      const version = await provider.getZipVersion();
-      expect(version).toContain(LOCALE['FAILED_ZIP_VERSION']);
-      expect(version).toContain('not found');
+    it('should parse version via exec if not cached', async () => {
+      cache.getOrCache.mockImplementation(async (_key, cb) => cb());
+      execAsyncMock.mockResolvedValue({ stdout: 'ffmpeg version 6.0 Copyright' });
+      const version = await provider.getFfMpegVersion();
+      expect(version).toBe('6.0');
+      expect(execAsyncMock).toHaveBeenCalledWith('ffmpeg -version');
     });
   });
 

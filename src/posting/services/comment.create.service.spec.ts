@@ -9,6 +9,7 @@ describe('CommentCreateService', () => {
   let attachedFileService: any;
   let wakabaMarkdown: any;
   let cachingProvider: any;
+  let cache: any;
   let service: CommentCreateService;
 
   jest.mock('@posting/lib/functions', () => ({
@@ -33,12 +34,17 @@ describe('CommentCreateService', () => {
       reloadCacheForThread: jest.fn(),
       removeThreadPage: jest.fn()
     };
+    cache = {
+      del: jest.fn(),
+      delKeyStartWith: jest.fn()
+    };
     service = new CommentCreateService(
       boardPersistenceService,
       commentPersistenceService,
       attachedFileService,
       wakabaMarkdown,
-      cachingProvider
+      cachingProvider,
+      cache
     );
     jest.clearAllMocks();
   });

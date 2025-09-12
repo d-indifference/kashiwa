@@ -11,7 +11,7 @@ mixin PageHeader()
     div.sublogo= SITE_SETTINGS().siteSlogan
     hr
     | [
-    a(href=`/${board.url}/kashiwa.html`)= LOCALE.GO_BACK
+    a(href=`/${board.url}/kashiwa${HTML_SUFFIX}`)= LOCALE.GO_BACK
     | ]
     div.theader
         | #{commons.pageSubtitle}
@@ -56,7 +56,7 @@ block content
         br
 
         ='['
-        a(href=`/${board.url}/res/${thread.num}.html`) #{LOCALE.POST_REPLY}
+        a(href=`/${board.url}/res/${thread.num}${HTML_SUFFIX}`) #{LOCALE.POST_REPLY}
         =']'
 
         hr

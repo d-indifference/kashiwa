@@ -132,7 +132,8 @@ export class CachingUpdateProvider {
       fileSize,
       applicationVersion,
       formatDateTime,
-      truncateText
+      truncateText,
+      HTML_SUFFIX: Constants.HTML_SUFFIX
     });
   }
 }

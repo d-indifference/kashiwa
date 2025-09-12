@@ -55,9 +55,12 @@ export class WakabaMarkdownProvider {
           .then((comment: Comment | null): string => {
             if (comment) {
               if (comment.parentId) {
-                return `<a href="/${boardUrl}/res/${comment['parent'].num}.html#${num}">>>${num}</a>`;
+                const parentNum = comment['parent'].num;
+                return `
+                <a href="/${boardUrl}/res/${parentNum}.html#${num}" class="ref ${parentNum}|${num}">>>${num}</a>
+                `.trim();
               }
-              return `<a href="/${boardUrl}/res/${num}.html#${num}">>>${num}</a>`;
+              return `<a href="/${boardUrl}/res/${num}.html#${num}" class="ref ${num}|${num}">>>${num}</a>`;
             }
             return `>>${num}`;
           })

@@ -46,6 +46,7 @@ export const locale: Record<string, LocaleArgument> = {
   RULES_DEFAULT: '<ul><li>No CP</li><li>No shitposting</li><li>Moderator is always right</li></ul>',
   // _admin-links.pug
   DASHBOARD: 'Dashboard',
+  SWAGGER: 'Swagger',
   SITE_SETTINGS: 'Site settings',
   STAFF_PANEL: 'Staff panel',
   BOARDS: 'Boards',
@@ -208,6 +209,7 @@ export const locale: Record<string, LocaleArgument> = {
     `URL: '/${args[0]}' is reserved by system. You cannot create a board with this URL.`,
   BOARD_ALREADY_EXISTS: (...args: string[]) => `Board with URL: '/${args[0]}' is already exists`,
   THREAD_NOT_FOUND: (...args: string[]) => `Thread /${args[0]}/res/${args[1]} was not found`,
+  POST_NOT_FOUND: (...args: string[]) => `Post on board '${args[0]}' of No. ${args[1]} was not found`,
   USER_WITH_ID_NOT_FOUND: (...args: string[]) => `User with ID: ${args[0]} was not found`,
   WRONG_USERNAME_OR_PASSWORD: 'Wrong username or password',
   USER_ALREADY_EXISTS: (...args: string[]) => `User with username: ${args[0]} is already exists`,

@@ -4,7 +4,6 @@ import { DumpService } from './dump.service';
 import { DatabaseDumpingUtilsProvider } from '@admin/providers';
 import { FileSystemProvider } from '@library/providers';
 import { PinoLogger } from 'nestjs-pino';
-import { Constants } from '@library/constants';
 import { ISession } from '@admin/interfaces';
 import { Cookie } from 'express-session';
 import { UserRole } from '@prisma/client';
@@ -12,6 +11,8 @@ import { DumpForm } from '@admin/forms';
 import { Response } from 'express';
 import { Dirent } from 'fs-extra';
 import { sep } from 'path';
+import { ConfigService } from '@nestjs/config';
+import * as path from 'path';
 
 jest.mock('archiver', () => () => ({
   pipe: jest.fn(),
@@ -29,12 +30,21 @@ jest.mock('node:fs', () => ({
 
 describe('DumpService', () => {
   let service: DumpService;
+  let config: jest.Mocked<ConfigService>;
   let databaseDumpingUtils: jest.Mocked<DatabaseDumpingUtilsProvider>;
   let fileSystem: jest.Mocked<FileSystemProvider>;
   let logger: jest.Mocked<PinoLogger>;
   let mockRes: any;
 
   beforeEach(() => {
+    config = {
+      getOrThrow: jest.fn().mockImplementation((key: string) => {
+        if (key === 'file-storage.path') {
+          return `${path.sep}app${path.sep}volume`;
+        }
+        throw new Error(`Unexpected config key: ${key}`);
+      })
+    } as any;
     databaseDumpingUtils = {
       dumpSql: jest.fn()
     } as any;
@@ -46,7 +56,7 @@ describe('DumpService', () => {
       setContext: jest.fn(),
       info: jest.fn()
     } as any;
-    service = new DumpService(databaseDumpingUtils, fileSystem, logger);
+    service = new DumpService(databaseDumpingUtils, fileSystem, logger, config);
     mockRes = { redirect: jest.fn() };
     process.env['npm_package_version'] = '1.0.0';
   });
@@ -100,10 +110,7 @@ describe('DumpService', () => {
       ]);
       const result = await (service as any).getCacheForArchivation(form);
       expect(result).toEqual(
-        expect.arrayContaining([
-          `${Constants.Paths.APP_VOLUME}${sep}cache`,
-          `${Constants.Paths.APP_VOLUME}${sep}settings`
-        ])
+        expect.arrayContaining([`${sep}app${sep}volume${sep}cache`, `${sep}app${sep}volume${sep}settings`])
       );
     });
   });

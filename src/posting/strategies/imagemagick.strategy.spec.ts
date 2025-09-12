@@ -1,79 +1,57 @@
 import { ImagemagickStrategy } from './imagemagick.strategy';
-import * as im from 'imagemagick';
+import { MediaUtilsWrapper } from '@posting/strategies/media-utils-wrapper';
 
-jest.mock('imagemagick');
+jest.mock('@posting/strategies/media-utils-wrapper', () => ({
+  MediaUtilsWrapper: {
+    getDimensions: jest.fn(),
+    createThumbnail: jest.fn()
+  }
+}));
 
 describe('ImagemagickStrategy', () => {
   let strategy: ImagemagickStrategy;
-  let mockIdentify: jest.Mock;
-  let mockConvert: jest.Mock;
 
   beforeEach(() => {
     strategy = new ImagemagickStrategy();
-    mockIdentify = jest.fn();
-    mockConvert = jest.fn();
-    (im.identify as unknown as jest.Mock).mockImplementation(mockIdentify);
-    (im.convert as unknown as jest.Mock).mockImplementation(mockConvert);
     jest.clearAllMocks();
   });
 
   describe('getDimensions', () => {
-    it('should return width and height on valid output', async () => {
-      mockIdentify.mockImplementation((_args, cb) => {
-        cb(null, '1920x1080');
-      });
+    it('should call MediaUtilsWrapper.getDimensions with correct command and separator', async () => {
+      (MediaUtilsWrapper.getDimensions as jest.Mock).mockResolvedValue({ width: 800, height: 600 });
 
-      const result = await strategy.getDimensions('/path/image.png');
+      const filePath = '/path/to/image.png';
+      const result = await strategy.getDimensions(filePath);
 
-      expect(mockIdentify).toHaveBeenCalledWith(['-format', '%wx%h', '/path/image.png[0]'], expect.any(Function));
-      expect(result).toEqual({ width: 1920, height: 1080 });
+      expect(MediaUtilsWrapper.getDimensions).toHaveBeenCalledWith(`identify -format %wx%h "${filePath}"[0]`, 'x');
+      expect(result).toEqual({ width: 800, height: 600 });
     });
 
-    it('should reject if identify returns error', async () => {
-      mockIdentify.mockImplementation((_args, cb) => {
-        cb(new Error('identify failed'));
-      });
+    it('should propagate errors from MediaUtilsWrapper.getDimensions', async () => {
+      (MediaUtilsWrapper.getDimensions as jest.Mock).mockRejectedValue(new Error('identify failed'));
 
-      await expect(strategy.getDimensions('/path/image.png')).rejects.toThrow('identify failed');
-    });
-
-    it('should throw if output is invalid', async () => {
-      mockIdentify.mockImplementation((_args, cb) => {
-        cb(null, 'abcxxyz');
-      });
-
-      await expect(strategy.getDimensions('/path/image.png')).rejects.toThrow(/Invalid dimensions/);
+      await expect(strategy.getDimensions('/bad/image.png')).rejects.toThrow('identify failed');
     });
   });
 
   describe('createThumbnail', () => {
-    it('should resolve when convert succeeds', async () => {
-      mockConvert.mockImplementation((_args, cb) => {
-        cb(null);
-      });
+    it('should call MediaUtilsWrapper.createThumbnail with correct command', async () => {
+      (MediaUtilsWrapper.createThumbnail as jest.Mock).mockResolvedValue(undefined);
 
-      await expect(strategy.createThumbnail('/src.png', '/thumb.png', 100, 200)).resolves.toBeUndefined();
+      const srcPath = '/path/to/image.gif';
+      const thumbPath = '/path/to/thumb.gif';
 
-      expect(mockConvert).toHaveBeenCalledWith(
-        ['/src.png', '-coalesce', '-resize', '100x200', '-layers', 'optimize', '-loop', '0', '/thumb.png'],
-        expect.any(Function)
+      await strategy.createThumbnail(srcPath, thumbPath, 320, 240);
+
+      expect(MediaUtilsWrapper.createThumbnail).toHaveBeenCalledWith(
+        `convert "${srcPath}" -coalesce -resize 320x240 -layers optimize -loop 0 "${thumbPath}"`
       );
     });
 
-    it('should reject when convert fails', async () => {
-      mockConvert.mockImplementation((_args, cb) => {
-        cb(new Error('convert failed'));
-      });
+    it('should propagate errors from MediaUtilsWrapper.createThumbnail', async () => {
+      (MediaUtilsWrapper.createThumbnail as jest.Mock).mockRejectedValue(new Error('convert failed'));
 
-      await expect(strategy.createThumbnail('/src.png', '/thumb.png', 100, 200)).rejects.toThrow('convert failed');
-    });
-
-    it('should throw InternalServerErrorException if convert throws synchronously', async () => {
-      mockConvert.mockImplementation(() => {
-        throw new Error('sync error');
-      });
-
-      await expect(strategy.createThumbnail('/src.png', '/thumb.png', 100, 200)).rejects.toBeInstanceOf(Error);
+      await expect(strategy.createThumbnail('src.gif', 'thumb.gif', 100, 100)).rejects.toThrow('convert failed');
     });
   });
 });

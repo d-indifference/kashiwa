@@ -39,10 +39,10 @@ mixin Pagination()
             td
                 if page.previous !== null
                     if (page.previous === 0)
-                        form(method='get' action=`/${board.url}/kashiwa.html`)
+                        form(method='get' action=`/${board.url}/kashiwa${HTML_SUFFIX}`)
                             input(type='submit' value=LOCALE.PREVIOUS)
                     else
-                        form(method='get' action=`/${board.url}/${page.previous}.html`)
+                        form(method='get' action=`/${board.url}/${page.previous}${HTML_SUFFIX}`)
                             input(type='submit' value=LOCALE.PREVIOUS)
                 else
                     span= LOCALE.PREVIOUS
@@ -55,16 +55,16 @@ mixin Pagination()
                     else
                         if i === 0
                             ='['
-                            a(href=`/${board.url}/kashiwa.html`) #{i}
+                            a(href=`/${board.url}/kashiwa${HTML_SUFFIX}`) #{i}
                             =']'
                         else
                             ='['
-                            a(href=`/${board.url}/${i}.html`) #{i}
+                            a(href=`/${board.url}/${i}${HTML_SUFFIX}`) #{i}
                             =']'
                     - i++;
             td
                 if page.next !== null
-                    form(method='get' action=`/${board.url}/${page.next}.html`)
+                    form(method='get' action=`/${board.url}/${page.next}${HTML_SUFFIX}`)
                         input(type='submit' value=LOCALE.NEXT)
                 else
                     =' '
@@ -72,6 +72,7 @@ mixin Pagination()
 
 
 block content
+    div.reply-link-container
     +AdminBar()
     +PageHeader()
     +PostArea()
@@ -84,4 +85,5 @@ block content
     br(clear='all')
     +AdminBar()
 
-
+    script.
+      processReplyPreview('#{board.url}');
