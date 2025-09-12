@@ -81,3 +81,12 @@ form {
 .adminPost {
   font-weight: 900;
 }
+
+.reply-link-container {
+    display: none;
+    min-width: 15px;
+    min-height: 15px;
+    border: 1px dotted #000;
+    position: absolute;
+    z-index: 5;
+}

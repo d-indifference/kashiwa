@@ -6,7 +6,8 @@ http:
   port: 3000
 
 file-storage:
-  path: /var/lib/application.kashiwa/data
+  # path: /var/lib/application.kashiwa/data
+  path: /home/roman/volume.kashiwa
 
 secure:
   user:

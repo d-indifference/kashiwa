@@ -72,6 +72,7 @@ mixin Pagination()
 
 
 block content
+    div.reply-link-container
     +AdminBar()
     +PageHeader()
     +PostArea()
@@ -84,4 +85,5 @@ block content
     br(clear='all')
     +AdminBar()
 
-
+    script.
+      processReplyPreview('#{board.url}');

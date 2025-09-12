@@ -25,7 +25,10 @@ import { SwaggerModule } from '@nestjs/swagger';
 import * as process from 'node:process';
 
 const bootstrap = async (): Promise<void> => {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bufferLogs: true,
+    cors: { origin: '*' }
+  });
   const config = app.get(ConfigService);
 
   const port = config.getOrThrow<number>('http.port');
