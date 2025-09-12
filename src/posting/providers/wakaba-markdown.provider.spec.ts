@@ -101,8 +101,8 @@ describe('WakabaMarkdownProvider', () => {
         .mockResolvedValueOnce({ parentId: 1, parent: { num: 999 } })
         .mockResolvedValueOnce({ parentId: null });
       const result = await provider.formatAsWakaba(input, 'b', true, false);
-      expect(result).toContain('<a href="/b/res/999.html#123">>>123</a>');
-      expect(result).toContain('<a href="/b/res/456.html#456">>>456</a>');
+      expect(result).toContain('<p><a href="/b/res/999.html#123" class="ref 999|123">>>123</a> <a href="/b/res/456.html#456" class="ref 456|456">>>456</a></p>');
+      expect(result).toContain('<p><a href="/b/res/999.html#123" class="ref 999|123">>>123</a> <a href="/b/res/456.html#456" class="ref 456|456">>>456</a></p>');
     });
 
     it('should leave >>num as is if comment not found', async () => {
@@ -121,7 +121,7 @@ describe('WakabaMarkdownProvider', () => {
         parentId: null
       });
       const result = await provider['parseCommentLinks']('&gt;&gt;42', 'b');
-      expect(result).toContain('<a href="/b/res/42.html#42">>>42</a>');
+      expect(result).toContain('<a href="/b/res/42.html#42" class="ref 42|42">>>42</a>');
     });
 
     it('should leave comment link as is if not found', async () => {
@@ -136,7 +136,7 @@ describe('WakabaMarkdownProvider', () => {
         parent: { num: 777 }
       });
       const result = await provider['parseCommentLinks']('&gt;&gt;55', 'b');
-      expect(result).toContain('<a href="/b/res/777.html#55">>>55</a>');
+      expect(result).toContain('<a href="/b/res/777.html#55" class="ref 777|55">>>55</a>');
     });
 
     it('should handle multiple comment links', async () => {
@@ -144,7 +144,7 @@ describe('WakabaMarkdownProvider', () => {
         .mockResolvedValueOnce({ parentId: 10, parent: { num: 88 } })
         .mockResolvedValueOnce(null);
       const result = await provider['parseCommentLinks']('&gt;&gt;10 &gt;&gt;99', 'b');
-      expect(result).toContain('<a href="/b/res/88.html#10">>>10</a>');
+      expect(result).toContain('<a href="/b/res/88.html#10" class="ref 88|10">>>10</a> >>99');
       expect(result).toContain('>>99');
     });
 
