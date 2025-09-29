@@ -2,6 +2,8 @@ import { RestrictionService, RestrictionType } from './restriction.service';
 import { BadRequestException, ForbiddenException, InternalServerErrorException } from '@nestjs/common';
 import { BoardDto, BoardSettingsDto } from '@persistence/dto/board';
 import { ReplyCreateForm, ThreadCreateForm } from '@posting/forms';
+import { PinoLogger } from 'nestjs-pino';
+import { Params } from 'nestjs-pino/params';
 
 describe('RestrictionService', () => {
   let commentPersistenceService: any;
@@ -63,7 +65,8 @@ describe('RestrictionService', () => {
       boardPersistenceService,
       antiSpamService,
       banService,
-      captchaSolvingPredicateProvider
+      captchaSolvingPredicateProvider,
+      new PinoLogger({} as Params)
     );
     jest.clearAllMocks();
   });

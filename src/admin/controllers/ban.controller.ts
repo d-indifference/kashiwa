@@ -23,6 +23,7 @@ import { Transform } from 'class-transformer';
 import { emptyFormText } from '@library/transforms';
 import { TablePage } from '@admin/pages';
 import { RenderableSessionFormPage } from '@admin/lib';
+import { PinoLogger } from 'nestjs-pino';
 
 class BanCreationPreset {
   @Transform(emptyFormText)
@@ -34,7 +35,12 @@ class BanCreationPreset {
 
 @Controller('kashiwa/ban')
 export class BanController {
-  constructor(private readonly banService: BanService) {}
+  constructor(
+    private readonly banService: BanService,
+    private readonly logger: PinoLogger
+  ) {
+    this.logger.setContext(BanController.name);
+  }
 
   @Get()
   @UseGuards(SessionGuard)
@@ -43,6 +49,8 @@ export class BanController {
     @Query(new ValidationPipe({ transform: true })) page: PageRequest,
     @Session() session: ISession
   ): Promise<TablePage> {
+    this.logger.debug({ session, page }, 'URL called: GET /kashiwa/ban');
+
     return await this.banService.getBanPage(session, page);
   }
 
@@ -53,6 +61,8 @@ export class BanController {
     @Session() session: ISession,
     @Query(new ValidationPipe({ transform: true })) query: BanCreationPreset
   ): RenderableSessionFormPage {
+    this.logger.debug({ session, query }, 'URL called: GET /kashiwa/ban/new');
+
     return this.banService.getBanForm(session, query.ip, query.boardUrl);
   }
 
@@ -64,12 +74,16 @@ export class BanController {
     @Body(new ValidationPipe({ transform: true })) form: BanCreateForm,
     @Res() res: Response
   ): Promise<void> {
+    this.logger.debug({ session, form }, 'URL called: POST /kashiwa/ban/new');
+
     await this.banService.create(session, form, res);
   }
 
   @Post('delete/:id')
   @UseGuards(SessionGuard)
   public async deleteBan(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response): Promise<void> {
+    this.logger.debug(`URL called: POST /kashiwa/ban/delete/${id}`);
+
     await this.banService.remove(id, res);
   }
 }

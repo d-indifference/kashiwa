@@ -3,6 +3,8 @@ import { ForbiddenException } from '@nestjs/common';
 import { BanDto } from '@persistence/dto/ban';
 import { DateTime } from 'luxon';
 import { LOCALE } from '@locale/locale';
+import { PinoLogger } from 'nestjs-pino';
+import { Params } from 'nestjs-pino/params';
 
 describe('BanService', () => {
   let banPersistenceService: any;
@@ -16,7 +18,7 @@ describe('BanService', () => {
     banPersistenceService = {
       getCurrentBan: jest.fn()
     };
-    service = new BanService(banPersistenceService);
+    service = new BanService(banPersistenceService, new PinoLogger({} as Params));
     jest.clearAllMocks();
   });
 

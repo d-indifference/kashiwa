@@ -3,6 +3,8 @@ import { FileSystemProvider, IpBlacklistProvider, SiteContextProvider } from '@l
 import { ISession } from '@admin/interfaces';
 import { IpFilterForm } from '@admin/forms';
 import { Response } from 'express';
+import { PinoLogger } from 'nestjs-pino';
+import { Params } from 'nestjs-pino/params';
 
 describe('IpFilterService', () => {
   let service: IpFilterService;
@@ -23,7 +25,7 @@ describe('IpFilterService', () => {
     siteContext = {
       setIpBlackList: jest.fn()
     } as any;
-    service = new IpFilterService(fileSystem, ipBlacklist, siteContext);
+    service = new IpFilterService(fileSystem, ipBlacklist, siteContext, new PinoLogger({} as Params));
     mockSession = { user: { id: '1' } };
     mockRes = { redirect: jest.fn() };
   });

@@ -7,6 +7,8 @@ import { InternalServerErrorException } from '@nestjs/common';
 import { ISession, ISessionPayload } from '@admin/interfaces';
 import { Response, Request } from 'express';
 import { Cookie } from 'express-session';
+import { PinoLogger } from 'nestjs-pino';
+import { Params } from 'nestjs-pino/params';
 
 type MockExpressResponseType = { redirect: (url: string) => void };
 type MockExpressRequestType = { session: { destroy: (cb: (err: unknown) => void) => void } };
@@ -23,7 +25,7 @@ describe('AuthService', () => {
       create: jest.fn(),
       signIn: jest.fn()
     } as any;
-    service = new AuthService(userService);
+    service = new AuthService(userService, new PinoLogger({} as Params));
     mockSession = { payload: {} as ISessionPayload, cookie: {} as Cookie };
     mockRes = { redirect: jest.fn() };
     mockReq = { session: { destroy: jest.fn() } };

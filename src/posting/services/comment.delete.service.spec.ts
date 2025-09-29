@@ -1,5 +1,7 @@
 import { CommentDeleteService } from './comment.delete.service';
 import { Response } from 'express';
+import { PinoLogger } from 'nestjs-pino';
+import { Params } from 'nestjs-pino/params';
 
 describe('CommentDeleteService', () => {
   let commentPersistenceService: any;
@@ -25,7 +27,8 @@ describe('CommentDeleteService', () => {
       commentPersistenceService,
       attachedFilePersistenceService,
       cachingProvider,
-      cache
+      cache,
+      new PinoLogger({} as Params)
     );
     jest.clearAllMocks();
   });

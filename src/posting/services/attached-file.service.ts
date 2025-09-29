@@ -3,6 +3,7 @@ import { AttachedFilePersistenceService, BoardPersistenceService } from '@persis
 import { FormFileProvider } from '@posting/providers';
 import { Prisma } from '@prisma/client';
 import { MemoryStoredFile } from 'nestjs-form-data';
+import { PinoLogger } from 'nestjs-pino';
 
 /**
  * Service for working with attached files
@@ -12,8 +13,11 @@ export class AttachedFileService {
   constructor(
     private readonly attachedFilePersistenceService: AttachedFilePersistenceService,
     private readonly boardPersistenceService: BoardPersistenceService,
-    private readonly formFileProvider: FormFileProvider
-  ) {}
+    private readonly formFileProvider: FormFileProvider,
+    private readonly logger: PinoLogger
+  ) {
+    this.logger.setContext(AttachedFileService.name);
+  }
 
   /**
    * Save attached file and get its Prisma creation input
@@ -24,6 +28,8 @@ export class AttachedFileService {
     file: MemoryStoredFile | undefined,
     boardUrl: string
   ): Promise<Pick<Prisma.CommentCreateInput, 'attachedFile'>> {
+    this.logger.debug({ file, boardUrl }, 'createAttachedFile');
+
     if (file) {
       const md5 = this.formFileProvider.md5(file);
       const fileByMd5 = await this.attachedFilePersistenceService.findFileByMd5(md5, boardUrl);

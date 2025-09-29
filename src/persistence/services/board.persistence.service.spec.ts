@@ -24,7 +24,8 @@ const boardMapperMock = {
 };
 const loggerMock = {
   setContext: jest.fn(),
-  info: jest.fn()
+  info: jest.fn(),
+  debug: jest.fn()
 };
 const attachedFilePersistenceServiceMock = {
   removeOrphaned: jest.fn()

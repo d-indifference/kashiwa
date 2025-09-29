@@ -30,6 +30,8 @@ export class CommentPersistenceService {
    * Get all comments count
    */
   public async countAll(): Promise<number> {
+    this.logger.debug('countAll');
+
     return (await this.prisma.comment.count()) as number;
   }
 
@@ -38,6 +40,8 @@ export class CommentPersistenceService {
    * @param url board URL
    */
   public async threadCount(url: string): Promise<number> {
+    this.logger.debug({ url }, 'threadCount');
+
     return (await this.prisma.comment.count({ where: { board: { url }, NOT: { lastHit: null } } })) as number;
   }
 
@@ -47,6 +51,8 @@ export class CommentPersistenceService {
    * @param page Page request
    */
   public async findAll(boardId: string, page: PageRequest): Promise<Page<ThreadCollapsedDto>> {
+    this.logger.debug({ boardId, page }, 'findAll');
+
     const comments = await Page.ofFilter<
       Comment,
       Prisma.CommentWhereInput,
@@ -69,6 +75,8 @@ export class CommentPersistenceService {
    * @param url board URL
    */
   public async findThreadNums(url: string): Promise<bigint[]> {
+    this.logger.debug({ url }, 'findThreadNums');
+
     return (
       await this.prisma.comment.findMany({
         where: { board: { url }, NOT: { lastHit: null } },
@@ -83,6 +91,8 @@ export class CommentPersistenceService {
    * @param page Page request
    */
   public async findManyForModeration(boardId: string, page: PageRequest): Promise<Page<CommentModerationDto>> {
+    this.logger.debug({ boardId, page }, 'findManyForModeration');
+
     const comments = await Page.ofFilter<
       Comment,
       Prisma.CommentWhereInput,
@@ -105,6 +115,8 @@ export class CommentPersistenceService {
     orderByField: 'createdAt' | 'lastHit',
     page: PageRequest
   ): Promise<Page<CommentDto>> {
+    this.logger.debug({ url, page, orderByField }, 'findManyForCatalog');
+
     const comments = await Page.ofFilter<
       Comment,
       Prisma.CommentWhereInput,
@@ -128,6 +140,8 @@ export class CommentPersistenceService {
    * @param num Thread number on board
    */
   public async findThread(url: string, num: bigint): Promise<CommentDto> {
+    this.logger.debug({ url, num }, 'findThread');
+
     const openingPost = await this.prisma.comment.findFirst({
       include: {
         board: { include: { boardSettings: true } },
@@ -150,6 +164,8 @@ export class CommentPersistenceService {
    * @param num Comment number on board
    */
   public async findPost(url: string, num: bigint): Promise<CommentDto> {
+    this.logger.debug({ url, num }, 'findPost');
+
     const post = await this.prisma.comment.findFirst({
       include: {
         board: { include: { boardSettings: true } },
@@ -171,6 +187,8 @@ export class CommentPersistenceService {
    * @param num Thread number on board
    */
   public async findOpeningPost(url: string, num: bigint): Promise<CommentDto> {
+    this.logger.debug({ url, num }, 'findOpeningPost');
+
     const post = await this.prisma.comment.findFirst({ where: { board: { url }, num, NOT: { lastHit: null } } });
 
     if (!post) {
@@ -186,6 +204,8 @@ export class CommentPersistenceService {
    * @param num Comment number on board
    */
   public async findCommentForFormatting(url: string, num: bigint): Promise<Comment | null> {
+    this.logger.debug({ url, num }, 'findCommentForFormatting');
+
     const comment = (await this.prisma.comment.findFirst({
       include: { board: true, parent: true },
       where: { board: { url }, num }
@@ -200,6 +220,8 @@ export class CommentPersistenceService {
    * @param num Thread number on board
    */
   public async findRepliesCount(url: string, num: bigint): Promise<number> {
+    this.logger.debug({ url, num }, 'findRepliesCount');
+
     return (await this.prisma.comment.count({
       where: { parent: { board: { url }, num, NOT: { lastHit: null } }, lastHit: null }
     })) as number;
@@ -210,6 +232,8 @@ export class CommentPersistenceService {
    * @param ip Poster's IP
    */
   public async findLastCommentByIp(ip: string): Promise<{ createdAt: Date } | null> {
+    this.logger.debug({ ip }, 'findLastCommentByIp');
+
     return (
       (await this.prisma.comment.findFirst({
         where: { ip },

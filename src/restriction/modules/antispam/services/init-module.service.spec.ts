@@ -1,6 +1,8 @@
 import { InitModuleService } from './init-module.service';
 import * as path from 'node:path';
 import * as process from 'node:process';
+import { PinoLogger } from 'nestjs-pino';
+import { Params } from 'nestjs-pino/params';
 
 describe('InitModuleService', () => {
   let fileSystem: any;
@@ -30,14 +32,14 @@ describe('InitModuleService', () => {
       }
     }));
 
-    service = new InitModuleService(fileSystem, siteContext);
+    service = new InitModuleService(fileSystem, siteContext, new PinoLogger({} as Params));
     jest.clearAllMocks();
   });
 
   describe('onModuleInit', () => {
-    it('should call activateSpamBase', async () => {
+    it('should call activateSpamBase', () => {
       const activateSpamBaseSpy = jest.spyOn(service, 'activateSpamBase').mockResolvedValue(undefined);
-      await service.onModuleInit();
+      service.onModuleInit();
       expect(activateSpamBaseSpy).toHaveBeenCalled();
     });
   });

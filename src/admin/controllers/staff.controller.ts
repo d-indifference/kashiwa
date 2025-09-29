@@ -24,6 +24,7 @@ import { StaffCreateForm, StaffUpdateForm, StaffUpdateMyselfForm } from '@admin/
 import { LOCALE } from '@locale/locale';
 import { FormDataRequest } from 'nestjs-form-data';
 import { Response } from 'express';
+import { PinoLogger } from 'nestjs-pino';
 
 const getDefaultNewStaffMemberForm = (): StaffCreateForm => {
   const form = new StaffCreateForm();
@@ -33,7 +34,12 @@ const getDefaultNewStaffMemberForm = (): StaffCreateForm => {
 
 @Controller('kashiwa/staff')
 export class StaffController {
-  constructor(private readonly staffService: StaffService) {}
+  constructor(
+    private readonly staffService: StaffService,
+    private readonly logger: PinoLogger
+  ) {
+    this.logger.setContext(StaffController.name);
+  }
 
   @Get()
   @Roles(UserRole.ADMINISTRATOR)
@@ -43,6 +49,8 @@ export class StaffController {
     @Query(new ValidationPipe({ transform: true })) page: PageRequest,
     @Session() session: ISession
   ): Promise<TablePage> {
+    this.logger.debug({ session, page }, 'URL called: GET /kashiwa/staff');
+
     return await this.staffService.getList(page, session);
   }
 
@@ -50,6 +58,8 @@ export class StaffController {
   @UseGuards(SessionGuard)
   @Render('admin/common_form_page')
   public async getMyProfileForm(@Session() session: ISession): Promise<RenderableSessionFormPage> {
+    this.logger.debug({ session }, 'URL called: GET /kashiwa/staff/my');
+
     return await this.staffService.getMyProfileForm(session);
   }
 
@@ -58,6 +68,8 @@ export class StaffController {
   @UseGuards(SessionGuard)
   @Render('admin/common_form_page')
   public getCreationForm(@Session() session: ISession): RenderableSessionFormPage {
+    this.logger.debug({ session }, 'URL called: GET /kashiwa/staff/new');
+
     const form = getDefaultNewStaffMemberForm();
 
     return FormPage.toSessionTemplateContent(session, form, {
@@ -75,6 +87,8 @@ export class StaffController {
     @Session() session: ISession,
     @Param('id', ParseUUIDPipe) id: string
   ): Promise<RenderableSessionFormPage> {
+    this.logger.debug({ session }, `URL called: GET /kashiwa/staff/edit/${id}`);
+
     return await this.staffService.getForUpdate(session, id);
   }
 
@@ -86,6 +100,8 @@ export class StaffController {
     @Body(new ValidationPipe({ transform: true })) form: StaffCreateForm,
     @Res() res: Response
   ): Promise<void> {
+    this.logger.debug({ form }, 'URL called: POST /kashiwa/staff/new');
+
     await this.staffService.create(form, res);
   }
 
@@ -97,6 +113,8 @@ export class StaffController {
     @Session() session: ISession,
     @Res() res: Response
   ): Promise<void> {
+    this.logger.debug({ session, form }, 'URL called: POST /kashiwa/staff/my');
+
     return await this.staffService.update(form, res, '/kashiwa', session);
   }
 
@@ -109,6 +127,8 @@ export class StaffController {
     @Session() session: ISession,
     @Res() res: Response
   ): Promise<void> {
+    this.logger.debug({ session, form }, 'URL called: POST /kashiwa/staff/edit');
+
     await this.staffService.update(form, res, `/kashiwa/staff/edit/${form.id}`, session);
   }
 
@@ -116,6 +136,8 @@ export class StaffController {
   @Roles(UserRole.ADMINISTRATOR)
   @UseGuards(SessionGuard)
   public async deleteUser(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response): Promise<void> {
+    this.logger.debug(`URL called: POST /kashiwa/staff/delete/${id}`);
+
     await this.staffService.remove(id, res);
   }
 }

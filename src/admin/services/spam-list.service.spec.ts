@@ -6,6 +6,8 @@ import { Cookie } from 'express-session';
 import { UserRole } from '@prisma/client';
 import { ISession } from '@admin/interfaces';
 import { Response } from 'express';
+import { PinoLogger } from 'nestjs-pino';
+import { Params } from 'nestjs-pino/params';
 
 describe('SpamListService', () => {
   let service: SpamListService;
@@ -26,7 +28,7 @@ describe('SpamListService', () => {
     antiSpamService = {
       compileSpamRegexes: jest.fn()
     } as any;
-    service = new SpamListService(fileSystem, siteContext, antiSpamService);
+    service = new SpamListService(fileSystem, siteContext, antiSpamService, new PinoLogger({} as Params));
     mockSession = { cookie: {} as Cookie, payload: { id: '1', role: UserRole.ADMINISTRATOR } };
     mockRes = { redirect: jest.fn() };
   });

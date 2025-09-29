@@ -33,6 +33,8 @@ export class DumpService {
    * @param session Session object
    */
   public getForm(session: ISession): RenderableSessionFormPage {
+    this.logger.debug({ session }, 'getForm');
+
     const form = new DumpForm();
     form.dbTable = ['_prisma_migrations', 'ban', 'board', 'comment', 'user'];
     form.additional = ['cache', 'settings'];
@@ -50,7 +52,7 @@ export class DumpService {
    * @param res `express.js` `Response` object
    */
   public async processDump(form: DumpForm, res: Response): Promise<void> {
-    this.logger.info(form, 'processDump');
+    this.logger.info({ form }, 'processDump');
 
     const dumpTargetPath = this.config.getOrThrow<string>('file-storage.path');
 

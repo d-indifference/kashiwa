@@ -10,6 +10,7 @@ import { DashboardUtilsProvider } from '@admin/providers';
 import { DashboardPage } from '@admin/pages';
 import { ISession } from '@admin/interfaces';
 import { FileSystemProvider, InMemoryCacheProvider } from '@library/providers';
+import { PinoLogger } from 'nestjs-pino';
 
 /**
  * Service for rendering the dashboard page
@@ -21,8 +22,11 @@ export class DashboardService {
     private readonly commentPersistenceService: CommentPersistenceService,
     private readonly utils: DashboardUtilsProvider,
     private readonly fileSystem: FileSystemProvider,
-    private readonly cache: InMemoryCacheProvider
-  ) {}
+    private readonly cache: InMemoryCacheProvider,
+    private readonly logger: PinoLogger
+  ) {
+    this.logger.setContext(DashboardService.name);
+  }
 
   /**
    * Render dashboard page
@@ -30,6 +34,8 @@ export class DashboardService {
    * @param session Session data
    */
   public async getDashboardPage(req: Request, session: ISession): Promise<DashboardPage> {
+    this.logger.debug({ session }, 'getDashboardPage');
+
     const statsFromDb = await this.getStatsFromDb();
     const diskSpaceUsed = await this.getDiskSpaceUsed();
     const processInfo = this.getProcessInfo();

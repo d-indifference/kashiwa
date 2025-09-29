@@ -46,7 +46,19 @@ export class Constants {
   public static DEFAULT_THUMBNAIL_SIDE = 200;
 
   /** Potential reserved board URLs */
-  public static RESERVED_BOARD_URLS = ['img', 'css', 'js', 'icons', 'kashiwa', 'front', 'frame', 'faq', 'rules', 'api'];
+  public static RESERVED_BOARD_URLS = [
+    'img',
+    'css',
+    'js',
+    'icons',
+    'kashiwa',
+    'front',
+    'frame',
+    'faq',
+    'rules',
+    'api',
+    'menu'
+  ];
 
   /** Default string file size format */
   public static FILE_SIZE_FORMAT: 'si' | 'iec' | 'jedec' = 'jedec';

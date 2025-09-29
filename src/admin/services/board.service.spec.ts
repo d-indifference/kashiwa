@@ -10,6 +10,8 @@ import { Page, PageRequest } from '@persistence/lib/page';
 import { Board, FileAttachmentMode } from '@prisma/client';
 import { Response } from 'express';
 import { InMemoryCacheProvider } from '@library/providers';
+import { PinoLogger } from 'nestjs-pino';
+import { Params } from 'nestjs-pino/params';
 
 describe('BoardService', () => {
   let service: BoardService;
@@ -42,7 +44,13 @@ describe('BoardService', () => {
     cache = {
       delKeyStartWith: jest.fn()
     } as any;
-    service = new BoardService(boardPersistenceService, commentPersistenceService, cachingProvider, cache);
+    service = new BoardService(
+      boardPersistenceService,
+      commentPersistenceService,
+      cachingProvider,
+      cache,
+      new PinoLogger({} as Params)
+    );
     mockSession = {
       cookie: {} as Cookie,
       payload: { user: { id: 'user1' } } as unknown as ISessionPayload

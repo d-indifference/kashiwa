@@ -7,6 +7,7 @@ import { FormPage, RenderableSessionFormPage } from '@admin/lib';
 import { FileSystemProvider, SiteContextProvider } from '@library/providers';
 import { ISession } from '@admin/interfaces';
 import { AntiSpamService } from '@restriction/modules/antispam/services';
+import { PinoLogger } from 'nestjs-pino';
 
 /**
  * Service for handling of the spam list form
@@ -16,14 +17,19 @@ export class SpamListService {
   constructor(
     private readonly fileSystem: FileSystemProvider,
     private readonly siteContext: SiteContextProvider,
-    private readonly antiSpamService: AntiSpamService
-  ) {}
+    private readonly antiSpamService: AntiSpamService,
+    private readonly logger: PinoLogger
+  ) {
+    this.logger.setContext(SpamListService.name);
+  }
 
   /**
    * Load the spam list to form
    * @param session Session object
    */
   public async renderFormContent(session: ISession): Promise<RenderableSessionFormPage> {
+    this.logger.debug({ session }, 'renderFormContent');
+
     const form = new SpamListForm();
     form.spamList = await this.readSpamList();
 
@@ -40,6 +46,8 @@ export class SpamListService {
    * @param res `Express.js` response
    */
   public async saveSpamList(form: SpamListForm, res: Response): Promise<void> {
+    this.logger.info({ form }, 'saveSpamList');
+
     const spamList = form.spamList.split('\r\n').filter(str => str !== '');
 
     this.siteContext.setSpamExpressions(spamList);

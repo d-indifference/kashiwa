@@ -6,6 +6,7 @@ import { Constants } from '@library/constants';
 import { FormPage, RenderableSessionFormPage } from '@admin/lib';
 import { GlobalSettingsForm } from '@admin/forms';
 import { FileSystemProvider, SiteContextProvider } from '@library/providers';
+import { PinoLogger } from 'nestjs-pino';
 
 /**
  * Service for form operations with the global settings object
@@ -14,7 +15,8 @@ import { FileSystemProvider, SiteContextProvider } from '@library/providers';
 export class GlobalSettingsService {
   constructor(
     private readonly fileSystem: FileSystemProvider,
-    private readonly siteContext: SiteContextProvider
+    private readonly siteContext: SiteContextProvider,
+    private readonly logger: PinoLogger
   ) {}
 
   /**
@@ -22,6 +24,8 @@ export class GlobalSettingsService {
    * @param session Session object
    */
   public getGlobalSettings(session: ISession): RenderableSessionFormPage {
+    this.logger.debug({ session }, 'getGlobalSettings');
+
     const globalSettings = this.siteContext.getGlobalSettings();
     const form = GlobalSettingsForm.fromNonDecoratedForm(globalSettings);
 
@@ -38,6 +42,8 @@ export class GlobalSettingsService {
    * @param res `Express.js object`
    */
   public async saveGlobalSettings(form: GlobalSettingsForm, res: Response): Promise<void> {
+    this.logger.info({ form }, 'saveGlobalSettings');
+
     this.siteContext.setGlobalSettings(form);
 
     await this.overwriteSettingsFile(form);

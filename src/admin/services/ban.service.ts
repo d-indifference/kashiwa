@@ -11,6 +11,7 @@ import { Response } from 'express';
 import { Constants } from '@library/constants';
 import { Cron } from '@nestjs/schedule';
 import { getDefaultBanForm } from '@admin/misc';
+import { PinoLogger } from 'nestjs-pino';
 
 /**
  * A service for the operations of `Ban` model
@@ -21,7 +22,8 @@ export class BanService {
 
   constructor(
     private readonly banPersistenceService: BanPersistenceService,
-    private readonly boardPersistenceService: BoardPersistenceService
+    private readonly boardPersistenceService: BoardPersistenceService,
+    private readonly logger: PinoLogger
   ) {
     this.tableConstructor = new TableConstructor<BanDto>()
       .dateTimeValue(LOCALE.CREATED_AT as string, 'createdAt')
@@ -39,6 +41,7 @@ export class BanService {
         obj =>
           `<form method="post" action="/kashiwa/ban/delete/${obj.id}"><input type="submit" value="${LOCALE.DELETE as string}"></form>`
       );
+    this.logger.setContext(BanService.name);
   }
 
   /**
@@ -46,6 +49,8 @@ export class BanService {
    */
   @Cron(Constants.BAN_ROTATION_INTERVAL)
   public async deleteOldBans(): Promise<void> {
+    this.logger.info('deleteOldBans');
+
     await this.banPersistenceService.deleteOldBans();
   }
 
@@ -55,6 +60,8 @@ export class BanService {
    * @param page Page request
    */
   public async getBanPage(session: ISession, page: PageRequest): Promise<TablePage> {
+    this.logger.debug({ session, page }, 'getBanPage');
+
     const bans = await this.banPersistenceService.findAll(page);
     const table = this.tableConstructor.fromPage(bans, '/kashiwa/ban');
     return new TablePage(table, session, {
@@ -70,6 +77,8 @@ export class BanService {
    * @param boardUrl URL of board where user should be banned
    */
   public getBanForm(session: ISession, ip?: string, boardUrl?: string): RenderableSessionFormPage {
+    this.logger.debug({ session, ip, boardUrl }, 'getBanForm');
+
     const formContent = getDefaultBanForm(ip, boardUrl);
 
     return FormPage.toSessionTemplateContent(session, formContent, {
@@ -86,6 +95,8 @@ export class BanService {
    * @param res `Express.js` response
    */
   public async create(session: ISession, form: BanCreateForm, res: Response): Promise<void> {
+    this.logger.info({ session, form }, 'create');
+
     const board = form.boardUrl ? (await this.boardPersistenceService.findByUrl(form.boardUrl)).id : null;
     const dto = new BanCreateDto(form.ip, form.timeValue, form.timeUnit, form.reason, board);
 
@@ -100,6 +111,8 @@ export class BanService {
    * @param res `Express.js` response
    */
   public async remove(id: string, res: Response): Promise<void> {
+    this.logger.info({ id }, 'remove');
+
     await this.banPersistenceService.remove(id);
 
     res.redirect('/kashiwa/ban');

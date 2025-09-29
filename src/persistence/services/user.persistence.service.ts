@@ -26,6 +26,8 @@ export class UserPersistenceService {
    * @param page Page request
    */
   public async findAll(page: PageRequest): Promise<Page<UserDto>> {
+    this.logger.debug({ page }, 'findAll');
+
     const entities = await Page.of<User>(this.prisma, 'user', page);
 
     return entities.map(this.userMapper.toDto);
@@ -36,6 +38,8 @@ export class UserPersistenceService {
    * @param id User's ID
    */
   public async findById(id: string): Promise<UserDto> {
+    this.logger.debug({ id }, 'findById');
+
     const user = await this.prisma.user.findFirst({ where: { id } });
 
     if (!user) {
@@ -49,6 +53,8 @@ export class UserPersistenceService {
    * Get `User` total count
    */
   public async countAll(): Promise<number> {
+    this.logger.debug('countAll');
+
     return (await this.prisma.user.count()) as number;
   }
 
@@ -57,6 +63,8 @@ export class UserPersistenceService {
    * @param id User's ID
    */
   public async findByIdStrict(id: string): Promise<User | null> {
+    this.logger.debug({ id }, 'findByIdStrict');
+
     const user = await this.prisma.user.findFirst({ where: { id } });
 
     return user ?? null;
@@ -67,7 +75,8 @@ export class UserPersistenceService {
    * @param dto User's creation input
    */
   public async create(dto: UserCreateDto): Promise<UserDto> {
-    this.logger.info(dto, 'create');
+    this.logger.info({ ...dto, password: '***' }, 'create');
+    this.logger.debug(dto, 'create');
 
     await this.checkUniqueUserOnCreate(dto);
 
@@ -83,7 +92,8 @@ export class UserPersistenceService {
    * @param dto User's update input
    */
   public async update(dto: UserUpdateDto): Promise<UserDto> {
-    this.logger.info(dto, 'update');
+    this.logger.info({ ...dto, password: '***' }, 'update');
+    this.logger.debug(dto, 'update');
 
     await this.checkUserOnUpdate(dto);
 
@@ -111,7 +121,8 @@ export class UserPersistenceService {
    * @param password Non-hashed password
    */
   public async signIn(username: string, password: string): Promise<UserDto> {
-    this.logger.info({ username }, 'signIn');
+    this.logger.info({ username, password: '***' }, 'signIn');
+    this.logger.debug({ username, password }, 'signIn');
 
     const user = await this.prisma.user.findFirst({ where: { username } });
 

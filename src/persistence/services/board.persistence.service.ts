@@ -28,6 +28,8 @@ export class BoardPersistenceService {
    * @param page Page request
    */
   public async findAll(page: PageRequest): Promise<Page<BoardShortDto>> {
+    this.logger.debug({ page }, 'findAll');
+
     const boards = await Page.of<Board>(this.prisma, 'board', page);
 
     return boards.map(this.boardMapper.toShortDto);
@@ -38,6 +40,8 @@ export class BoardPersistenceService {
    * @param id Board's ID
    */
   public async findById(id: string): Promise<Board> {
+    this.logger.debug({ id }, 'findById');
+
     const board = await this.prisma.board.findFirst({ where: { id }, include: { boardSettings: true } });
 
     if (!board) {
@@ -52,6 +56,8 @@ export class BoardPersistenceService {
    * @param id Board's ID
    */
   public async findDtoById(id: string): Promise<BoardDto> {
+    this.logger.debug({ id }, 'findDtoById');
+
     const board = await this.findById(id);
     return this.boardMapper.toDto(board, board['boardSettings'] as BoardSettings);
   }
@@ -61,6 +67,8 @@ export class BoardPersistenceService {
    * @param id Board's ID
    */
   public async findShortDtoById(id: string): Promise<BoardShortDto> {
+    this.logger.debug({ id }, 'findShortDtoById');
+
     const board = await this.findById(id);
     return this.boardMapper.toShortDto(board);
   }
@@ -70,6 +78,8 @@ export class BoardPersistenceService {
    * @param url Board's URL
    */
   public async findByUrl(url: string): Promise<BoardDto> {
+    this.logger.debug({ url }, 'findByUrl');
+
     const board = await this.prisma.board.findFirst({ where: { url }, include: { boardSettings: true } });
 
     if (!board) {
@@ -87,6 +97,8 @@ export class BoardPersistenceService {
    * Get count of boards
    */
   public async countAll(): Promise<number> {
+    this.logger.debug('countAll');
+
     return (await this.prisma.board.count()) as number;
   }
 
@@ -95,6 +107,8 @@ export class BoardPersistenceService {
    * @param url Board URL
    */
   public async getCurrentPostCount(url: string): Promise<number> {
+    this.logger.debug({ url }, 'getCurrentPostCount');
+
     const response = await this.prisma.board.findFirst({ select: { postCount: true }, where: { url } });
 
     if (response === null) {

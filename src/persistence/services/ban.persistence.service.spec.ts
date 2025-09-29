@@ -15,7 +15,8 @@ const banMapperMock = {
 };
 const loggerMock = {
   setContext: jest.fn(),
-  info: jest.fn()
+  info: jest.fn(),
+  debug: jest.fn()
 };
 const PageMock = {
   ofFilter: jest.fn()

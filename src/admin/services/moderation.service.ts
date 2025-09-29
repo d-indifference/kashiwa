@@ -15,6 +15,7 @@ import { moderationBoardTableConstructor, moderationCommentsTableConstructor } f
 import { Response } from 'express';
 import { CachingProvider } from '@caching/providers';
 import { InMemoryCacheProvider } from '@library/providers';
+import { PinoLogger } from 'nestjs-pino';
 
 /**
  * Service for moderation operations
@@ -30,8 +31,10 @@ export class ModerationService {
     private readonly commentPersistenceService: CommentPersistenceService,
     private readonly attachedFilePersistenceService: AttachedFilePersistenceService,
     private readonly cachingProvider: CachingProvider,
-    private readonly cache: InMemoryCacheProvider
+    private readonly cache: InMemoryCacheProvider,
+    private readonly logger: PinoLogger
   ) {
+    this.logger.setContext(ModerationService.name);
     this.boardTableConstructor = moderationBoardTableConstructor;
     this.commentsTableConstructor = moderationCommentsTableConstructor;
   }
@@ -42,6 +45,8 @@ export class ModerationService {
    * @param session Session data
    */
   public async findBoardsForModeration(session: ISession, page: PageRequest): Promise<TablePage> {
+    this.logger.debug({ session, page }, 'findBoardsForModeration');
+
     const content = await this.boardPersistenceService.findAll(page);
     const table = this.boardTableConstructor.fromPage(content, '/kashiwa/moderation', true);
     return new TablePage(table, session, {
@@ -57,6 +62,8 @@ export class ModerationService {
    * @param page Page request object
    */
   public async findCommentsForModeration(session: ISession, id: string, page: PageRequest): Promise<TablePage> {
+    this.logger.debug({ session, id, page }, 'findCommentsForModeration');
+
     const comments = await this.commentPersistenceService.findManyForModeration(id, page);
     const table = this.commentsTableConstructor.fromPage(comments, `/kashiwa/moderation/${id}`, true);
     return new TablePage(table, session, {
@@ -72,6 +79,8 @@ export class ModerationService {
    * @param res `Express.js` response
    */
   public async deleteComment(url: string, num: bigint, res: Response): Promise<void> {
+    this.logger.info({ url, num: num.toString() }, 'deleteComment');
+
     await this.commentPersistenceService.remove(url, num);
     await this.cachingProvider.fullyReloadCache(url);
     const board = await this.boardPersistenceService.findByUrl(url);
@@ -89,6 +98,8 @@ export class ModerationService {
    * @param res `Express.js` response
    */
   public async clearFile(url: string, num: bigint, res: Response): Promise<void> {
+    this.logger.info({ url, num: num.toString() }, 'clearFile');
+
     await this.attachedFilePersistenceService.clearFromComment(url, num);
     await this.cachingProvider.fullyReloadCache(url);
     const board = await this.boardPersistenceService.findByUrl(url);
@@ -106,6 +117,8 @@ export class ModerationService {
    * @param res `Express.js` response
    */
   public async deleteAllByIp(url: string, ip: string, res: Response): Promise<void> {
+    this.logger.info({ url, ip }, 'deleteAllByIp');
+
     await this.commentPersistenceService.removeByIp(url, ip);
     await this.cachingProvider.fullyReloadCache(url);
     const board = await this.boardPersistenceService.findByUrl(url);

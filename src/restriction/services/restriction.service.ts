@@ -23,6 +23,7 @@ import { BanService } from '@restriction/services/ban.service';
 import { CaptchaSolvingPredicateProvider } from '@captcha/providers';
 import { LOCALE } from '@locale/locale';
 import { BoardPersistenceService, CommentPersistenceService } from '@persistence/services';
+import { PinoLogger } from 'nestjs-pino';
 
 /**
  * Type for describing of Exception class
@@ -50,8 +51,11 @@ export class RestrictionService {
     private readonly boardPersistenceService: BoardPersistenceService,
     private readonly antiSpamService: AntiSpamService,
     private readonly banService: BanService,
-    private readonly captchaSolvingPredicateProvider: CaptchaSolvingPredicateProvider
-  ) {}
+    private readonly captchaSolvingPredicateProvider: CaptchaSolvingPredicateProvider,
+    private readonly logger: PinoLogger
+  ) {
+    this.logger.setContext(RestrictionService.name);
+  }
 
   /**
    * Apply posting restrictions
@@ -68,6 +72,8 @@ export class RestrictionService {
     form: FormsType,
     isAdmin: boolean
   ): Promise<void> {
+    this.logger.debug({ restrictionType, ip, url, form, isAdmin }, 'checkRestrictions');
+
     const board = await this.boardPersistenceService.findByUrl(url);
     if (board.boardSettings === undefined) {
       throw new InternalServerErrorException(LOCALE['YOU_CANNOT_CREATE_WITHOUT_BOARD_SETTINGS']);

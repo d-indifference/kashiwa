@@ -3,6 +3,8 @@
 
 import { CommentService } from './comment.service';
 import { NotFoundException } from '@nestjs/common';
+import { PinoLogger } from 'nestjs-pino';
+import { Params } from 'nestjs-pino/params';
 
 const boardPersistenceServiceMock = {
   findByUrl: jest.fn()
@@ -29,7 +31,8 @@ describe('CommentService', () => {
       commentPersistenceServiceMock as any,
       boardPersistenceServiceMock as any,
       commentMapperMock as any,
-      cacheMock as any
+      cacheMock as any,
+      new PinoLogger({} as Params)
     );
   });
 

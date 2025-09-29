@@ -75,7 +75,7 @@ export default tseslint.config(
       'key-spacing': 'error',
       'keyword-spacing': ['error', { 'after': true, 'before': true }],
       'line-comment-position': 'off',
-      'linebreak-style': ['error', 'windows'],
+      'linebreak-style': ['error', 'unix'],
       'lines-around-comment': 'off',
       'lines-between-class-members': 'warn',
       'max-classes-per-file': 'off',

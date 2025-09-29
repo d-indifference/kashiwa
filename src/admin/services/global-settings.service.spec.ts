@@ -3,6 +3,8 @@ import { FileSystemProvider, SiteContextProvider } from '@library/providers';
 import { GlobalSettingsForm } from '@admin/forms';
 import { ISession } from '@admin/interfaces';
 import { Response } from 'express';
+import { PinoLogger } from 'nestjs-pino';
+import { Params } from 'nestjs-pino/params';
 
 describe('GlobalSettingsService', () => {
   let service: GlobalSettingsService;
@@ -19,7 +21,7 @@ describe('GlobalSettingsService', () => {
       getGlobalSettings: jest.fn(),
       setGlobalSettings: jest.fn()
     } as any;
-    service = new GlobalSettingsService(fileSystem, siteContext);
+    service = new GlobalSettingsService(fileSystem, siteContext, new PinoLogger({} as Params));
     mockSession = { user: { id: '1' } };
     mockRes = { redirect: jest.fn() };
   });

@@ -14,6 +14,8 @@ import { BoardDto, BoardShortDto } from '@persistence/dto/board';
 import { CommentModerationDto } from '@persistence/dto/comment/moderation';
 import { Response } from 'express';
 import { InMemoryCacheProvider } from '@library/providers';
+import { PinoLogger } from 'nestjs-pino';
+import { Params } from 'nestjs-pino/params';
 
 describe('ModerationService', () => {
   let service: ModerationService;
@@ -50,7 +52,8 @@ describe('ModerationService', () => {
       commentPersistenceService,
       attachedFilePersistenceService,
       cachingProvider,
-      cache
+      cache,
+      new PinoLogger({} as Params)
     );
     mockSession = { cookie: {} as Cookie, payload: { id: '1', role: UserRole.ADMINISTRATOR } };
     mockRes = { redirect: jest.fn() };
