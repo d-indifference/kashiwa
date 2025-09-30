@@ -202,3 +202,95 @@ function buildReferenceHtml(boardUrl, threadNumber, postNumber, content) {
   return result;
 }
 
+function createHiddenThreadsObject() {
+  var clearingIntervalYears = 5;
+  var currentDate = new Date();
+  var nextCleaningDate = (new Date).setFullYear(currentDate.getFullYear() + clearingIntervalYears);
+
+  var storageObject = {
+    nextCleaning: nextCleaningDate
+  };
+
+  localStorage.setItem('hiddenThreads', JSON.stringify(storageObject));
+}
+
+function initHiddenThreads() {
+  if (!localStorage.getItem('hiddenThreads')) {
+    createHiddenThreadsObject();
+  }
+}
+
+function clearHiddenThreads() {
+  if (!localStorage.getItem('hiddenThreads')) {
+    var now = Date.now();
+    var currentHiddenThreads = JSON.parse(localStorage.getItem('hiddenThreads'));
+
+    if (now > currentHiddenThreads.nextCleaning) {
+      createHiddenThreadsObject();
+    }
+  }
+}
+
+function hideThread(board, num) {
+  clearHiddenThreads();
+  initHiddenThreads();
+
+  var currentHiddenThreads = JSON.parse(localStorage.getItem('hiddenThreads'));
+
+  if (!currentHiddenThreads[board]) {
+    currentHiddenThreads[board] = [];
+  }
+
+  if (currentHiddenThreads[board].indexOf(num) === -1) {
+    currentHiddenThreads[board].push(num);
+  }
+
+  localStorage.setItem('hiddenThreads', JSON.stringify(currentHiddenThreads));
+  applyThreadHiding();
+}
+
+function applyThreadHiding() {
+  var boardUrl = document.location.pathname.split('/')[1];
+  var hiddenThreadsStorage = JSON.parse(localStorage.getItem('hiddenThreads'));
+
+  if (hiddenThreadsStorage.hasOwnProperty(boardUrl)) {
+    var hiddenThreadNums = hiddenThreadsStorage[boardUrl];
+
+    for (var i = 0; i < hiddenThreadNums.length; i++) {
+      var hiddenThreadId = '#thread-' + hiddenThreadNums[i];
+
+      var hiddenThread = $(hiddenThreadId);
+
+      if (!hiddenThread.hasClass('hidden')) {
+        hiddenThread.addClass('hidden');
+
+        var linkToHiddenThread = hiddenThread
+          .children('span.replytothread')
+          .children('a')
+          .attr('href');
+
+        hiddenThread.before('<div id="hidden-' + hiddenThreadNums[i] + '">Thread <a href="' + linkToHiddenThread + '">' + hiddenThreadNums[i] + '</a> is hidden. <button type="button" onclick="showThread(\''+ boardUrl +'\', \''+ hiddenThreadNums[i] +'\')">Show</button></div>');
+      }
+    }
+  }
+}
+
+function showThread(url, num) {
+  var hiddenThreadsStorage = JSON.parse(localStorage.getItem('hiddenThreads'));
+
+  if (hiddenThreadsStorage.hasOwnProperty(url)) {
+    var hiddenThreadIndex = hiddenThreadsStorage[url].indexOf(num);
+
+    if (hiddenThreadIndex !== -1) {
+      hiddenThreadsStorage[url].splice(hiddenThreadIndex, 1);
+
+      var hiddenThreadId = '#thread-' + num;
+      var hiddenReplacerId = '#hidden-' + num;
+
+      $(hiddenReplacerId).remove();
+      $(hiddenThreadId).removeClass('hidden');
+
+      localStorage.setItem('hiddenThreads', JSON.stringify(hiddenThreadsStorage));
+    }
+  }
+}

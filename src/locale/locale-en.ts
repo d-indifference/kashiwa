@@ -254,7 +254,8 @@ export const locale: Record<string, LocaleArgument> = {
   LAST_HIT: 'Last hit',
   CATALOG: 'Catalog',
   INVALID_DIMENSIONS: 'Invalid dimensions',
-  APPLY_SORTING: 'Apply sorting'
+  APPLY_SORTING: 'Apply sorting',
+  HIDE_THREAD: 'Hide'
 };
 
 export const localeValidators: Record<string, (...args: unknown[]) => string> = {

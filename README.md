@@ -11,13 +11,14 @@ follow it through to the final release :).
 - Easy to install: simply clone the project, add an `.env` file ([see description below](#run-the-application-with-docker)), and start working with the application
 - Configuration options: basic setup is done via a configuration file, but during operation you can customize page content and board functionality
 - Extensive capabilities for creating and customizing boards
-- Traditional imageboard features such as sage, tripcodes, text formatting (still a work in progress), captcha, anti-flood, and style switching
+- Traditional imageboard features such as sage, tripcodes, text formatting (still a work in progress), captcha, anti-flood, thread hiding, and style switching
 - Support for uploading the most popular image, video, and audio formats, as well as the ability to upload torrents (yo-ho-ho! 🏴‍☠️) and .swf files
 - Ability to add an administrative team: registered users can be either administrators or regular moderators
 - Configure a spam filter using JavaScript regular expressions
 - Ability to temporarily ban users who break the board’s rules, as well as set up an IP blacklist to block access entirely
 - The engine supports database dumps and cached board backups — your data will be safe
 - Initial REST API support for retrieving post information (detailed Swagger documentation available)
+- Adding banners. Simply upload your banner images to `./kashiwa/static/img/banners`
 - All localizable strings are stored in one place, making it easy to add new site translations
 
 ## Installation and Launch
