@@ -35,6 +35,8 @@ export class BoardMapper {
           enableCaptcha: dto.enableCaptcha,
           isCaptchaCaseSensitive: dto.isCaptchaCaseSensitive,
           allowedFileTypes: JSON.stringify(dto.allowedFileTypes),
+          allowOekakiThreads: dto.allowOekakiThreads,
+          allowOekakiReplies: dto.allowOekakiReplies,
           rules: dto.rules
         }
       },
@@ -71,6 +73,8 @@ export class BoardMapper {
           enableCaptcha: dto.enableCaptcha ?? undefined,
           isCaptchaCaseSensitive: dto.isCaptchaCaseSensitive ?? undefined,
           allowedFileTypes: dto.allowedFileTypes ? JSON.stringify(dto.allowedFileTypes) : [],
+          allowOekakiThreads: dto.allowOekakiThreads ?? undefined,
+          allowOekakiReplies: dto.allowOekakiReplies ?? undefined,
           rules: dto.rules ?? undefined
         }
       }
@@ -110,6 +114,8 @@ export class BoardMapper {
         boardSettings.enableCaptcha,
         boardSettings.isCaptchaCaseSensitive,
         this.mapStringArray(boardSettings.allowedFileTypes),
+        boardSettings.allowOekakiThreads,
+        boardSettings.allowOekakiReplies,
         boardSettings.rules
       );
 

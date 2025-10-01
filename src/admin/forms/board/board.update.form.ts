@@ -306,6 +306,24 @@ export class BoardUpdateForm {
   allowedFileTypes: string[];
 
   /**
+   * Can board threads start with an oekaki
+   */
+  @FormCheckbox({ displayName: LOCALE.ALLOW_OEKAKI_THREADS as string })
+  @IsOptional()
+  @Transform(normalizeBooleanCheckbox)
+  @KIsBoolean('ALLOW_OEKAKI_THREADS')
+  allowOekakiThreads: boolean = false;
+
+  /**
+   * Can replies contain an oekaki
+   */
+  @FormCheckbox({ displayName: LOCALE.ALLOW_OEKAKI_REPLIES as string })
+  @IsOptional()
+  @Transform(normalizeBooleanCheckbox)
+  @KIsBoolean('ALLOW_OEKAKI_REPLIES')
+  allowOekakiReplies: boolean = false;
+
+  /**
    * HTML fragment with board rules
    */
   @FormTextarea({ displayName: LOCALE.RULES as string, rows: 6, cols: 60 })

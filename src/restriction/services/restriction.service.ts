@@ -15,7 +15,8 @@ import {
   maxCommentSize,
   maxStringFieldSize,
   requiredFiles,
-  strictAnonymity
+  strictAnonymity,
+  forbiddenOekaki
 } from '@restriction/lib';
 import { DateTime } from 'luxon';
 import { AntiSpamService } from '@restriction/modules/antispam/services';
@@ -117,6 +118,7 @@ export class RestrictionService {
     );
     this.antiSpamService.checkSpam(form, isAdmin);
     this.checkRestriction(() => forbiddenFiles(restrictionType, settings, form), LOCALE['FORBIDDEN_FILES'] as string);
+    this.checkRestriction(() => forbiddenOekaki(restrictionType, settings, form), LOCALE['FORBIDDEN_OEKAKI'] as string);
     this.checkRestriction(() => requiredFiles(restrictionType, settings, form), LOCALE['PLEASE_ATTACH_FILE'] as string);
     this.checkRestriction(() => allowedFileTypes(settings, form), LOCALE['DISALLOWED_FILE_TYPE'] as string);
 

@@ -293,6 +293,24 @@ export class BoardCreateForm {
   allowedFileTypes: string[] = [];
 
   /**
+   * Can board threads start with an oekaki
+   */
+  @FormCheckbox({ displayName: LOCALE.ALLOW_OEKAKI_THREADS as string })
+  @Transform(normalizeBooleanCheckbox)
+  @KIsBoolean('ALLOW_OEKAKI_THREADS')
+  @KIsNotEmpty('ALLOW_OEKAKI_THREADS')
+  allowOekakiThreads: boolean = false;
+
+  /**
+   * Can replies contain an oekaki
+   */
+  @FormCheckbox({ displayName: LOCALE.ALLOW_OEKAKI_REPLIES as string })
+  @Transform(normalizeBooleanCheckbox)
+  @KIsBoolean('ALLOW_OEKAKI_REPLIES')
+  @KIsNotEmpty('ALLOW_OEKAKI_REPLIES')
+  allowOekakiReplies: boolean = false;
+
+  /**
    * HTML fragment with board rules
    */
   @FormTextarea({ displayName: LOCALE.RULES as string, rows: 6, cols: 60 })

@@ -108,6 +108,16 @@ export class BoardSettingsDto {
   allowedFileTypes: string[];
 
   /**
+   * Can board threads start with an oekaki
+   */
+  allowOekakiThreads: boolean;
+
+  /**
+   * Can replies contain an oekaki
+   */
+  allowOekakiReplies: boolean;
+
+  /**
    * HTML fragment with board rules
    */
   rules: string;
@@ -132,6 +142,8 @@ export class BoardSettingsDto {
     enableCaptcha: boolean,
     isCaptchaCaseSensitive: boolean,
     allowedFileTypes: string[],
+    allowOekakiThreads: boolean,
+    allowOekakiReplies: boolean,
     rules: string
   ) {
     this.allowPosting = allowPosting;
@@ -153,6 +165,8 @@ export class BoardSettingsDto {
     this.enableCaptcha = enableCaptcha;
     this.isCaptchaCaseSensitive = isCaptchaCaseSensitive;
     this.allowedFileTypes = allowedFileTypes;
+    this.allowOekakiThreads = allowOekakiThreads;
+    this.allowOekakiReplies = allowOekakiReplies;
     this.rules = rules;
   }
 }

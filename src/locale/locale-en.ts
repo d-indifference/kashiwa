@@ -255,7 +255,11 @@ export const locale: Record<string, LocaleArgument> = {
   CATALOG: 'Catalog',
   INVALID_DIMENSIONS: 'Invalid dimensions',
   APPLY_SORTING: 'Apply sorting',
-  HIDE_THREAD: 'Hide'
+  HIDE_THREAD: 'Hide',
+  ALLOW_OEKAKI_THREADS: 'Allow oekaki threads',
+  ALLOW_OEKAKI_REPLIES: 'Allow oekaki replies',
+  OEKAKI: 'Oekaki',
+  FORBIDDEN_OEKAKI: 'You cannot posing an oekaki here'
 };
 
 export const localeValidators: Record<string, (...args: unknown[]) => string> = {
@@ -278,5 +282,6 @@ export const localeValidators: Record<string, (...args: unknown[]) => string> = 
   V_MIN_LENGTH: (...args: string[]) => `"${args[0]}": minimal input length is ${args[1]}<br>`,
   V_FILE: (...args: string[]) => `"${args[0]}": should be a file<br>`,
   V_MAX_FILE_SIZE: (...args: string[]) => `"${args[0]}": the file is too large<br>`,
-  V_BIGINT: (...args: string[]) => `"${args[0]}": must be a bigint or a string representing a bigint<br>`
+  V_BIGINT: (...args: string[]) => `"${args[0]}": must be a bigint or a string representing a bigint<br>`,
+  V_BASE64: (...args: string[]) => `"${args[0]}": must be a valid Base64 string<br>`
 };

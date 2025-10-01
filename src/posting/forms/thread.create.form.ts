@@ -2,7 +2,7 @@ import { MemoryStoredFile } from 'nestjs-form-data';
 import { IsOptional } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { normalizeFormEmptyString } from '@library/transforms';
-import { KIsFile, KIsNotEmpty, KIsString, KLength, KMaxFileSize, KMinLength } from '@library/validators';
+import { KIsBase64, KIsFile, KIsNotEmpty, KIsString, KLength, KMaxFileSize, KMinLength } from '@library/validators';
 import { Constants } from '@library/constants';
 
 /**
@@ -77,4 +77,12 @@ export class ThreadCreateForm {
   @KIsString('CAPTCHA_ANSWER_ERROR')
   @KIsNotEmpty('CAPTCHA_ANSWER_ERROR')
   nya?: string;
+
+  /**
+   * Base64 oekaki string
+   */
+  @IsOptional()
+  @KIsString('OEKAKI')
+  @KIsBase64('OEKAKI')
+  oekaki?: string;
 }

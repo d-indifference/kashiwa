@@ -89,6 +89,8 @@ export class BoardService {
     form.enableCaptcha = boardSettings.enableCaptcha;
     form.isCaptchaCaseSensitive = boardSettings.isCaptchaCaseSensitive;
     form.allowedFileTypes = boardSettings.allowedFileTypes as string[];
+    form.allowOekakiThreads = boardSettings.allowOekakiThreads;
+    form.allowOekakiReplies = boardSettings.allowOekakiReplies;
     form.rules = boardSettings.rules;
 
     return FormPage.toSessionTemplateContent(session, form, {
@@ -128,6 +130,8 @@ export class BoardService {
       form.enableCaptcha,
       form.isCaptchaCaseSensitive,
       form.allowedFileTypes,
+      form.allowOekakiThreads,
+      form.allowOekakiReplies,
       form.rules
     );
 
@@ -169,6 +173,8 @@ export class BoardService {
       form.enableCaptcha,
       form.isCaptchaCaseSensitive,
       form.allowedFileTypes,
+      form.allowOekakiThreads,
+      form.allowOekakiReplies,
       form.rules
     );
 

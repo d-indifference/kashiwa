@@ -10,6 +10,7 @@ mixin FormSageOption()
 
 
 mixin ReplyForm()
+    +FormOekaki(board.boardSettings.allowOekakiReplies)
     table
         tbody
             if !board.boardSettings.strictAnonymity

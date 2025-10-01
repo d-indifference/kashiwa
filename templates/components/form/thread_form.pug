@@ -2,6 +2,7 @@ include ./form_components
 
 
 mixin ThreadForm()
+    +FormOekaki(board.boardSettings.allowOekakiThreads)
     table
         tbody
             if !board.boardSettings.strictAnonymity

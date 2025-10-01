@@ -221,7 +221,7 @@ function initHiddenThreads() {
 }
 
 function clearHiddenThreads() {
-  if (!localStorage.getItem('hiddenThreads')) {
+  if (localStorage.getItem('hiddenThreads')) {
     var now = Date.now();
     var currentHiddenThreads = JSON.parse(localStorage.getItem('hiddenThreads'));
 
