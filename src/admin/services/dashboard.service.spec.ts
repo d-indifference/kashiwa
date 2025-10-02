@@ -8,6 +8,8 @@ import { FileSystemProvider, InMemoryCacheProvider } from '@library/providers';
 import { UserRole } from '@prisma/client';
 import { Request } from 'express';
 import { ISession } from '@admin/interfaces';
+import { PinoLogger } from 'nestjs-pino';
+import { Params } from 'nestjs-pino/params';
 
 describe('DashboardService', () => {
   let service: DashboardService;
@@ -38,7 +40,14 @@ describe('DashboardService', () => {
       getOrCache: jest.fn()
     } as any;
 
-    service = new DashboardService(boardPersistenceService, commentPersistenceService, utils, fileSystem, cache);
+    service = new DashboardService(
+      boardPersistenceService,
+      commentPersistenceService,
+      utils,
+      fileSystem,
+      cache,
+      new PinoLogger({} as Params)
+    );
 
     mockSession = { payload: { role: UserRole.ADMINISTRATOR } };
     mockReq = { headers: { host: 'localhost:3000' } };

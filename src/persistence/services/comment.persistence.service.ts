@@ -30,6 +30,8 @@ export class CommentPersistenceService {
    * Get all comments count
    */
   public async countAll(): Promise<number> {
+    this.logger.debug('countAll');
+
     return (await this.prisma.comment.count()) as number;
   }
 
@@ -38,6 +40,8 @@ export class CommentPersistenceService {
    * @param url board URL
    */
   public async threadCount(url: string): Promise<number> {
+    this.logger.debug({ url }, 'threadCount');
+
     return (await this.prisma.comment.count({ where: { board: { url }, NOT: { lastHit: null } } })) as number;
   }
 
@@ -47,19 +51,17 @@ export class CommentPersistenceService {
    * @param page Page request
    */
   public async findAll(boardId: string, page: PageRequest): Promise<Page<ThreadCollapsedDto>> {
+    this.logger.debug({ boardId, page }, 'findAll');
+
     const comments = await Page.ofFilter<
       Comment,
       Prisma.CommentWhereInput,
-      Prisma.CommentOrderByWithAggregationInput,
+      Prisma.CommentOrderByWithAggregationInput[],
       Prisma.CommentInclude
-    >(
-      this.prisma,
-      'comment',
-      page,
-      { boardId, lastHit: { not: null } },
-      { lastHit: 'desc' },
-      { attachedFile: true, children: { orderBy: { createdAt: 'asc' }, include: { attachedFile: true } } }
-    );
+    >(this.prisma, 'comment', page, { boardId, lastHit: { not: null } }, [{ pinnedAt: 'asc' }, { lastHit: 'desc' }], {
+      attachedFile: true,
+      children: { orderBy: { createdAt: 'asc' }, include: { attachedFile: true } }
+    });
 
     return comments.map(c => this.commentMapper.toCollapsedDto(c));
   }
@@ -69,6 +71,8 @@ export class CommentPersistenceService {
    * @param url board URL
    */
   public async findThreadNums(url: string): Promise<bigint[]> {
+    this.logger.debug({ url }, 'findThreadNums');
+
     return (
       await this.prisma.comment.findMany({
         where: { board: { url }, NOT: { lastHit: null } },
@@ -83,19 +87,18 @@ export class CommentPersistenceService {
    * @param page Page request
    */
   public async findManyForModeration(boardId: string, page: PageRequest): Promise<Page<CommentModerationDto>> {
+    this.logger.debug({ boardId, page }, 'findManyForModeration');
+
     const comments = await Page.ofFilter<
       Comment,
       Prisma.CommentWhereInput,
-      Prisma.CommentOrderByWithAggregationInput,
+      Prisma.CommentOrderByWithAggregationInput[],
       Prisma.CommentInclude
-    >(
-      this.prisma,
-      'comment',
-      page,
-      { board: { id: boardId } },
-      { createdAt: 'desc' },
-      { attachedFile: { include: { board: true } }, parent: true, board: true }
-    );
+    >(this.prisma, 'comment', page, { board: { id: boardId } }, [{ pinnedAt: 'asc' }, { createdAt: 'desc' }], {
+      attachedFile: { include: { board: true } },
+      parent: true,
+      board: true
+    });
 
     return comments.map(c => this.commentMapper.toModerationDto(c));
   }
@@ -105,17 +108,19 @@ export class CommentPersistenceService {
     orderByField: 'createdAt' | 'lastHit',
     page: PageRequest
   ): Promise<Page<CommentDto>> {
+    this.logger.debug({ url, page, orderByField }, 'findManyForCatalog');
+
     const comments = await Page.ofFilter<
       Comment,
       Prisma.CommentWhereInput,
-      Prisma.CommentOrderByWithAggregationInput,
+      Prisma.CommentOrderByWithAggregationInput[],
       Prisma.CommentInclude
     >(
       this.prisma,
       'comment',
       page,
       { board: { url }, NOT: { lastHit: null } },
-      { [orderByField]: 'desc' },
+      [{ pinnedAt: 'asc' }, { [orderByField]: 'desc' }],
       { attachedFile: { include: { board: true } } }
     );
 
@@ -128,6 +133,8 @@ export class CommentPersistenceService {
    * @param num Thread number on board
    */
   public async findThread(url: string, num: bigint): Promise<CommentDto> {
+    this.logger.debug({ url, num }, 'findThread');
+
     const openingPost = await this.prisma.comment.findFirst({
       include: {
         board: { include: { boardSettings: true } },
@@ -150,6 +157,8 @@ export class CommentPersistenceService {
    * @param num Comment number on board
    */
   public async findPost(url: string, num: bigint): Promise<CommentDto> {
+    this.logger.debug({ url, num }, 'findPost');
+
     const post = await this.prisma.comment.findFirst({
       include: {
         board: { include: { boardSettings: true } },
@@ -171,6 +180,8 @@ export class CommentPersistenceService {
    * @param num Thread number on board
    */
   public async findOpeningPost(url: string, num: bigint): Promise<CommentDto> {
+    this.logger.debug({ url, num }, 'findOpeningPost');
+
     const post = await this.prisma.comment.findFirst({ where: { board: { url }, num, NOT: { lastHit: null } } });
 
     if (!post) {
@@ -186,6 +197,8 @@ export class CommentPersistenceService {
    * @param num Comment number on board
    */
   public async findCommentForFormatting(url: string, num: bigint): Promise<Comment | null> {
+    this.logger.debug({ url, num }, 'findCommentForFormatting');
+
     const comment = (await this.prisma.comment.findFirst({
       include: { board: true, parent: true },
       where: { board: { url }, num }
@@ -200,6 +213,8 @@ export class CommentPersistenceService {
    * @param num Thread number on board
    */
   public async findRepliesCount(url: string, num: bigint): Promise<number> {
+    this.logger.debug({ url, num }, 'findRepliesCount');
+
     return (await this.prisma.comment.count({
       where: { parent: { board: { url }, num, NOT: { lastHit: null } }, lastHit: null }
     })) as number;
@@ -210,6 +225,8 @@ export class CommentPersistenceService {
    * @param ip Poster's IP
    */
   public async findLastCommentByIp(ip: string): Promise<{ createdAt: Date } | null> {
+    this.logger.debug({ ip }, 'findLastCommentByIp');
+
     return (
       (await this.prisma.comment.findFirst({
         where: { ip },
@@ -277,6 +294,78 @@ export class CommentPersistenceService {
   }
 
   /**
+   * Mark thread as pinned
+   * @param url Board URL
+   * @param num Thread number
+   */
+  public async pinThread(url: string, num: bigint): Promise<void> {
+    this.logger.info({ url, num }, 'pinThread');
+
+    const board = await this.boardPersistenceService.findByUrl(url);
+
+    const pinnedComment = await this.prisma.comment.update({
+      where: { boardId_num: { boardId: board.id, num }, NOT: { lastHit: null }, pinnedAt: null },
+      data: { pinnedAt: new Date() }
+    });
+
+    this.logger.info({ id: pinnedComment.id }, '[SUCCESS] pinThread');
+  }
+
+  /**
+   * Remove the pinning of the thread
+   * @param url Board URL
+   * @param num Thread number
+   */
+  public async unpinThread(url: string, num: bigint): Promise<void> {
+    this.logger.info({ url, num }, 'unpinThread');
+
+    const board = await this.boardPersistenceService.findByUrl(url);
+
+    const pinnedComment = await this.prisma.comment.update({
+      where: { boardId_num: { boardId: board.id, num }, NOT: { lastHit: null, pinnedAt: null } },
+      data: { pinnedAt: null }
+    });
+
+    this.logger.info({ id: pinnedComment.id }, '[SUCCESS] unpinThread');
+  }
+
+  /**
+   * Disable posting in thread
+   * @param url Board URL
+   * @param num Thread number
+   */
+  public async disableThreadPosting(url: string, num: bigint): Promise<void> {
+    this.logger.info({ url, num }, 'disableThreadPosting');
+
+    const board = await this.boardPersistenceService.findByUrl(url);
+
+    const disabledPostingThread = await this.prisma.comment.update({
+      where: { boardId_num: { boardId: board.id, num }, NOT: { lastHit: null }, isPostingEnabled: true },
+      data: { isPostingEnabled: false }
+    });
+
+    this.logger.info({ id: disabledPostingThread.id }, '[SUCCESS] disableThreadPosting');
+  }
+
+  /**
+   * Enable posting in thread with disabled posting
+   * @param url Board URL
+   * @param num Thread number
+   */
+  public async enableThreadPosting(url: string, num: bigint): Promise<void> {
+    this.logger.info({ url, num }, 'enableThreadPosting');
+
+    const board = await this.boardPersistenceService.findByUrl(url);
+
+    const enablePostingThread = await this.prisma.comment.update({
+      where: { boardId_num: { boardId: board.id, num }, NOT: { lastHit: null, isPostingEnabled: false } },
+      data: { isPostingEnabled: true }
+    });
+
+    this.logger.info({ id: enablePostingThread.id }, '[SUCCESS] enableThreadPosting');
+  }
+
+  /**
    * Remove all comment from board
    * @param url Board URL
    */
@@ -299,7 +388,7 @@ export class CommentPersistenceService {
 
     await this.prisma.$transaction(async tx => {
       const oldestThread = await tx.comment.findFirst({
-        where: { NOT: { lastHit: null }, board: { url } },
+        where: { pinnedAt: null, NOT: { lastHit: null }, board: { url } },
         orderBy: { lastHit: 'asc' }
       });
 

@@ -3,6 +3,7 @@ import { BoardPersistenceService, CommentPersistenceService } from '@persistence
 import { PageRequest } from '@persistence/lib/page';
 import { CatalogPage } from '@posting/pages';
 import { LOCALE } from '@locale/locale';
+import { PinoLogger } from 'nestjs-pino';
 
 /**
  * Service for operation with catalog of threads
@@ -11,8 +12,11 @@ import { LOCALE } from '@locale/locale';
 export class CatalogService {
   constructor(
     private readonly commentPersistenceService: CommentPersistenceService,
-    private readonly boardPersistenceService: BoardPersistenceService
-  ) {}
+    private readonly boardPersistenceService: BoardPersistenceService,
+    private readonly logger: PinoLogger
+  ) {
+    this.logger.setContext(CatalogService.name);
+  }
 
   /**
    * Receive a page of catalog of threads
@@ -25,6 +29,8 @@ export class CatalogService {
     orderByField: 'createdAt' | 'lastHit',
     page: PageRequest
   ): Promise<CatalogPage> {
+    this.logger.debug({ url, orderByField, page }, 'getCatalogPage');
+
     const board = await this.boardPersistenceService.findByUrl(url);
     const comments = await this.commentPersistenceService.findManyForCatalog(url, orderByField, page);
 

@@ -2,7 +2,16 @@ import { IsOptional } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { normalizeBooleanCheckbox, normalizeFormEmptyString } from '@library/transforms';
 import { MemoryStoredFile } from 'nestjs-form-data';
-import { KIsBoolean, KIsFile, KIsNotEmpty, KIsString, KLength, KMaxFileSize, KMinLength } from '@library/validators';
+import {
+  KIsBase64,
+  KIsBoolean,
+  KIsFile,
+  KIsNotEmpty,
+  KIsString,
+  KLength,
+  KMaxFileSize,
+  KMinLength
+} from '@library/validators';
 
 /**
  * Form for reply creation
@@ -84,4 +93,12 @@ export class ReplyCreateForm {
   @KIsString('CAPTCHA_ANSWER_ERROR')
   @KIsNotEmpty('CAPTCHA_ANSWER_ERROR')
   nya?: string;
+
+  /**
+   * Base64 oekaki string
+   */
+  @IsOptional()
+  @KIsString('OEKAKI')
+  @KIsBase64('OEKAKI')
+  oekaki?: string;
 }

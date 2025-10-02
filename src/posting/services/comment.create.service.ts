@@ -10,6 +10,7 @@ import { BoardDto } from '@persistence/dto/board';
 import { AttachedFileService } from '@posting/services/attached-file.service';
 import { CachingProvider } from '@caching/providers';
 import { InMemoryCacheProvider } from '@library/providers';
+import { PinoLogger } from 'nestjs-pino';
 
 /**
  * Service for comment creation
@@ -22,8 +23,11 @@ export class CommentCreateService {
     private readonly attachedFileService: AttachedFileService,
     private readonly wakabaMarkdown: WakabaMarkdownProvider,
     private readonly cachingProvider: CachingProvider,
-    private readonly cache: InMemoryCacheProvider
-  ) {}
+    private readonly cache: InMemoryCacheProvider,
+    private readonly logger: PinoLogger
+  ) {
+    this.logger.setContext(CommentCreateService.name);
+  }
 
   /**
    * Create a new thread
@@ -40,6 +44,8 @@ export class CommentCreateService {
     res: Response,
     isAdmin: boolean = false
   ): Promise<void> {
+    this.logger.info({ url, form, ip, isAdmin }, 'createThread');
+
     const board = await this.boardPersistenceService.findByUrl(url);
     const input = await this.toThreadCreateInput(board, form, ip, isAdmin);
     const newThread = await this.commentPersistenceService.createComment(url, input);
@@ -71,6 +77,8 @@ export class CommentCreateService {
     res: Response,
     isAdmin: boolean = false
   ): Promise<void> {
+    this.logger.info({ url, parentNum, form, ip, isAdmin }, 'createReply');
+
     const board = await this.boardPersistenceService.findByUrl(url);
     const input = await this.toReplyCreateInput(board, parentNum, form, ip, isAdmin);
     const newReply = await this.commentPersistenceService.createComment(url, input);

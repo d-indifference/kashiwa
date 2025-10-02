@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { LOCALE } from '@locale/locale';
 import { SiteContextProvider } from '@library/providers';
+import { PinoLogger } from 'nestjs-pino';
 
 /** Base template for a posting form  */
 interface PostingForm {
@@ -18,14 +19,20 @@ interface PostingForm {
 export class AntiSpamService {
   private compiledSpamRegexes: RegExp[];
 
-  constructor(private readonly siteContext: SiteContextProvider) {
+  constructor(
+    private readonly siteContext: SiteContextProvider,
+    private readonly logger: PinoLogger
+  ) {
     this.compileSpamRegexes();
+    this.logger.setContext(AntiSpamService.name);
   }
 
   /**
    * Get spam base from memory and compile it to regexp array
    */
   public compileSpamRegexes(): void {
+    this.logger.info('compileSpamRegexes');
+
     this.compiledSpamRegexes = ((this.siteContext.getSpamExpressions() || []) as string[]).map(
       pattern => new RegExp(pattern, 'i')
     );
@@ -38,6 +45,8 @@ export class AntiSpamService {
    * @param isAdmin Whether the user is an admin and should bypass the spam check
    */
   public checkSpam<T extends PostingForm>(form: T, isAdmin: boolean): void {
+    this.logger.debug({ form, isAdmin }, 'compileSpamRegexes');
+
     if (isAdmin) {
       return;
     }

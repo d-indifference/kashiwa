@@ -3,6 +3,7 @@ import { BoardPersistenceService, CommentPersistenceService } from '@persistence
 import { CommentDto, CommentPageDto, PageRequestDto } from '@api/dto/v1';
 import { CommentMapper } from '@api/mappers';
 import { InMemoryCacheProvider } from '@library/providers';
+import { PinoLogger } from 'nestjs-pino';
 
 /**
  * Service for operations with `Comment` object
@@ -13,8 +14,11 @@ export class CommentService {
     private readonly commentPersistenceService: CommentPersistenceService,
     private readonly boardPersistenceService: BoardPersistenceService,
     private readonly commentMapper: CommentMapper,
-    private readonly cache: InMemoryCacheProvider
-  ) {}
+    private readonly cache: InMemoryCacheProvider,
+    private readonly logger: PinoLogger
+  ) {
+    this.logger.setContext(CommentService.name);
+  }
 
   /**
    * Find a thread with its replies.
@@ -24,6 +28,8 @@ export class CommentService {
    * @param num Thread number
    */
   public async findThread(url: string, num: bigint): Promise<CommentDto> {
+    this.logger.debug({ url, num }, 'findThread');
+
     return await this.cache.getOrCache(`api.findThread:${url}:${num}`, async () => {
       const board = await this.boardPersistenceService.findByUrl(url);
       const thread = await this.commentPersistenceService.findThread(url, num);
@@ -40,6 +46,8 @@ export class CommentService {
    * @param num Post number
    */
   public async findPost(url: string, num: bigint): Promise<CommentDto> {
+    this.logger.debug({ url, num }, 'findPost');
+
     return await this.cache.getOrCache(`api.findPost:${url}:${num}`, async () => {
       const board = await this.boardPersistenceService.findByUrl(url);
       const comment = await this.commentPersistenceService.findPost(url, num);
@@ -55,6 +63,8 @@ export class CommentService {
    * @param request Page requests
    */
   public async findThreadsPage(url: string, request: PageRequestDto): Promise<CommentPageDto> {
+    this.logger.debug({ url, request }, 'findThreadsPage');
+
     return await this.cache.getOrCache(`api.findThreadsPage:${request.page}:${request.limit}`, async () => {
       const board = await this.boardPersistenceService.findByUrl(url);
       const comment = await this.commentPersistenceService.findAll(board.id, { ...request });

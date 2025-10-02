@@ -1,5 +1,7 @@
 import { AttachedFileService } from './attached-file.service';
 import { MemoryStoredFile } from 'nestjs-form-data';
+import { PinoLogger } from 'nestjs-pino';
+import { Params } from 'nestjs-pino/params';
 
 describe('AttachedFileService', () => {
   let attachedFilePersistenceServiceMock: any;
@@ -22,7 +24,8 @@ describe('AttachedFileService', () => {
     service = new AttachedFileService(
       attachedFilePersistenceServiceMock,
       boardPersistenceServiceMock,
-      formFileProviderMock
+      formFileProviderMock,
+      new PinoLogger({} as Params)
     );
   });
 

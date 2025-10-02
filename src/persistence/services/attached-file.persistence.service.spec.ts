@@ -20,7 +20,8 @@ const fileSystemMock = {
 
 const loggerMock = {
   setContext: jest.fn(),
-  info: jest.fn()
+  info: jest.fn(),
+  debug: jest.fn()
 };
 
 const Constants = {

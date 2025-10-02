@@ -3,6 +3,8 @@ include components/admin_bar
 include components/form/thread_form
 include components/post/thread
 include components/user_delete
+include components/oekaki
+
 
 mixin PageHeader()
     div.logo
@@ -16,6 +18,9 @@ mixin PageHeader()
 mixin PostArea()
     div.postarea
         if board.boardSettings.allowPosting
+            if board.boardSettings.allowOekakiThreads
+                +Oekaki()
+
             form#postform(action=`/kashiwa/post/${board.url}` method='post' enctype='multipart/form-data')
                 +ThreadForm()
     ='['
@@ -87,3 +92,4 @@ block content
 
     script.
       processReplyPreview('#{board.url}');
+      applyThreadHiding();

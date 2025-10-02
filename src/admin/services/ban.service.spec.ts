@@ -9,6 +9,8 @@ import { Cookie } from 'express-session';
 import { UserRole } from '@prisma/client';
 import { BoardDto } from '@persistence/dto/board';
 import { Response } from 'express';
+import { PinoLogger } from 'nestjs-pino';
+import { Params } from 'nestjs-pino/params';
 
 describe('BanService', () => {
   let service: BanService;
@@ -27,7 +29,7 @@ describe('BanService', () => {
     boardPersistenceService = {
       findByUrl: jest.fn()
     } as any;
-    service = new BanService(banPersistenceService, boardPersistenceService);
+    service = new BanService(banPersistenceService, boardPersistenceService, new PinoLogger({} as Params));
     mockSession = { payload: { id: 'user1', role: UserRole.ADMINISTRATOR }, cookie: {} as unknown as Cookie };
     mockRes = { redirect: jest.fn() };
   });

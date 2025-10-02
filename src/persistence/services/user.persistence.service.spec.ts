@@ -20,7 +20,8 @@ const userMapperMock = {
 const loggerMock = {
   setContext: jest.fn(),
   info: jest.fn(),
-  warn: jest.fn()
+  warn: jest.fn(),
+  debug: jest.fn()
 };
 
 jest.mock('@locale/locale', () => ({
@@ -129,7 +130,7 @@ describe('UserPersistenceService', () => {
       prismaMock.user.create.mockResolvedValueOnce(createdUser);
       userMapperMock.toDto.mockReturnValueOnce({ id: 'uid', username: 'test' });
 
-      const dto = { username: 'test', password: 'pass' };
+      const dto = { username: 'test', password: '***' };
       const result = await service.create(dto as any);
 
       expect(loggerMock.info).toHaveBeenCalledWith(dto, 'create');
@@ -154,7 +155,7 @@ describe('UserPersistenceService', () => {
       prismaMock.user.update.mockResolvedValueOnce(updatedUser);
       userMapperMock.toDto.mockReturnValueOnce({ id: 'uid', username: 'new' });
 
-      const dto = { id: 'uid', username: 'new', password: 'pass' };
+      const dto = { id: 'uid', username: 'new', password: '***' };
       const result = await service.update(dto as any);
 
       expect(loggerMock.info).toHaveBeenCalledWith(dto, 'update');

@@ -120,6 +120,16 @@ export class BoardUpdateDto {
   allowedFileTypes?: string[];
 
   /**
+   * Can board threads start with an oekaki
+   */
+  allowOekakiThreads?: boolean;
+
+  /**
+   * Can replies contain an oekaki
+   */
+  allowOekakiReplies?: boolean;
+
+  /**
    * HTML fragment with board rules
    */
   rules?: string;
@@ -147,6 +157,8 @@ export class BoardUpdateDto {
     enableCaptcha: boolean | undefined,
     isCaptchaCaseSensitive: boolean | undefined,
     allowedFileTypes: string[] | undefined,
+    allowOekakiThreads: boolean | undefined,
+    allowOekakiReplies: boolean | undefined,
     rules: string | undefined
   ) {
     this.id = id;
@@ -171,6 +183,8 @@ export class BoardUpdateDto {
     this.enableCaptcha = enableCaptcha;
     this.isCaptchaCaseSensitive = isCaptchaCaseSensitive;
     this.allowedFileTypes = allowedFileTypes;
+    this.allowOekakiThreads = allowOekakiThreads;
+    this.allowOekakiReplies = allowOekakiReplies;
     this.rules = rules;
   }
 }

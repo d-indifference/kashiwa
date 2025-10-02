@@ -19,7 +19,8 @@ import {
   IsNumberString,
   MinLength,
   registerDecorator,
-  ValidationArguments
+  ValidationArguments,
+  IsBase64
 } from 'class-validator';
 import { LOCALE, V_LOCALE, vStr } from '@locale/locale';
 import * as ValidatorJS from 'validator';
@@ -202,6 +203,15 @@ export const IsBigInt = (validationOptions?: ValidationOptions) => {
     });
   };
 };
+
+/**
+ * Localized wrapper for `@IsBase64` decorator from `'class-validator'` package
+ */
+export const KIsBase64 =
+  (field: string, base64Options?: ValidatorJS.IsBase64Options, options?: ValidationOptions) =>
+  (obj: object, prop: string) => {
+    IsBase64(base64Options, { message: V_LOCALE['V_BASE64'](vStr(LOCALE[field])), ...options })(obj, prop);
+  };
 
 const isValidBigInt = (value: unknown): boolean => {
   try {

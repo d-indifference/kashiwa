@@ -25,6 +25,7 @@ import { LOCALE } from '@locale/locale';
 import { Constants } from '@library/constants';
 import { FormDataRequest } from 'nestjs-form-data';
 import { Response } from 'express';
+import { PinoLogger } from 'nestjs-pino';
 
 const getDefaultNewBoardForm = (): BoardCreateForm => {
   const form = new BoardCreateForm();
@@ -51,7 +52,12 @@ const getDefaultNewBoardForm = (): BoardCreateForm => {
 
 @Controller('kashiwa/board')
 export class BoardController {
-  constructor(private readonly boardService: BoardService) {}
+  constructor(
+    private readonly boardService: BoardService,
+    private readonly logger: PinoLogger
+  ) {
+    this.logger.setContext(BoardController.name);
+  }
 
   @Get()
   @Roles(UserRole.ADMINISTRATOR)
@@ -61,6 +67,8 @@ export class BoardController {
     @Query(new ValidationPipe({ transform: true })) page: PageRequest,
     @Session() session: ISession
   ): Promise<TablePage> {
+    this.logger.debug({ session, page }, 'URL called: GET /kashiwa/board');
+
     return await this.boardService.findAll(session, page);
   }
 
@@ -69,6 +77,8 @@ export class BoardController {
   @UseGuards(SessionGuard)
   @Render('admin/common_form_page')
   public getBoardForm(@Session() session: ISession): RenderableSessionFormPage {
+    this.logger.debug({ session }, 'URL called: GET /kashiwa/board/new');
+
     const form = getDefaultNewBoardForm();
 
     return FormPage.toSessionTemplateContent(session, form, {
@@ -86,6 +96,8 @@ export class BoardController {
     @Session() session: ISession,
     @Param('id', ParseUUIDPipe) id: string
   ): Promise<RenderableSessionFormPage & { boardId: string }> {
+    this.logger.debug({ session }, `URL called: GET /kashiwa/board/edit/${id}`);
+
     return { ...(await this.boardService.getForUpdate(session, id)), boardId: id };
   }
 
@@ -97,6 +109,8 @@ export class BoardController {
     @Body(new ValidationPipe({ transform: true, skipUndefinedProperties: false })) form: BoardCreateForm,
     @Res() res: Response
   ): Promise<void> {
+    this.logger.debug({ form }, 'URL called: POST /kashiwa/board/new');
+
     await this.boardService.create(form, res);
   }
 
@@ -108,6 +122,8 @@ export class BoardController {
     @Body(new ValidationPipe({ transform: true, skipUndefinedProperties: false })) form: BoardUpdateForm,
     @Res() res: Response
   ): Promise<void> {
+    this.logger.debug({ form }, 'URL called: POST /kashiwa/board/edit');
+
     await this.boardService.update(form, res);
   }
 
@@ -115,6 +131,8 @@ export class BoardController {
   @Roles(UserRole.ADMINISTRATOR)
   @UseGuards(SessionGuard)
   public async reloadBoardCache(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response): Promise<void> {
+    this.logger.debug(`URL called: POST /kashiwa/board/reload/${id}`);
+
     await this.boardService.reloadBoardCache(id, res);
   }
 
@@ -122,6 +140,8 @@ export class BoardController {
   @Roles(UserRole.ADMINISTRATOR)
   @UseGuards(SessionGuard)
   public async clearBoard(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response): Promise<void> {
+    this.logger.debug(`URL called: POST /kashiwa/board/clear/${id}`);
+
     await this.boardService.clearBoard(id, res);
   }
 
@@ -129,6 +149,8 @@ export class BoardController {
   @Roles(UserRole.ADMINISTRATOR)
   @UseGuards(SessionGuard)
   public async deleteBoard(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response): Promise<void> {
+    this.logger.debug(`URL called: POST /kashiwa/board/delete/${id}`);
+
     await this.boardService.remove(id, res);
   }
 }

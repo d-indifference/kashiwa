@@ -8,6 +8,8 @@ import { Cookie } from 'express-session';
 import { UserRole } from '@prisma/client';
 import { ISession } from '@admin/interfaces';
 import { Response } from 'express';
+import { PinoLogger } from 'nestjs-pino';
+import { Params } from 'nestjs-pino/params';
 
 describe('StaffService', () => {
   let service: StaffService;
@@ -23,7 +25,7 @@ describe('StaffService', () => {
       update: jest.fn(),
       remove: jest.fn()
     } as any;
-    service = new StaffService(userPersistenceService);
+    service = new StaffService(userPersistenceService, new PinoLogger({} as Params));
     mockSession = { cookie: {} as Cookie, payload: { id: '1', role: UserRole.ADMINISTRATOR } };
     mockRes = { redirect: jest.fn() };
   });

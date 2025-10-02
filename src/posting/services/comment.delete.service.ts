@@ -5,6 +5,7 @@ import { CommentDeleteForm } from '@posting/forms';
 import { Response } from 'express';
 import { Constants } from '@library/constants';
 import { InMemoryCacheProvider } from '@library/providers';
+import { PinoLogger } from 'nestjs-pino';
 
 /**
  * Service for comment deletion
@@ -15,8 +16,11 @@ export class CommentDeleteService {
     private readonly commentPersistenceService: CommentPersistenceService,
     private readonly attachedFilePersistenceService: AttachedFilePersistenceService,
     private readonly cachingProvider: CachingProvider,
-    private readonly cache: InMemoryCacheProvider
-  ) {}
+    private readonly cache: InMemoryCacheProvider,
+    private readonly logger: PinoLogger
+  ) {
+    this.logger.setContext(CommentDeleteService.name);
+  }
 
   /**
    * Delete comments or clear a files
@@ -26,6 +30,8 @@ export class CommentDeleteService {
    * @param num Thread num
    */
   public async deleteComment(url: string, form: CommentDeleteForm, res: Response, num?: bigint): Promise<void> {
+    this.logger.info({ url, form, num: num?.toString() }, 'deleteComment');
+
     await this.processCommentDeletion(url, form);
     await this.cachingProvider.fullyReloadCache(url);
 

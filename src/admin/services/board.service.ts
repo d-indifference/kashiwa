@@ -12,6 +12,7 @@ import { BoardCreateForm, BoardUpdateForm } from '@admin/forms/board';
 import { Response } from 'express';
 import { CachingProvider } from '@caching/providers';
 import { InMemoryCacheProvider } from '@library/providers';
+import { PinoLogger } from 'nestjs-pino';
 
 /**
  * Service for working with boards
@@ -24,7 +25,8 @@ export class BoardService {
     private readonly boardPersistenceService: BoardPersistenceService,
     private readonly commentPersistenceService: CommentPersistenceService,
     private readonly cachingProvider: CachingProvider,
-    private readonly cache: InMemoryCacheProvider
+    private readonly cache: InMemoryCacheProvider,
+    private readonly logger: PinoLogger
   ) {
     this.tableConstructor = new TableConstructor<BoardShortDto>()
       .mappedValue(
@@ -34,6 +36,7 @@ export class BoardService {
       .plainValue(LOCALE.NAME as string, 'name')
       .plainValue(LOCALE.LAST_POST_INDEX as string, 'postCount')
       .mappedValue(LOCALE.EDIT as string, obj => `[<a href="/kashiwa/board/edit/${obj.id}">Edit</a>]`);
+    this.logger.setContext(BoardService.name);
   }
 
   /**
@@ -42,6 +45,8 @@ export class BoardService {
    * @param session Session data
    */
   public async findAll(session: ISession, page: PageRequest): Promise<TablePage> {
+    this.logger.debug({ session, page }, 'findAll');
+
     const content = await this.boardPersistenceService.findAll(page);
     const table = this.tableConstructor.fromPage(content, '/kashiwa/board');
     return new TablePage(table, session, {
@@ -56,6 +61,8 @@ export class BoardService {
    * @param id Board's ID
    */
   public async getForUpdate(session: ISession, id: string): Promise<RenderableSessionFormPage> {
+    this.logger.debug({ session, id }, 'getForUpdate');
+
     const board = await this.boardPersistenceService.findById(id);
     const boardSettings: BoardSettings = board['boardSettings'];
 
@@ -82,6 +89,8 @@ export class BoardService {
     form.enableCaptcha = boardSettings.enableCaptcha;
     form.isCaptchaCaseSensitive = boardSettings.isCaptchaCaseSensitive;
     form.allowedFileTypes = boardSettings.allowedFileTypes as string[];
+    form.allowOekakiThreads = boardSettings.allowOekakiThreads;
+    form.allowOekakiReplies = boardSettings.allowOekakiReplies;
     form.rules = boardSettings.rules;
 
     return FormPage.toSessionTemplateContent(session, form, {
@@ -97,6 +106,8 @@ export class BoardService {
    * @param res Express.js `res` object
    */
   public async create(form: BoardCreateForm, res: Response): Promise<void> {
+    this.logger.info({ form }, 'create');
+
     const dto = new BoardCreateDto(
       form.url,
       form.name,
@@ -119,6 +130,8 @@ export class BoardService {
       form.enableCaptcha,
       form.isCaptchaCaseSensitive,
       form.allowedFileTypes,
+      form.allowOekakiThreads,
+      form.allowOekakiReplies,
       form.rules
     );
 
@@ -134,6 +147,8 @@ export class BoardService {
    * @param res Express.js `res` object
    */
   public async update(form: BoardUpdateForm, res: Response): Promise<void> {
+    this.logger.info({ form }, 'create');
+
     const board = await this.boardPersistenceService.findById(form.id);
     const dto = new BoardUpdateDto(
       form.id,
@@ -158,6 +173,8 @@ export class BoardService {
       form.enableCaptcha,
       form.isCaptchaCaseSensitive,
       form.allowedFileTypes,
+      form.allowOekakiThreads,
+      form.allowOekakiReplies,
       form.rules
     );
 

@@ -6,6 +6,7 @@ import { LOCALE } from '@locale/locale';
 import { Constants } from '@library/constants';
 import { Response } from 'express';
 import { FileSystemProvider, IpBlacklistProvider, SiteContextProvider } from '@library/providers';
+import { PinoLogger } from 'nestjs-pino';
 
 /**
  * Service for handling of the IP denylist form
@@ -15,14 +16,19 @@ export class IpFilterService {
   constructor(
     private readonly fileSystem: FileSystemProvider,
     private readonly ipBlacklist: IpBlacklistProvider,
-    private readonly siteContext: SiteContextProvider
-  ) {}
+    private readonly siteContext: SiteContextProvider,
+    private readonly logger: PinoLogger
+  ) {
+    this.logger.setContext(IpFilterService.name);
+  }
 
   /**
    * Load denylist to form
    * @param session Session object
    */
   public async renderFormContent(session: ISession): Promise<RenderableSessionFormPage> {
+    this.logger.debug({ session }, 'renderFormContent');
+
     const form = new IpFilterForm();
     form.blackList = await this.readBlackList();
 
@@ -39,6 +45,8 @@ export class IpFilterService {
    * @param res `Express.js` response
    */
   public async saveIpFilter(form: IpFilterForm, res: Response): Promise<void> {
+    this.logger.info({ form }, 'saveIpFilter');
+
     const ipFilterList = form.blackList.split('\r\n').filter(str => str !== '');
 
     this.siteContext.setIpBlackList(ipFilterList);

@@ -40,6 +40,28 @@ const mapAttachedFileHtml = (file: AttachedFileModerationDto): string => {
       `;
 };
 
+const mapThreadOptions = (comment: CommentModerationDto): string => {
+  if (comment.num !== comment.parentNum) {
+    return '-';
+  }
+
+  let result = '';
+
+  if (comment.pinnedAt) {
+    result += `<form action="/kashiwa/moderation/toggle-post-pinning/${comment.boardUrl}/${comment.num}" method="post"><input type="submit" value="${LOCALE.UNPIN as string}"></form>`;
+  } else {
+    result += `<form action="/kashiwa/moderation/toggle-post-pinning/${comment.boardUrl}/${comment.num}" method="post"><input type="submit" value="${LOCALE.PIN as string}"></form>`;
+  }
+
+  if (comment.isPostingEnabled) {
+    result += `<form action="/kashiwa/moderation/toggle-thread-posting/${comment.boardUrl}/${comment.num}" method="post"><input type="submit" value="${LOCALE.DISABLE_REPLIES as string}"></form>`;
+  } else {
+    result += `<form action="/kashiwa/moderation/toggle-thread-posting/${comment.boardUrl}/${comment.num}" method="post"><input type="submit" value="${LOCALE.ENABLE_REPLIES as string}"></form>`;
+  }
+
+  return result;
+};
+
 /** Table constructor for moderation boards list */
 export const moderationBoardTableConstructor = new TableConstructor<BoardShortDto>()
   .mappedValue(
@@ -69,9 +91,11 @@ export const moderationCommentsTableConstructor = new TableConstructor<CommentMo
   .nullablePlainValue(LOCALE.FORM_SUBJECT as string, 'subject')
   .plainValue(LOCALE.FORM_COMMENT as string, 'comment')
   .mappedValue(LOCALE.FORM_FILE as string, obj => (obj.attachedFile ? mapAttachedFileHtml(obj.attachedFile) : '-'))
+  .mappedValue('', obj => mapThreadOptions(obj))
   .mappedValue(
     '',
-    obj => `[<a target="_blank" href="/kashiwa/ban/new?ip=${obj.ip}&boardUrl=${obj.boardUrl}">Ban this IP</a>]`
+    obj =>
+      `[<a target="_blank" href="/kashiwa/ban/new?ip=${obj.ip}&boardUrl=${obj.boardUrl}">${LOCALE.BAN_THIS_IP as string}</a>]`
   )
   .mappedValue(
     '',

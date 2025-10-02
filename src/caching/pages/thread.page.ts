@@ -7,6 +7,9 @@ import { CommentDto } from '@persistence/dto/comment/common';
  * Thread renderable page
  */
 export class ThreadPage extends CommonPage {
+  /**
+   * Board & settings
+   */
   board: BoardDto;
 
   /**

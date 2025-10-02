@@ -7,7 +7,9 @@ mixin ThreadPreview(_board, _comment, _omitted_posts, _omitted_files)
         if _comment.attachedFile
             +AttachedFile(_board, _comment)
         +CommentLabel(_board, _comment, false)
+        +ThreadPin(_comment)
         +ThreadPreviewRefLink(_board, _comment)
+        +ThreadPreviewHideButton(_board, _comment)
         +ReplyToThread(_board, _comment)
         +ThreadCommentPreview(_board, _comment)
         +OmittedPosts(_omitted_posts, _omitted_files)
@@ -24,6 +26,7 @@ mixin Thread(_board, _comment)
         if _comment.attachedFile
             +AttachedFile(_board, _comment)
         +CommentLabel(_board, _comment, false)
+        +ThreadPin(_comment)
         +ThreadRefLink(_board, _comment)
         +CommentFull(_comment)
 

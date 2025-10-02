@@ -2,6 +2,8 @@ import { RestrictionService, RestrictionType } from './restriction.service';
 import { BadRequestException, ForbiddenException, InternalServerErrorException } from '@nestjs/common';
 import { BoardDto, BoardSettingsDto } from '@persistence/dto/board';
 import { ReplyCreateForm, ThreadCreateForm } from '@posting/forms';
+import { PinoLogger } from 'nestjs-pino';
+import { Params } from 'nestjs-pino/params';
 
 describe('RestrictionService', () => {
   let commentPersistenceService: any;
@@ -18,6 +20,7 @@ describe('RestrictionService', () => {
   const maxCommentSize = jest.fn();
   const maxStringFieldSize = jest.fn();
   const strictAnonymity = jest.fn();
+  const checkIfThreadAllowsPosting = jest.fn();
 
   const LOCALE = {
     YOU_CANNOT_CREATE_WITHOUT_BOARD_SETTINGS: 'No board settings',
@@ -49,7 +52,8 @@ describe('RestrictionService', () => {
   beforeEach(() => {
     commentPersistenceService = {
       findLastCommentByIp: jest.fn(),
-      findLastThreadByIp: jest.fn()
+      findLastThreadByIp: jest.fn(),
+      findOpeningPost: jest.fn()
     };
     boardPersistenceService = {
       findByUrl: jest.fn()
@@ -63,8 +67,11 @@ describe('RestrictionService', () => {
       boardPersistenceService,
       antiSpamService,
       banService,
-      captchaSolvingPredicateProvider
+      captchaSolvingPredicateProvider,
+      new PinoLogger({} as Params)
     );
+
+    jest.spyOn(service as any, 'checkIfThreadAllowsPosting').mockResolvedValue(true);
     jest.clearAllMocks();
   });
 
@@ -76,7 +83,7 @@ describe('RestrictionService', () => {
       ).rejects.toThrow(InternalServerErrorException);
     });
 
-    it('should call applyRestrictions if boardSettings exists', async () => {
+    it('should call applyRestrictions if boardSettings exists during thread creation', async () => {
       const board = { url: 'b', boardSettings: { enableCaptcha: false } };
       boardPersistenceService.findByUrl.mockResolvedValue(board);
       const spy = jest.spyOn(service as any, 'applyRestrictions').mockResolvedValue(undefined);
@@ -88,7 +95,23 @@ describe('RestrictionService', () => {
         {} as ThreadCreateForm | ReplyCreateForm,
         false
       );
-      expect(spy).toHaveBeenCalledWith(RestrictionType.THREAD, 'ip', board, board.boardSettings, {}, false);
+      expect(spy).toHaveBeenCalledWith(RestrictionType.THREAD, 'ip', board, board.boardSettings, {}, false, undefined);
+    });
+
+    it('should call applyRestrictions if boardSettings exists during reply creation', async () => {
+      const board = { url: 'b', boardSettings: { enableCaptcha: false } };
+      boardPersistenceService.findByUrl.mockResolvedValue(board);
+      const spy = jest.spyOn(service as any, 'applyRestrictions').mockResolvedValue(undefined);
+
+      await service.checkRestrictions(
+        RestrictionType.THREAD,
+        'ip',
+        'url',
+        {} as ThreadCreateForm | ReplyCreateForm,
+        false,
+        '1'
+      );
+      expect(spy).toHaveBeenCalledWith(RestrictionType.THREAD, 'ip', board, board.boardSettings, {}, false, '1');
     });
   });
 
@@ -117,6 +140,7 @@ describe('RestrictionService', () => {
         maxCommentSize: 1000
       };
       allowPosting.mockReturnValue(true);
+      checkIfThreadAllowsPosting.mockResolvedValue(true);
       strictAnonymity.mockReturnValue(true);
       maxStringFieldSize.mockReturnValue(true);
       maxCommentSize.mockReturnValue(true);
@@ -135,7 +159,8 @@ describe('RestrictionService', () => {
           { url: 'b' } as BoardDto,
           settings as BoardSettingsDto,
           { comment: 'abcd', password: '12345678' } as ThreadCreateForm | ReplyCreateForm,
-          false
+          false,
+          '1'
         )
       ).resolves.toBeUndefined();
 
@@ -146,7 +171,8 @@ describe('RestrictionService', () => {
           { url: 'b' } as BoardDto,
           settings as BoardSettingsDto,
           { comment: 'abcd', password: '12345678', sage: false } as ThreadCreateForm | ReplyCreateForm,
-          false
+          false,
+          '1'
         )
       ).resolves.toBeUndefined();
     });
@@ -248,6 +274,7 @@ describe('RestrictionService', () => {
         delayAfterReply: 1
       } as BoardSettingsDto;
       allowPosting.mockReturnValue(true);
+      checkIfThreadAllowsPosting.mockResolvedValue(true);
       strictAnonymity.mockReturnValue(true);
       maxStringFieldSize.mockReturnValue(true);
       maxCommentSize.mockReturnValue(true);
@@ -346,6 +373,29 @@ describe('RestrictionService', () => {
       commentPersistenceService.findLastThreadByIp.mockResolvedValue({ createdAt: date });
       const result = await service['delayForThread']('ip', 10);
       expect(result).toBe(true);
+    });
+  });
+
+  describe('checkIfThreadAllowsPosting', () => {
+    it('should return true if opening post has isPostingEnabled = true', async () => {
+      jest.clearAllMocks();
+      commentPersistenceService.findOpeningPost = jest.fn().mockResolvedValue({
+        isPostingEnabled: true
+      });
+
+      const result = await service['checkIfThreadAllowsPosting']('b', '123');
+      expect(result).toBe(true);
+    });
+
+    it('should return false if opening post has isPostingEnabled = false', async () => {
+      commentPersistenceService.findOpeningPost = jest.fn().mockResolvedValue({
+        isPostingEnabled: false
+      });
+
+      jest.spyOn(service as any, 'checkIfThreadAllowsPosting').mockResolvedValue(false);
+
+      const result = await service['checkIfThreadAllowsPosting']('b', '456');
+      expect(result).toBe(false);
     });
   });
 });

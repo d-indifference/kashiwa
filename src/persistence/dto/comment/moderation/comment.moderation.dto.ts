@@ -55,6 +55,16 @@ export class CommentModerationDto {
   comment: string;
 
   /**
+   * Thread pinning date
+   */
+  pinnedAt: Date | null;
+
+  /**
+   * Check if posting in thread enabled (no effect for replies)
+   */
+  isPostingEnabled: boolean;
+
+  /**
    * Attached File
    */
   attachedFile: AttachedFileModerationDto | null;
@@ -70,6 +80,8 @@ export class CommentModerationDto {
     email: string | null,
     subject: string | null,
     comment: string,
+    pinnedAt: Date | null,
+    isPostingEnabled: boolean,
     attachedFile: AttachedFileModerationDto | null
   ) {
     this.id = id;
@@ -82,6 +94,8 @@ export class CommentModerationDto {
     this.email = email;
     this.subject = subject;
     this.comment = comment;
+    this.pinnedAt = pinnedAt;
+    this.isPostingEnabled = isPostingEnabled;
     this.attachedFile = attachedFile;
   }
 }

@@ -23,6 +23,8 @@ export class CommentMapper {
       comment: comment.comment,
       hasSage: comment.hasSage,
       attachedFile: this.mapAttachedFile(comment['attachedFile'] as AttachedFile),
+      pinnedAt: comment.pinnedAt,
+      isPostingEnabled: comment.isPostingEnabled,
       children: replies.map(reply => this.toDto(reply))
     };
   }

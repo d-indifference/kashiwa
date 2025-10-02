@@ -42,6 +42,8 @@ model BoardSettings {
   enableCaptcha            Boolean            @map("enable_captcha") @db.Boolean
   isCaptchaCaseSensitive   Boolean            @map("is_captcha_case_sensetive") @db.Boolean
   allowedFileTypes         Json               @map("allowed_file_types")
+  allowOekakiThreads       Boolean            @default(false) @map("allow_oekaki_threads") @db.Boolean
+  allowOekakiReplies       Boolean            @default(false) @map("allow_oekaki_replies") @db.Boolean
   rules                    String             @db.Text
 
   @@map("board_settings")

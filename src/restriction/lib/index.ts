@@ -43,7 +43,7 @@ export const forbiddenFiles = (
   boardSettings: BoardSettingsDto,
   form: FormsType
 ): boolean => {
-  if (form.file) {
+  if (form.file || form.oekaki) {
     if (restrictionType === RestrictionType.THREAD) {
       if (boardSettings.threadFileAttachmentMode === FileAttachmentMode.FORBIDDEN) {
         return false;
@@ -52,6 +52,27 @@ export const forbiddenFiles = (
 
     if (restrictionType === RestrictionType.REPLY) {
       if (boardSettings.replyFileAttachmentMode === FileAttachmentMode.FORBIDDEN) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+};
+
+/**
+ * Check if board allows to post an oekaki.
+ */
+export const forbiddenOekaki = (restrictionType: RestrictionType, boardSettings: BoardSettingsDto, form: FormsType) => {
+  if (form.oekaki) {
+    if (restrictionType === RestrictionType.THREAD) {
+      if (!boardSettings.allowOekakiThreads) {
+        return false;
+      }
+    }
+
+    if (restrictionType === RestrictionType.REPLY) {
+      if (!boardSettings.allowOekakiReplies) {
         return false;
       }
     }
@@ -70,14 +91,14 @@ export const requiredFiles = (
 ): boolean => {
   if (restrictionType === RestrictionType.THREAD) {
     if (boardSettings.threadFileAttachmentMode === FileAttachmentMode.STRICT) {
-      return Boolean(form.file);
+      return Boolean(form.file || form.oekaki);
     }
     return true;
   }
 
   if (restrictionType === RestrictionType.REPLY) {
     if (boardSettings.replyFileAttachmentMode === FileAttachmentMode.STRICT) {
-      return Boolean(form.file);
+      return Boolean(form.file || form.oekaki);
     }
     return true;
   }

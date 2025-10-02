@@ -90,3 +90,11 @@ form {
     position: absolute;
     z-index: 5;
 }
+
+.hidden {
+  display: none;
+}
+
+.pin {
+  color: #ff0000;
+}

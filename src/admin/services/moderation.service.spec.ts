@@ -14,6 +14,9 @@ import { BoardDto, BoardShortDto } from '@persistence/dto/board';
 import { CommentModerationDto } from '@persistence/dto/comment/moderation';
 import { Response } from 'express';
 import { InMemoryCacheProvider } from '@library/providers';
+import { PinoLogger } from 'nestjs-pino';
+import { Params } from 'nestjs-pino/params';
+import { CommentDto } from '@persistence/dto/comment/common';
 
 describe('ModerationService', () => {
   let service: ModerationService;
@@ -33,13 +36,19 @@ describe('ModerationService', () => {
     commentPersistenceService = {
       findManyForModeration: jest.fn(),
       remove: jest.fn(),
-      removeByIp: jest.fn()
+      removeByIp: jest.fn(),
+      findOpeningPost: jest.fn(),
+      unpinThread: jest.fn(),
+      pinThread: jest.fn(),
+      enableThreadPosting: jest.fn(),
+      disableThreadPosting: jest.fn()
     } as any;
     attachedFilePersistenceService = {
       clearFromComment: jest.fn()
     } as any;
     cachingProvider = {
-      fullyReloadCache: jest.fn()
+      fullyReloadCache: jest.fn(),
+      reloadCacheForThread: jest.fn()
     } as any;
     cache = {
       del: jest.fn(),
@@ -50,10 +59,12 @@ describe('ModerationService', () => {
       commentPersistenceService,
       attachedFilePersistenceService,
       cachingProvider,
-      cache
+      cache,
+      new PinoLogger({} as Params)
     );
     mockSession = { cookie: {} as Cookie, payload: { id: '1', role: UserRole.ADMINISTRATOR } };
     mockRes = { redirect: jest.fn() };
+    jest.spyOn(service as any, 'clearThreadCacheAndRedirect').mockImplementation(jest.fn());
   });
 
   describe('findBoardsForModeration', () => {
@@ -115,6 +126,70 @@ describe('ModerationService', () => {
       expect(cachingProvider.fullyReloadCache).toHaveBeenCalledWith('b');
       expect(boardPersistenceService.findByUrl).toHaveBeenCalledWith('b');
       expect(mockRes.redirect).toHaveBeenCalledWith('/kashiwa/moderation/boardId');
+    });
+  });
+
+  describe('toggleThreadPinning', () => {
+    it('should unpin thread if it is already pinned', async () => {
+      const mockCommentPinned = { num: 1n, pinnedAt: new Date(), isPostingEnabled: true } as CommentDto;
+
+      commentPersistenceService.findOpeningPost.mockResolvedValue(mockCommentPinned);
+      commentPersistenceService.unpinThread.mockResolvedValue(undefined);
+      boardPersistenceService.findByUrl.mockResolvedValue({ id: '1', url: 'b' } as BoardDto);
+
+      await service.toggleThreadPinning('b', mockCommentPinned.num, mockRes);
+
+      expect(commentPersistenceService.findOpeningPost).toHaveBeenCalledWith('b', mockCommentPinned.num);
+      expect(commentPersistenceService.unpinThread).toHaveBeenCalledWith('b', mockCommentPinned.num);
+      expect(commentPersistenceService.pinThread).not.toHaveBeenCalled();
+      expect(service['clearThreadCacheAndRedirect']).toHaveBeenCalledWith('b', mockCommentPinned.num, mockRes);
+    });
+
+    it('should pin thread if it is not pinned', async () => {
+      const mockCommentUnpinned = { num: 1n, pinnedAt: null, isPostingEnabled: true } as CommentDto;
+
+      commentPersistenceService.findOpeningPost.mockResolvedValue(mockCommentUnpinned);
+      commentPersistenceService.pinThread.mockResolvedValue(undefined);
+      boardPersistenceService.findByUrl.mockResolvedValue({ id: '1', url: 'b' } as BoardDto);
+
+      await service.toggleThreadPinning('b', mockCommentUnpinned.num, mockRes);
+
+      expect(commentPersistenceService.findOpeningPost).toHaveBeenCalledWith('b', mockCommentUnpinned.num);
+      expect(commentPersistenceService.pinThread).toHaveBeenCalledWith('b', mockCommentUnpinned.num);
+      expect(commentPersistenceService.unpinThread).not.toHaveBeenCalled();
+      expect(service['clearThreadCacheAndRedirect']).toHaveBeenCalledWith('b', mockCommentUnpinned.num, mockRes);
+    });
+  });
+
+  describe('toggleThreadPosting', () => {
+    it('should disable posting if it is enabled', async () => {
+      const mockCommentPostingEnabled = { num: 1n, pinnedAt: new Date(), isPostingEnabled: true } as CommentDto;
+
+      commentPersistenceService.findOpeningPost.mockResolvedValue(mockCommentPostingEnabled);
+      commentPersistenceService.disableThreadPosting.mockResolvedValue(undefined);
+      boardPersistenceService.findByUrl.mockResolvedValue({ id: '1', url: 'b' } as BoardDto);
+
+      await service.toggleThreadPosting('b', 1n, mockRes);
+
+      expect(commentPersistenceService.findOpeningPost).toHaveBeenCalledWith('b', 1n);
+      expect(commentPersistenceService.disableThreadPosting).toHaveBeenCalledWith('b', 1n);
+      expect(commentPersistenceService.enableThreadPosting).not.toHaveBeenCalled();
+      expect(service['clearThreadCacheAndRedirect']).toHaveBeenCalledWith('b', 1n, mockRes);
+    });
+
+    it('should enable posting if it is disabled', async () => {
+      const mockCommentPostingDisabled = { num: 1n, pinnedAt: new Date(), isPostingEnabled: false } as CommentDto;
+
+      commentPersistenceService.findOpeningPost.mockResolvedValue(mockCommentPostingDisabled);
+      commentPersistenceService.enableThreadPosting.mockResolvedValue(undefined);
+      boardPersistenceService.findByUrl.mockResolvedValue({ id: '1', url: 'b' } as BoardDto);
+
+      await service.toggleThreadPosting('b', 1n, mockRes);
+
+      expect(commentPersistenceService.findOpeningPost).toHaveBeenCalledWith('b', 1n);
+      expect(commentPersistenceService.enableThreadPosting).toHaveBeenCalledWith('b', 1n);
+      expect(commentPersistenceService.disableThreadPosting).not.toHaveBeenCalled();
+      expect(service['clearThreadCacheAndRedirect']).toHaveBeenCalledWith('b', 1n, mockRes);
     });
   });
 });

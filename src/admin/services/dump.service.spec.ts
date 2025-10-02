@@ -54,7 +54,8 @@ describe('DumpService', () => {
     } as any;
     logger = {
       setContext: jest.fn(),
-      info: jest.fn()
+      info: jest.fn(),
+      debug: jest.fn()
     } as any;
     service = new DumpService(databaseDumpingUtils, fileSystem, logger, config);
     mockRes = { redirect: jest.fn() };

@@ -2,6 +2,8 @@ import { CommentCreateService } from './comment.create.service';
 import { BoardDto, BoardSettingsDto } from '@persistence/dto/board';
 import { ReplyCreateForm, ThreadCreateForm } from '@posting/forms';
 import { Response } from 'express';
+import { PinoLogger } from 'nestjs-pino';
+import { Params } from 'nestjs-pino/params';
 
 describe('CommentCreateService', () => {
   let boardPersistenceService: any;
@@ -44,7 +46,8 @@ describe('CommentCreateService', () => {
       attachedFileService,
       wakabaMarkdown,
       cachingProvider,
-      cache
+      cache,
+      new PinoLogger({} as Params)
     );
     jest.clearAllMocks();
   });

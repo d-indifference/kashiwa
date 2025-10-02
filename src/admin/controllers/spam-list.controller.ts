@@ -8,16 +8,22 @@ import { ISession } from '@admin/interfaces';
 import { RenderableSessionFormPage } from '@admin/lib';
 import { SpamListForm } from '@admin/forms';
 import { SpamListService } from '@admin/services';
+import { PinoLogger } from 'nestjs-pino';
 
 @Controller('kashiwa/spam')
 export class SpamListController {
-  constructor(private readonly spamListService: SpamListService) {}
+  constructor(
+    private readonly spamListService: SpamListService,
+    private readonly logger: PinoLogger
+  ) {}
 
   @Get()
   @Roles(UserRole.ADMINISTRATOR)
   @UseGuards(SessionGuard)
   @Render('admin/common_form_page')
   public async getSpamListForm(@Session() session: ISession): Promise<RenderableSessionFormPage> {
+    this.logger.debug({ session }, 'URL called: GET /kashiwa/spam');
+
     return await this.spamListService.renderFormContent(session);
   }
 
@@ -29,6 +35,8 @@ export class SpamListController {
     @Body(new ValidationPipe({ transform: true })) form: SpamListForm,
     @Res() res: Response
   ): Promise<void> {
+    this.logger.debug({ form }, 'URL called: POST /kashiwa/spam');
+
     await this.spamListService.saveSpamList(form, res);
   }
 }

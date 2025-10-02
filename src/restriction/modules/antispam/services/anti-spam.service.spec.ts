@@ -1,5 +1,7 @@
 import { AntiSpamService } from './anti-spam.service';
 import { BadRequestException } from '@nestjs/common';
+import { PinoLogger } from 'nestjs-pino';
+import { Params } from 'nestjs-pino/params';
 
 describe('AntiSpamService', () => {
   let siteContextMock: any;
@@ -18,7 +20,7 @@ describe('AntiSpamService', () => {
     siteContextMock = {
       getSpamExpressions: jest.fn()
     };
-    service = new AntiSpamService(siteContextMock);
+    service = new AntiSpamService(siteContextMock, new PinoLogger({} as Params));
   });
 
   describe('compileSpamRegexes', () => {

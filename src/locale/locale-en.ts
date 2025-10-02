@@ -162,6 +162,7 @@ export const locale: Record<string, LocaleArgument> = {
   FILE_WAS_DELETED: 'File was deleted',
   GO_TO_POST: 'Go to post',
   BAN_THIS_POSTER: 'Ban this poster',
+  BAN_THIS_IP: 'Ban this IP',
   DELETE_THIS_POST: 'Delete this post',
   DELETE_THIS_FILE: 'Delete this file',
   DELETE_ALL_BY_IP: 'Delete all posts of this IP',
@@ -254,7 +255,19 @@ export const locale: Record<string, LocaleArgument> = {
   LAST_HIT: 'Last hit',
   CATALOG: 'Catalog',
   INVALID_DIMENSIONS: 'Invalid dimensions',
-  APPLY_SORTING: 'Apply sorting'
+  APPLY_SORTING: 'Apply sorting',
+  HIDE_THREAD: 'Hide',
+  ALLOW_OEKAKI_THREADS: 'Allow oekaki threads',
+  ALLOW_OEKAKI_REPLIES: 'Allow oekaki replies',
+  OEKAKI: 'Oekaki',
+  FORBIDDEN_OEKAKI: 'You cannot posing an oekaki here',
+  PUSHPIN_SYMBOL: '🖈',
+  PINNED_THREAD: 'Pinned thread',
+  PIN: 'Pin',
+  UNPIN: 'Unpin',
+  DISABLE_REPLIES: 'Disable replies',
+  ENABLE_REPLIES: 'Enable replies',
+  REPLIES_ARE_DISABLED: 'You cannot reply this thread'
 };
 
 export const localeValidators: Record<string, (...args: unknown[]) => string> = {
@@ -277,5 +290,6 @@ export const localeValidators: Record<string, (...args: unknown[]) => string> = 
   V_MIN_LENGTH: (...args: string[]) => `"${args[0]}": minimal input length is ${args[1]}<br>`,
   V_FILE: (...args: string[]) => `"${args[0]}": should be a file<br>`,
   V_MAX_FILE_SIZE: (...args: string[]) => `"${args[0]}": the file is too large<br>`,
-  V_BIGINT: (...args: string[]) => `"${args[0]}": must be a bigint or a string representing a bigint<br>`
+  V_BIGINT: (...args: string[]) => `"${args[0]}": must be a bigint or a string representing a bigint<br>`,
+  V_BASE64: (...args: string[]) => `"${args[0]}": must be a valid Base64 string<br>`
 };

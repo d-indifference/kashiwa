@@ -15,6 +15,7 @@ import { moderationBoardTableConstructor, moderationCommentsTableConstructor } f
 import { Response } from 'express';
 import { CachingProvider } from '@caching/providers';
 import { InMemoryCacheProvider } from '@library/providers';
+import { PinoLogger } from 'nestjs-pino';
 
 /**
  * Service for moderation operations
@@ -30,8 +31,10 @@ export class ModerationService {
     private readonly commentPersistenceService: CommentPersistenceService,
     private readonly attachedFilePersistenceService: AttachedFilePersistenceService,
     private readonly cachingProvider: CachingProvider,
-    private readonly cache: InMemoryCacheProvider
+    private readonly cache: InMemoryCacheProvider,
+    private readonly logger: PinoLogger
   ) {
+    this.logger.setContext(ModerationService.name);
     this.boardTableConstructor = moderationBoardTableConstructor;
     this.commentsTableConstructor = moderationCommentsTableConstructor;
   }
@@ -42,6 +45,8 @@ export class ModerationService {
    * @param session Session data
    */
   public async findBoardsForModeration(session: ISession, page: PageRequest): Promise<TablePage> {
+    this.logger.debug({ session, page }, 'findBoardsForModeration');
+
     const content = await this.boardPersistenceService.findAll(page);
     const table = this.boardTableConstructor.fromPage(content, '/kashiwa/moderation', true);
     return new TablePage(table, session, {
@@ -57,6 +62,8 @@ export class ModerationService {
    * @param page Page request object
    */
   public async findCommentsForModeration(session: ISession, id: string, page: PageRequest): Promise<TablePage> {
+    this.logger.debug({ session, id, page }, 'findCommentsForModeration');
+
     const comments = await this.commentPersistenceService.findManyForModeration(id, page);
     const table = this.commentsTableConstructor.fromPage(comments, `/kashiwa/moderation/${id}`, true);
     return new TablePage(table, session, {
@@ -66,12 +73,54 @@ export class ModerationService {
   }
 
   /**
+   * Pin thread if it is not and unpin thread if it is pinned
+   * @param url Board URL
+   * @param num Post number
+   * @param res `Express.js` response
+   */
+  public async toggleThreadPinning(url: string, num: bigint, res: Response): Promise<void> {
+    this.logger.info({ url, num: num.toString() }, 'toggleThreadPinning');
+
+    const comment = await this.commentPersistenceService.findOpeningPost(url, num);
+
+    if (comment.pinnedAt) {
+      await this.commentPersistenceService.unpinThread(url, num);
+    } else {
+      await this.commentPersistenceService.pinThread(url, num);
+    }
+
+    await this.clearThreadCacheAndRedirect(url, num, res);
+  }
+
+  /**
+   * Disables posting to a thread if it was possible to post in it, otherwise, enables it back
+   * @param url Board URL
+   * @param num Post number
+   * @param res `Express.js` response
+   */
+  public async toggleThreadPosting(url: string, num: bigint, res: Response): Promise<void> {
+    this.logger.info({ url, num: num.toString() }, 'toggleThreadPosting');
+
+    const comment = await this.commentPersistenceService.findOpeningPost(url, num);
+
+    if (comment.isPostingEnabled) {
+      await this.commentPersistenceService.disableThreadPosting(url, num);
+    } else {
+      await this.commentPersistenceService.enableThreadPosting(url, num);
+    }
+
+    await this.clearThreadCacheAndRedirect(url, num, res);
+  }
+
+  /**
    * Delete comment by board URL and post number
    * @param url Board URL
    * @param num Post number
    * @param res `Express.js` response
    */
   public async deleteComment(url: string, num: bigint, res: Response): Promise<void> {
+    this.logger.info({ url, num: num.toString() }, 'deleteComment');
+
     await this.commentPersistenceService.remove(url, num);
     await this.cachingProvider.fullyReloadCache(url);
     const board = await this.boardPersistenceService.findByUrl(url);
@@ -89,6 +138,8 @@ export class ModerationService {
    * @param res `Express.js` response
    */
   public async clearFile(url: string, num: bigint, res: Response): Promise<void> {
+    this.logger.info({ url, num: num.toString() }, 'clearFile');
+
     await this.attachedFilePersistenceService.clearFromComment(url, num);
     await this.cachingProvider.fullyReloadCache(url);
     const board = await this.boardPersistenceService.findByUrl(url);
@@ -106,12 +157,25 @@ export class ModerationService {
    * @param res `Express.js` response
    */
   public async deleteAllByIp(url: string, ip: string, res: Response): Promise<void> {
+    this.logger.info({ url, ip }, 'deleteAllByIp');
+
     await this.commentPersistenceService.removeByIp(url, ip);
     await this.cachingProvider.fullyReloadCache(url);
     const board = await this.boardPersistenceService.findByUrl(url);
     this.cache.delKeyStartWith(`api.findThread:${url}`);
     this.cache.delKeyStartWith(`api.findPost:${url}`);
     this.cache.delKeyStartWith(`api.findThreadsPage:${url}`);
+
+    res.redirect(`/kashiwa/moderation/${board.id}`);
+  }
+
+  private async clearThreadCacheAndRedirect(url: string, num: bigint, res: Response): Promise<void> {
+    await this.cachingProvider.reloadCacheForThread(url, num);
+    this.cache.del(`api.findThread:${url}:${num}`);
+    this.cache.del(`api.findPost:${url}:${num}`);
+
+    const board = await this.boardPersistenceService.findByUrl(url);
+    this.cache.delKeyStartWith(`api.findThreadsPage:${board.url}`);
 
     res.redirect(`/kashiwa/moderation/${board.id}`);
   }

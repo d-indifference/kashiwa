@@ -24,6 +24,8 @@ export class AttachedFilePersistenceService {
    * @param board Board URL
    */
   public async findFileByMd5(md5: string, board: string): Promise<AttachedFile | null> {
+    this.logger.debug({ md5, board }, 'findFileByMd5');
+
     const entity = await this.prisma.attachedFile.findFirst({
       where: { md5, comments: { every: { board: { url: board } } } },
       include: { comments: { include: { board: true } } }
@@ -72,7 +74,7 @@ export class AttachedFilePersistenceService {
    * @param num Comment number
    */
   public async clearFromComment(url: string, num: bigint): Promise<void> {
-    this.logger.info({ url, num }, 'clearFromComment');
+    this.logger.info({ url, num: num.toString() }, 'clearFromComment');
 
     await this.prisma.$transaction(async tx => {
       const comment = await tx.comment.findFirst({

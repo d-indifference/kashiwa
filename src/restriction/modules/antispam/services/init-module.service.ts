@@ -2,6 +2,7 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { Constants } from '@library/constants';
 import * as path from 'node:path';
 import { FileSystemProvider, SiteContextProvider } from '@library/providers';
+import { PinoLogger } from 'nestjs-pino';
 
 /**
  * Service for antispam module initialization
@@ -10,8 +11,11 @@ import { FileSystemProvider, SiteContextProvider } from '@library/providers';
 export class InitModuleService implements OnModuleInit {
   constructor(
     private readonly fileSystem: FileSystemProvider,
-    private readonly siteContext: SiteContextProvider
-  ) {}
+    private readonly siteContext: SiteContextProvider,
+    private readonly logger: PinoLogger
+  ) {
+    this.logger.setContext(InitModuleService.name);
+  }
 
   public onModuleInit() {
     this.activateSpamBase().then();
@@ -19,6 +23,8 @@ export class InitModuleService implements OnModuleInit {
 
   /** Activates spam base. If spam base does not exist, take it from presets */
   public async activateSpamBase(): Promise<void> {
+    this.logger.info('activateSpamBase');
+
     if (!(await this.fileSystem.pathExists([Constants.SETTINGS_DIR, Constants.SPAM_FILE_NAME]))) {
       await this.initSpamFile();
     }

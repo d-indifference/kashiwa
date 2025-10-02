@@ -24,6 +24,8 @@ export class BanPersistenceService {
    * @param page Page request
    */
   public async findAll(page: PageRequest): Promise<Page<BanDto>> {
+    this.logger.debug({ page }, 'findAll');
+
     const entities = await Page.ofFilter<
       Ban,
       Prisma.BanWhereInput,
@@ -39,6 +41,8 @@ export class BanPersistenceService {
    * @param ip Poster's IP
    */
   public async getCurrentBan(ip: string): Promise<BanDto | null> {
+    this.logger.debug({ ip }, 'getCurrentBan');
+
     const lastBan = await this.prisma.ban.findFirst({
       where: { ip },
       orderBy: { createdAt: 'desc' },

@@ -3,6 +3,7 @@ include components/admin_bar
 include components/form/reply_form
 include components/post/thread
 include components/user_delete
+include components/oekaki
 
 
 mixin PageHeader()
@@ -19,10 +20,12 @@ mixin PageHeader()
         | #{LOCALE.POST_REPLY}
 
 
-
 mixin PostArea()
     div.postarea
-        if board.boardSettings.allowPosting
+        if board.boardSettings.allowPosting && thread.isPostingEnabled
+            if board.boardSettings.allowOekakiThreads
+                +Oekaki()
+
             form#postform(action=`/kashiwa/post/${board.url}/${thread.num}` method='post' enctype='multipart/form-data')
                 +ReplyForm()
     ='['

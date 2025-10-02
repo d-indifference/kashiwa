@@ -1,11 +1,14 @@
 import { Body, Controller, Param, Post, Res, Session, ValidationPipe } from '@nestjs/common';
-import { FormDataRequest } from 'nestjs-form-data';
+import { FormDataRequest, MemoryStoredFile } from 'nestjs-form-data';
 import { ReplyCreateForm, ThreadCreateForm } from '@posting/forms';
 import { Response } from 'express';
 import { RealIP } from 'nestjs-real-ip';
 import { ISession } from '@admin/interfaces';
 import { CommentCreateService } from '@posting/services';
 import { RestrictionService, RestrictionType } from '@restriction/services';
+import { ParticleStoredFile } from 'nestjs-form-data/dist/interfaces/ParticleStoredFile';
+import { Readable as ReadableStream } from 'stream';
+import { nestjsFormDataConfig } from '@config/nestjs-form-data.config';
 
 @Controller('kashiwa/post')
 export class PostingController {
@@ -24,6 +27,7 @@ export class PostingController {
     @Session() session: ISession
   ): Promise<void> {
     await this.restrictionService.checkRestrictions(RestrictionType.THREAD, ip, url, form, Boolean(session.payload));
+    await this.normalizeOekaki(form);
     await this.commentCreateService.createThread(url, form, ip, res, Boolean(session.payload));
   }
 
@@ -37,7 +41,37 @@ export class PostingController {
     @RealIP() ip: string,
     @Session() session: ISession
   ): Promise<void> {
-    await this.restrictionService.checkRestrictions(RestrictionType.REPLY, ip, url, form, Boolean(session.payload));
+    await this.restrictionService.checkRestrictions(
+      RestrictionType.REPLY,
+      ip,
+      url,
+      form,
+      Boolean(session.payload),
+      num
+    );
+    await this.normalizeOekaki(form);
     await this.commentCreateService.createReply(url, BigInt(num), form, ip, res, Boolean(session.payload));
+  }
+
+  private async normalizeOekaki(form: ThreadCreateForm): Promise<void> {
+    if (form.oekaki) {
+      const oekakiMeta: ParticleStoredFile = {
+        mimetype: 'image/png',
+        encoding: '7-bit',
+        originalName: `${Date.now()}.png`
+      };
+
+      form.file = await MemoryStoredFile.create(oekakiMeta, this.base64ToStream(form.oekaki), nestjsFormDataConfig);
+      form.oekaki = undefined;
+    }
+  }
+
+  private base64ToStream(base64: string): ReadableStream {
+    const buffer = Buffer.from(base64, 'base64');
+
+    const stream = new ReadableStream();
+    stream.push(buffer);
+    stream.push(null);
+    return stream;
   }
 }
