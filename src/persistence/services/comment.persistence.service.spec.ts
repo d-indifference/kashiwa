@@ -343,4 +343,74 @@ describe('CommentPersistenceService', () => {
       expect(commentMapperMock.toDto).toHaveBeenCalledWith(post, []);
     });
   });
+
+  describe('pinThread', () => {
+    it('should pin a thread', async () => {
+      const comment = { id: '1', createdAt: new Date(), lastHit: new Date(), pinnedAt: new Date() };
+      (prismaMock.comment.update as jest.Mock).mockResolvedValue(comment);
+      (boardPersistenceServiceMock.findByUrl as jest.Mock).mockResolvedValue({ id: '2', url: 'b' });
+
+      await service.pinThread('b', 1n);
+
+      expect(boardPersistenceServiceMock.findByUrl).toHaveBeenCalledWith('b');
+      expect(prismaMock.comment.update).toHaveBeenCalledWith({
+        where: { boardId_num: { boardId: '2', num: 1n }, NOT: { lastHit: null }, pinnedAt: null },
+        data: { pinnedAt: expect.any(Date) }
+      });
+      expect(loggerMock.info).toHaveBeenCalledWith({ id: comment.id }, '[SUCCESS] pinThread');
+    });
+  });
+
+  describe('unpinThread', () => {
+    it('should unpin a thread', async () => {
+      const comment = { id: '1', num: 1n, createdAt: new Date(), lastHit: new Date(), pinnedAt: null };
+      (prismaMock.comment.update as jest.Mock).mockResolvedValue(comment);
+      (boardPersistenceServiceMock.findByUrl as jest.Mock).mockResolvedValue({ id: '2', url: 'b' });
+
+      await service.unpinThread('b', 1n);
+
+      expect(boardPersistenceServiceMock.findByUrl).toHaveBeenCalledWith('b');
+      expect(prismaMock.comment.update).toHaveBeenCalledWith({
+        where: { boardId_num: { boardId: '2', num: 1n }, NOT: { lastHit: null, pinnedAt: null } },
+        data: { pinnedAt: null }
+      });
+      expect(loggerMock.info).toHaveBeenCalledWith({ id: comment.id }, '[SUCCESS] unpinThread');
+    });
+  });
+
+  describe('disableThreadPosting', () => {
+    it('should disable posting in a thread', async () => {
+      const comment = { id: '1', num: 1n, createdAt: new Date(), lastHit: new Date(), isPostingEnabled: false };
+
+      (prismaMock.comment.update as jest.Mock).mockResolvedValue(comment);
+      (boardPersistenceServiceMock.findByUrl as jest.Mock).mockResolvedValue({ id: '2', url: 'b' });
+
+      await service.disableThreadPosting('b', 1n);
+
+      expect(boardPersistenceServiceMock.findByUrl).toHaveBeenCalledWith('b');
+      expect(prismaMock.comment.update).toHaveBeenCalledWith({
+        where: { boardId_num: { boardId: '2', num: 1n }, NOT: { lastHit: null }, isPostingEnabled: true },
+        data: { isPostingEnabled: false }
+      });
+      expect(loggerMock.info).toHaveBeenCalledWith({ id: comment.id }, '[SUCCESS] disableThreadPosting');
+    });
+  });
+
+  describe('enableThreadPosting', () => {
+    it('should enable posting in a thread', async () => {
+      const comment = { id: '1', num: 1n, createdAt: new Date(), lastHit: new Date(), isPostingEnabled: true };
+
+      (prismaMock.comment.update as jest.Mock).mockResolvedValue(comment);
+      (boardPersistenceServiceMock.findByUrl as jest.Mock).mockResolvedValue({ id: '2', url: 'b' });
+
+      await service.enableThreadPosting('b', 1n);
+
+      expect(boardPersistenceServiceMock.findByUrl).toHaveBeenCalledWith('b');
+      expect(prismaMock.comment.update).toHaveBeenCalledWith({
+        where: { boardId_num: { boardId: '2', num: 1n }, NOT: { lastHit: null, isPostingEnabled: false } },
+        data: { isPostingEnabled: true }
+      });
+      expect(loggerMock.info).toHaveBeenCalledWith({ id: comment.id }, '[SUCCESS] enableThreadPosting');
+    });
+  });
 });

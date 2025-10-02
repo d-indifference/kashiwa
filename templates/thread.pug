@@ -22,7 +22,7 @@ mixin PageHeader()
 
 mixin PostArea()
     div.postarea
-        if board.boardSettings.allowPosting
+        if board.boardSettings.allowPosting && thread.isPostingEnabled
             if board.boardSettings.allowOekakiThreads
                 +Oekaki()
 

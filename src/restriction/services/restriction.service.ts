@@ -65,13 +65,15 @@ export class RestrictionService {
    * @param url Board URL
    * @param form Thread / Reply creation form
    * @param isAdmin Is poster admin / moderator
+   * @param num Thread num (for thread replies)
    */
   public async checkRestrictions(
     restrictionType: RestrictionType,
     ip: string,
     url: string,
     form: FormsType,
-    isAdmin: boolean
+    isAdmin: boolean,
+    num?: string
   ): Promise<void> {
     this.logger.debug({ restrictionType, ip, url, form, isAdmin }, 'checkRestrictions');
 
@@ -80,7 +82,7 @@ export class RestrictionService {
       throw new InternalServerErrorException(LOCALE['YOU_CANNOT_CREATE_WITHOUT_BOARD_SETTINGS']);
     } else {
       const settings: BoardSettingsDto = board.boardSettings;
-      await this.applyRestrictions(restrictionType, ip, board, settings, form, isAdmin);
+      await this.applyRestrictions(restrictionType, ip, board, settings, form, isAdmin, num);
     }
   }
 
@@ -93,7 +95,8 @@ export class RestrictionService {
     board: BoardDto,
     settings: BoardSettingsDto,
     form: FormsType,
-    isAdmin: boolean
+    isAdmin: boolean,
+    num?: string
   ): Promise<void> {
     if (settings.enableCaptcha) {
       await this.checkRestrictionAsync(
@@ -106,6 +109,15 @@ export class RestrictionService {
     }
 
     this.checkRestriction(() => allowPosting(settings), LOCALE['BOARD_IS_CLOSED'] as string, ForbiddenException);
+
+    if (restrictionType === RestrictionType.REPLY) {
+      await this.checkRestrictionAsync(
+        async () => await this.checkIfThreadAllowsPosting(board.url, num as string),
+        LOCALE['REPLIES_ARE_DISABLED'] as string,
+        ForbiddenException
+      );
+    }
+
     await this.banService.checkBan(ip, isAdmin, board.url);
     this.checkRestriction(() => strictAnonymity(settings, form), LOCALE['PLEASE_STAY_ANONYMOUS'] as string);
     this.checkRestriction(
@@ -190,7 +202,7 @@ export class RestrictionService {
     return true;
   }
 
-  /*
+  /**
    * Checking delay for reply creation
    * @param ip Poster's IP
    * @param delayTime Time of max delay from board settings
@@ -206,5 +218,15 @@ export class RestrictionService {
    */
   private async delayForThread(ip: string, delayTime: number): Promise<boolean> {
     return this.delayPredicate(await this.commentPersistenceService.findLastThreadByIp(ip), delayTime);
+  }
+
+  /**
+   * Check if thread allows posting
+   * @param url Board URL
+   * @param num Thread number
+   */
+  private async checkIfThreadAllowsPosting(url: string, num: string): Promise<boolean> {
+    const post = await this.commentPersistenceService.findOpeningPost(url, BigInt(num));
+    return post.isPostingEnabled;
   }
 }

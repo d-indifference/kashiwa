@@ -56,16 +56,12 @@ export class CommentPersistenceService {
     const comments = await Page.ofFilter<
       Comment,
       Prisma.CommentWhereInput,
-      Prisma.CommentOrderByWithAggregationInput,
+      Prisma.CommentOrderByWithAggregationInput[],
       Prisma.CommentInclude
-    >(
-      this.prisma,
-      'comment',
-      page,
-      { boardId, lastHit: { not: null } },
-      { lastHit: 'desc' },
-      { attachedFile: true, children: { orderBy: { createdAt: 'asc' }, include: { attachedFile: true } } }
-    );
+    >(this.prisma, 'comment', page, { boardId, lastHit: { not: null } }, [{ pinnedAt: 'asc' }, { lastHit: 'desc' }], {
+      attachedFile: true,
+      children: { orderBy: { createdAt: 'asc' }, include: { attachedFile: true } }
+    });
 
     return comments.map(c => this.commentMapper.toCollapsedDto(c));
   }
@@ -96,16 +92,13 @@ export class CommentPersistenceService {
     const comments = await Page.ofFilter<
       Comment,
       Prisma.CommentWhereInput,
-      Prisma.CommentOrderByWithAggregationInput,
+      Prisma.CommentOrderByWithAggregationInput[],
       Prisma.CommentInclude
-    >(
-      this.prisma,
-      'comment',
-      page,
-      { board: { id: boardId } },
-      { createdAt: 'desc' },
-      { attachedFile: { include: { board: true } }, parent: true, board: true }
-    );
+    >(this.prisma, 'comment', page, { board: { id: boardId } }, [{ pinnedAt: 'asc' }, { createdAt: 'desc' }], {
+      attachedFile: { include: { board: true } },
+      parent: true,
+      board: true
+    });
 
     return comments.map(c => this.commentMapper.toModerationDto(c));
   }
@@ -120,14 +113,14 @@ export class CommentPersistenceService {
     const comments = await Page.ofFilter<
       Comment,
       Prisma.CommentWhereInput,
-      Prisma.CommentOrderByWithAggregationInput,
+      Prisma.CommentOrderByWithAggregationInput[],
       Prisma.CommentInclude
     >(
       this.prisma,
       'comment',
       page,
       { board: { url }, NOT: { lastHit: null } },
-      { [orderByField]: 'desc' },
+      [{ pinnedAt: 'asc' }, { [orderByField]: 'desc' }],
       { attachedFile: { include: { board: true } } }
     );
 
@@ -301,6 +294,78 @@ export class CommentPersistenceService {
   }
 
   /**
+   * Mark thread as pinned
+   * @param url Board URL
+   * @param num Thread number
+   */
+  public async pinThread(url: string, num: bigint): Promise<void> {
+    this.logger.info({ url, num }, 'pinThread');
+
+    const board = await this.boardPersistenceService.findByUrl(url);
+
+    const pinnedComment = await this.prisma.comment.update({
+      where: { boardId_num: { boardId: board.id, num }, NOT: { lastHit: null }, pinnedAt: null },
+      data: { pinnedAt: new Date() }
+    });
+
+    this.logger.info({ id: pinnedComment.id }, '[SUCCESS] pinThread');
+  }
+
+  /**
+   * Remove the pinning of the thread
+   * @param url Board URL
+   * @param num Thread number
+   */
+  public async unpinThread(url: string, num: bigint): Promise<void> {
+    this.logger.info({ url, num }, 'unpinThread');
+
+    const board = await this.boardPersistenceService.findByUrl(url);
+
+    const pinnedComment = await this.prisma.comment.update({
+      where: { boardId_num: { boardId: board.id, num }, NOT: { lastHit: null, pinnedAt: null } },
+      data: { pinnedAt: null }
+    });
+
+    this.logger.info({ id: pinnedComment.id }, '[SUCCESS] unpinThread');
+  }
+
+  /**
+   * Disable posting in thread
+   * @param url Board URL
+   * @param num Thread number
+   */
+  public async disableThreadPosting(url: string, num: bigint): Promise<void> {
+    this.logger.info({ url, num }, 'disableThreadPosting');
+
+    const board = await this.boardPersistenceService.findByUrl(url);
+
+    const disabledPostingThread = await this.prisma.comment.update({
+      where: { boardId_num: { boardId: board.id, num }, NOT: { lastHit: null }, isPostingEnabled: true },
+      data: { isPostingEnabled: false }
+    });
+
+    this.logger.info({ id: disabledPostingThread.id }, '[SUCCESS] disableThreadPosting');
+  }
+
+  /**
+   * Enable posting in thread with disabled posting
+   * @param url Board URL
+   * @param num Thread number
+   */
+  public async enableThreadPosting(url: string, num: bigint): Promise<void> {
+    this.logger.info({ url, num }, 'enableThreadPosting');
+
+    const board = await this.boardPersistenceService.findByUrl(url);
+
+    const enablePostingThread = await this.prisma.comment.update({
+      where: { boardId_num: { boardId: board.id, num }, NOT: { lastHit: null, isPostingEnabled: false } },
+      data: { isPostingEnabled: true }
+    });
+
+    this.logger.info({ id: enablePostingThread.id }, '[SUCCESS] enableThreadPosting');
+  }
+
+  /**
    * Remove all comment from board
    * @param url Board URL
    */
@@ -323,7 +388,7 @@ export class CommentPersistenceService {
 
     await this.prisma.$transaction(async tx => {
       const oldestThread = await tx.comment.findFirst({
-        where: { NOT: { lastHit: null }, board: { url } },
+        where: { pinnedAt: null, NOT: { lastHit: null }, board: { url } },
         orderBy: { lastHit: 'asc' }
       });
 

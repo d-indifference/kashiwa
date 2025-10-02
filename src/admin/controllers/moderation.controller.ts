@@ -52,6 +52,30 @@ export class ModerationController {
     return await this.moderationService.findCommentsForModeration(session, id, page);
   }
 
+  @Post('toggle-post-pinning/:url/:num')
+  @UseGuards(SessionGuard)
+  public async togglePostPinning(
+    @Param('url') url: string,
+    @Param('num', ParseBigintPipe) num: bigint,
+    @Res() res: Response
+  ): Promise<void> {
+    this.logger.debug(`URL called: POST /kashiwa/moderation/toggle-post-pinning/${url}/${num}`);
+
+    await this.moderationService.toggleThreadPinning(url, num, res);
+  }
+
+  @Post('toggle-thread-posting/:url/:num')
+  @UseGuards(SessionGuard)
+  public async toggleThreadPosting(
+    @Param('url') url: string,
+    @Param('num', ParseBigintPipe) num: bigint,
+    @Res() res: Response
+  ): Promise<void> {
+    this.logger.debug(`URL called: POST /kashiwa/moderation/toggle-thread-posting/${url}/${num}`);
+
+    await this.moderationService.toggleThreadPosting(url, num, res);
+  }
+
   @Post('delete-post/:url/:num')
   @UseGuards(SessionGuard)
   public async deletePost(

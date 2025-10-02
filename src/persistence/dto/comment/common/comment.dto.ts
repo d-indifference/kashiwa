@@ -55,6 +55,16 @@ export class CommentDto {
   hasSage: boolean;
 
   /**
+   * Thread pinning date
+   */
+  pinnedAt: Date | null;
+
+  /**
+   * Check if posting in thread enabled (no effect for replies)
+   */
+  isPostingEnabled: boolean;
+
+  /**
    * Attached file
    */
   attachedFile: AttachedFileDto | null;
@@ -74,6 +84,8 @@ export class CommentDto {
     subject: string | null,
     comment: string,
     hasSage: boolean,
+    pinnedAt: Date | null,
+    isPostingEnabled: boolean,
     attachedFile: AttachedFileDto | null,
     children: CommentDto[]
   ) {
@@ -86,6 +98,8 @@ export class CommentDto {
     this.subject = subject;
     this.comment = comment;
     this.hasSage = hasSage;
+    this.pinnedAt = pinnedAt;
+    this.isPostingEnabled = isPostingEnabled;
     this.attachedFile = attachedFile;
     this.children = children;
   }

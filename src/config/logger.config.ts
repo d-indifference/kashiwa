@@ -16,11 +16,9 @@ export const loggerConfig = (): Params => ({
           }
         }
       : undefined,
-    redact: !isDev
-      ? {
-          remove: true,
-          paths: ['req', 'res', 'form.file.buffer']
-        }
-      : undefined
+    redact: {
+      remove: true,
+      paths: ['req', 'res', 'form.file.buffer']
+    }
   }
 });

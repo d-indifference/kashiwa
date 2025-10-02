@@ -96,6 +96,13 @@ mixin CommentLabel(_board, _comment, _is_reply)
         =' '
 
 
+mixin ThreadPin(_comment)
+    if _comment.pinnedAt
+        | &nbsp;
+        span.pin(title=`${LOCALE.PINNED_THREAD}`)= LOCALE.PUSHPIN_SYMBOL
+        | &nbsp;
+
+
 mixin ThreadPreviewRefLink(_board, _comment)
     span.reflink
         a(href=`/${_board.url}/res/${_comment.num.toString()}${HTML_SUFFIX}#i${_comment.num.toString()}`) No. #{_comment.num.toString()}

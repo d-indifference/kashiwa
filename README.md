@@ -13,6 +13,7 @@ follow it through to the final release :).
 - Extensive capabilities for creating and customizing boards
 - Traditional imageboard features such as sage, tripcodes, text formatting (still a work in progress), captcha, anti-flood, thread hiding, and style switching
 - Oekaki board support is available (for browsers that support ECMAScript6+)
+- The ability to pin threads and disable posting in them individually
 - Support for uploading the most popular image, video, and audio formats, as well as the ability to upload torrents (yo-ho-ho! 🏴‍☠️) and .swf files
 - Ability to add an administrative team: registered users can be either administrators or regular moderators
 - Configure a spam filter using JavaScript regular expressions

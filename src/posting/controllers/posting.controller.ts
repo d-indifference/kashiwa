@@ -26,8 +26,8 @@ export class PostingController {
     @RealIP() ip: string,
     @Session() session: ISession
   ): Promise<void> {
-    await this.normalizeOekaki(form);
     await this.restrictionService.checkRestrictions(RestrictionType.THREAD, ip, url, form, Boolean(session.payload));
+    await this.normalizeOekaki(form);
     await this.commentCreateService.createThread(url, form, ip, res, Boolean(session.payload));
   }
 
@@ -41,8 +41,15 @@ export class PostingController {
     @RealIP() ip: string,
     @Session() session: ISession
   ): Promise<void> {
+    await this.restrictionService.checkRestrictions(
+      RestrictionType.REPLY,
+      ip,
+      url,
+      form,
+      Boolean(session.payload),
+      num
+    );
     await this.normalizeOekaki(form);
-    await this.restrictionService.checkRestrictions(RestrictionType.REPLY, ip, url, form, Boolean(session.payload));
     await this.commentCreateService.createReply(url, BigInt(num), form, ip, res, Boolean(session.payload));
   }
 
@@ -54,20 +61,12 @@ export class PostingController {
         originalName: `${Date.now()}.png`
       };
 
-      const oekakiFile = await MemoryStoredFile.create(
-        oekakiMeta,
-        this.base64ToStream(form.oekaki),
-        nestjsFormDataConfig
-      );
-
-      form.file = oekakiFile;
+      form.file = await MemoryStoredFile.create(oekakiMeta, this.base64ToStream(form.oekaki), nestjsFormDataConfig);
       form.oekaki = undefined;
     }
   }
 
   private base64ToStream(base64: string): ReadableStream {
-    // const matches = base64.match(/^data:.+;base64,(.*)$/);
-    // const base64Data = matches ? matches[1] : base64;
     const buffer = Buffer.from(base64, 'base64');
 
     const stream = new ReadableStream();

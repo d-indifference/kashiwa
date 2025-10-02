@@ -73,6 +73,46 @@ export class ModerationService {
   }
 
   /**
+   * Pin thread if it is not and unpin thread if it is pinned
+   * @param url Board URL
+   * @param num Post number
+   * @param res `Express.js` response
+   */
+  public async toggleThreadPinning(url: string, num: bigint, res: Response): Promise<void> {
+    this.logger.info({ url, num: num.toString() }, 'toggleThreadPinning');
+
+    const comment = await this.commentPersistenceService.findOpeningPost(url, num);
+
+    if (comment.pinnedAt) {
+      await this.commentPersistenceService.unpinThread(url, num);
+    } else {
+      await this.commentPersistenceService.pinThread(url, num);
+    }
+
+    await this.clearThreadCacheAndRedirect(url, num, res);
+  }
+
+  /**
+   * Disables posting to a thread if it was possible to post in it, otherwise, enables it back
+   * @param url Board URL
+   * @param num Post number
+   * @param res `Express.js` response
+   */
+  public async toggleThreadPosting(url: string, num: bigint, res: Response): Promise<void> {
+    this.logger.info({ url, num: num.toString() }, 'toggleThreadPosting');
+
+    const comment = await this.commentPersistenceService.findOpeningPost(url, num);
+
+    if (comment.isPostingEnabled) {
+      await this.commentPersistenceService.disableThreadPosting(url, num);
+    } else {
+      await this.commentPersistenceService.enableThreadPosting(url, num);
+    }
+
+    await this.clearThreadCacheAndRedirect(url, num, res);
+  }
+
+  /**
    * Delete comment by board URL and post number
    * @param url Board URL
    * @param num Post number
@@ -125,6 +165,17 @@ export class ModerationService {
     this.cache.delKeyStartWith(`api.findThread:${url}`);
     this.cache.delKeyStartWith(`api.findPost:${url}`);
     this.cache.delKeyStartWith(`api.findThreadsPage:${url}`);
+
+    res.redirect(`/kashiwa/moderation/${board.id}`);
+  }
+
+  private async clearThreadCacheAndRedirect(url: string, num: bigint, res: Response): Promise<void> {
+    await this.cachingProvider.reloadCacheForThread(url, num);
+    this.cache.del(`api.findThread:${url}:${num}`);
+    this.cache.del(`api.findPost:${url}:${num}`);
+
+    const board = await this.boardPersistenceService.findByUrl(url);
+    this.cache.delKeyStartWith(`api.findThreadsPage:${board.url}`);
 
     res.redirect(`/kashiwa/moderation/${board.id}`);
   }

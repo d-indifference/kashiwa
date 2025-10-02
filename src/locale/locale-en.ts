@@ -162,6 +162,7 @@ export const locale: Record<string, LocaleArgument> = {
   FILE_WAS_DELETED: 'File was deleted',
   GO_TO_POST: 'Go to post',
   BAN_THIS_POSTER: 'Ban this poster',
+  BAN_THIS_IP: 'Ban this IP',
   DELETE_THIS_POST: 'Delete this post',
   DELETE_THIS_FILE: 'Delete this file',
   DELETE_ALL_BY_IP: 'Delete all posts of this IP',
@@ -259,7 +260,14 @@ export const locale: Record<string, LocaleArgument> = {
   ALLOW_OEKAKI_THREADS: 'Allow oekaki threads',
   ALLOW_OEKAKI_REPLIES: 'Allow oekaki replies',
   OEKAKI: 'Oekaki',
-  FORBIDDEN_OEKAKI: 'You cannot posing an oekaki here'
+  FORBIDDEN_OEKAKI: 'You cannot posing an oekaki here',
+  PUSHPIN_SYMBOL: '🖈',
+  PINNED_THREAD: 'Pinned thread',
+  PIN: 'Pin',
+  UNPIN: 'Unpin',
+  DISABLE_REPLIES: 'Disable replies',
+  ENABLE_REPLIES: 'Enable replies',
+  REPLIES_ARE_DISABLED: 'You cannot reply this thread'
 };
 
 export const localeValidators: Record<string, (...args: unknown[]) => string> = {

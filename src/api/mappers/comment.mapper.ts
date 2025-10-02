@@ -31,6 +31,8 @@ export class CommentMapper {
       hasSage: comment.hasSage,
       num: comment.num.toString(),
       attachedFile: this.attachedFileMapper.toApiDto(comment.attachedFile, boardUrl),
+      pinnedAt: comment.pinnedAt,
+      isPostingEnabled: comment.isPostingEnabled,
       children: comment.children.length > 0 ? mappedChildren : undefined
     };
 

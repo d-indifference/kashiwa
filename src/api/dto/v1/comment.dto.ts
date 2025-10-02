@@ -11,6 +11,8 @@ export const DEFAULT_NO_CHILDREN_COMMENT_EXAMPLE = {
   email: 'example@example.com',
   comment: '<p>Hello guys!</p>',
   hasSage: false,
+  pinnedAt: new Date(),
+  isPostingEnabled: true,
   attachedFile: {
     path: '/b/src/1234567890.png',
     size: 3000000,
@@ -82,6 +84,18 @@ export class CommentDto {
    */
   @ApiProperty({ description: 'Is post has sage (don`t rise the thread up)', example: false })
   hasSage: boolean;
+
+  /**
+   * Thread pinning date
+   */
+  @ApiProperty({ description: 'Thread pinning date', example: new Date(), nullable: true, required: false })
+  pinnedAt: Date | null;
+
+  /**
+   * Check if posting in thread enabled (no effect for replies)
+   */
+  @ApiProperty({ description: 'Thread pinning date', example: true, default: true, type: Boolean })
+  isPostingEnabled: boolean;
 
   /**
    * Attached file
