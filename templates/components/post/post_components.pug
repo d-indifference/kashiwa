@@ -110,7 +110,13 @@ mixin ThreadPreviewRefLink(_board, _comment)
 
 
 mixin ThreadPreviewHideButton(_board, _comment)
-    button(type='button', onclick=`hideThread('${_board.url}', '${_comment.num.toString()}')`)= LOCALE.HIDE_THREAD
+    button(
+        type='button',
+        class='hide-button',
+        onclick=`hideThread('${_board.url}', '${_comment.num.toString()}')`
+        title=LOCALE.HIDE_THREAD
+    )
+        span= '▬'
     | &nbsp;
 
 

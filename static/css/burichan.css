@@ -197,3 +197,11 @@ a:hover {
 .reply-link-container {
   background-color: #d6daF0 !important;
 }
+
+.hide-button {
+  color: #133b5e;
+}
+
+.hide-button:hover {
+  color: #d60c0c;
+}

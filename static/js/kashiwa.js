@@ -269,7 +269,7 @@ function applyThreadHiding() {
           .children('a')
           .attr('href');
 
-        hiddenThread.before('<div id="hidden-' + hiddenThreadNums[i] + '">Thread <a href="' + linkToHiddenThread + '">' + hiddenThreadNums[i] + '</a> is hidden. <button type="button" onclick="showThread(\''+ boardUrl +'\', \''+ hiddenThreadNums[i] +'\')">Show</button></div>');
+        hiddenThread.before('<div id="hidden-' + hiddenThreadNums[i] + '">Thread <a href="' + linkToHiddenThread + '">' + hiddenThreadNums[i] + '</a> is hidden. <button class="hide-button" type="button" onclick="showThread(\''+ boardUrl +'\', \''+ hiddenThreadNums[i] +'\')" title="Show"><span>✚</span></button></div>');
       }
     }
   }
