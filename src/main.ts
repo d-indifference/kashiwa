@@ -14,6 +14,7 @@ import { ExceptionFilter } from '@library/filters';
 import { loggerConfig } from '@config/logger.config';
 import { applicationVersion, fileSize, getRandomBanner, truncateText } from '@library/helpers';
 import {
+  CorsAllowedOriginsProvider,
   FileSystemProvider,
   GlobalSettingsProvider,
   IpBlacklistProvider,
@@ -23,12 +24,10 @@ import {
 import { AntiSpamService, InitModuleService } from '@restriction/modules/antispam/services';
 import { SwaggerModule } from '@nestjs/swagger';
 import * as process from 'node:process';
+import { enableCors } from '@library/misc';
 
 const bootstrap = async (): Promise<void> => {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    bufferLogs: true,
-    cors: { origin: '*' }
-  });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
   const config = app.get(ConfigService);
 
   const port = config.getOrThrow<number>('http.port');
@@ -70,6 +69,16 @@ const bootstrap = async (): Promise<void> => {
 
   const antiSpam = app.get(AntiSpamService);
   antiSpam.compileSpamRegexes();
+
+  const corsAllowedOrigins = app.get(CorsAllowedOriginsProvider);
+  await corsAllowedOrigins.load();
+
+  enableCors(app, siteContext);
+
+  siteContext.on('corsUpdated', val => {
+    enableCors(app, siteContext);
+    NestLogger.debug(`[CORS] Updated allowed origins: ${val.join(', ')}`);
+  });
 
   app.getHttpAdapter().getInstance().set('trust proxy', true);
 

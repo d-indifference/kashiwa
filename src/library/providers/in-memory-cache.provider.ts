@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import * as NodeCache from 'node-cache';
+import { LOCALE } from '@locale/locale';
 
 /**
  * In-memory cache provider.
@@ -84,6 +85,18 @@ export class InMemoryCacheProvider {
   public delKeyStartWith(keyFragment: string): void {
     const availableKeys = this.cache.keys().filter(key => key.startsWith(keyFragment));
     this.cache.del(availableKeys);
+  }
+
+  /**
+   * **(*NB*: PLEASE USE IT ONLY IN DEVELOPMENT MODE. IT IS NOT FOR PRODUCTION!!!)**<br>
+   * Get all cache contents at the current moment
+   */
+  public dumpCache(): object {
+    if (process.env.NODE_ENV === 'production') {
+      throw new ForbiddenException(LOCALE['OPERATION_ONLY_FOR_DEVELOPMENT']);
+    }
+
+    return this.cache.mget(this.cache.keys());
   }
 
   /**

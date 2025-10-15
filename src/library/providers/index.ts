@@ -5,3 +5,4 @@ export * from './in-memory-cache.provider';
 export * from './site-context.provider';
 export * from './cache-cron-operations.provider';
 export * from './swagger-setup.provider';
+export * from './cors-allowed-origins.provider';

@@ -16,6 +16,7 @@ module.exports = {
     '^@caching/(.*)$': '<rootDir>/src/caching/$1',
     '^@captcha/(.*)$': '<rootDir>/src/captcha/$1',
     '^@config/(.*)$': '<rootDir>/src/config/$1',
+    '^@debug/(.*)$': '<rootDir>/src/debug/$1',
     '^@library/(.*)$': '<rootDir>/src/library/$1',
     '^@locale/(.*)$': '<rootDir>/src/locale/$1',
     '^@persistence/(.*)$': '<rootDir>/src/persistence/$1',

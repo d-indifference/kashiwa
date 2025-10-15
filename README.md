@@ -147,6 +147,32 @@ So, after completing the steps above, let’s proceed with installing the imageb
    Now you can go to [localhost:3000/kashiwa/auth/sign-up](http://localhost:3000/kashiwa/auth/sign-up) and create your first admin profile.
 9. (Optionally) Now you can set up a reverse proxy for the website, instructions will not be given here.
 
+## CORS Configuration
+
+### What is CORS and why it is needed
+
+CORS (Cross-Origin Resource Sharing) is a security mechanism implemented by web browsers that restricts web pages from making requests to a domain different from the one that served the web page.
+
+In this project, the Nest.js imageboard is a monolithic website that:
+- Serves static HTML pages pre-rendered with Pug.
+- Provides AJAX-based functionality via REST API endpoints.
+- Runs inside a Docker container.
+
+Even though your frontend and backend are served from the same application, some features may require cross-origin requests. 
+CORS ensures that only requests from trusted origins are allowed to interact with the API, preventing unauthorized websites from making requests on behalf of your users.
+
+### How to configure allowed origins
+
+The list of allowed origins for CORS is managed through the administrative panel. Follow these steps to configure it:
+
+1. Log in to your administrator account.
+2. Go to the admin panel, in the section labeled "CORS settings".
+3. Enter the desired origins in the form field. Each origin should be on a separate line (e.g., https://example.com).
+4. Click Save to apply the changes.
+
+Once saved, the new allowed origins are applied immediately to the application without restarting the server. 
+The CORS policy will restrict API access to the specified origins only.
+
 ## Supported markdown
 
 The engine supports the following types of text markdown in user's message:

@@ -5,7 +5,8 @@ import {
   IpBlacklistProvider,
   SiteContextProvider,
   CacheCronOperationsProvider,
-  SwaggerSetupProvider
+  SwaggerSetupProvider,
+  CorsAllowedOriginsProvider
 } from '@library/providers';
 import { ScheduleModule } from '@nestjs/schedule';
 
@@ -20,7 +21,8 @@ import { ScheduleModule } from '@nestjs/schedule';
     InMemoryCacheProvider,
     SiteContextProvider,
     SwaggerSetupProvider,
-    CacheCronOperationsProvider
+    CacheCronOperationsProvider,
+    CorsAllowedOriginsProvider
   ],
   exports: [FileSystemProvider, IpBlacklistProvider, InMemoryCacheProvider, SiteContextProvider, SwaggerSetupProvider]
 })

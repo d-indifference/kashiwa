@@ -111,4 +111,35 @@ describe('InMemoryCacheProvider', () => {
       expect(cacheMock.del).toHaveBeenCalledWith([]);
     });
   });
+
+  describe('dumpCache', () => {
+    const originalEnv = process.env;
+
+    beforeEach(() => {
+      jest.resetModules();
+      process.env = { ...originalEnv };
+    });
+
+    afterEach(() => {
+      process.env = originalEnv;
+    });
+
+    it('should throw ForbiddenException in production mode', () => {
+      process.env.NODE_ENV = 'production';
+
+      expect(() => provider.dumpCache()).toThrow('Please do not use this operation in production mode!');
+    });
+
+    it('should return all cache contents in non-production mode', () => {
+      process.env.NODE_ENV = 'development';
+      cacheMock.keys.mockReturnValue(['key1', 'key2']);
+      cacheMock.mget.mockReturnValue({ key1: 'value1', key2: 'value2' });
+
+      const result = provider.dumpCache();
+
+      expect(cacheMock.keys).toHaveBeenCalled();
+      expect(cacheMock.mget).toHaveBeenCalledWith(['key1', 'key2']);
+      expect(result).toEqual({ key1: 'value1', key2: 'value2' });
+    });
+  });
 });

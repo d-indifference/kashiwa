@@ -23,6 +23,7 @@
       "@caching/*": ["src/caching/*"],
       "@captcha/*": ["src/captcha/*"],
       "@config/*": ["src/config/*"],
+      "@debug/*": ["src/debug/*"],
       "@library/*": ["src/library/*"],
       "@locale/*": ["src/locale/*"],
       "@persistence/*": ["src/persistence/*"],

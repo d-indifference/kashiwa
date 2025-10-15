@@ -267,7 +267,11 @@ export const locale: Record<string, LocaleArgument> = {
   UNPIN: 'Unpin',
   DISABLE_REPLIES: 'Disable replies',
   ENABLE_REPLIES: 'Enable replies',
-  REPLIES_ARE_DISABLED: 'You cannot reply this thread'
+  REPLIES_ARE_DISABLED: 'You cannot reply this thread',
+  OPERATION_ONLY_FOR_DEVELOPMENT: 'Please do not use this operation in production mode!',
+  ALLOWED_ORIGINS: 'CORS Allowed origins',
+  CORS_SETTINGS: 'CORS settings',
+  EDIT_CORS_SETTINGS: 'Edit CORS settings'
 };
 
 export const localeValidators: Record<string, (...args: unknown[]) => string> = {

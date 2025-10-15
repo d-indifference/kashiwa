@@ -9,6 +9,7 @@ import { loggerConfig } from '@config/logger.config';
 import { AdminModule } from '@admin/admin.module';
 import { PostingModule } from '@posting/posting.module';
 import { ApiModule } from '@api/api.module';
+import { DebugModule } from '@debug/debug.module';
 
 @Module({
   controllers: [AppController],
@@ -25,6 +26,7 @@ import { ApiModule } from '@api/api.module';
     LoggerModule.forRoot(loggerConfig()),
     LibraryModule,
     ApiModule,
+    ...(process.env.NODE_ENV !== 'production' ? [DebugModule] : []),
     AdminModule,
     PostingModule
   ],

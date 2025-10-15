@@ -9,6 +9,7 @@ import {
   AuthService,
   BanService,
   BoardService,
+  CorsSettingsService,
   DashboardService,
   DumpService,
   GlobalSettingsService,
@@ -27,7 +28,8 @@ import {
   StaffController,
   BoardController,
   BanController,
-  ModerationController
+  ModerationController,
+  CorsSettingsController
 } from '@admin/controllers';
 import { DashboardUtilsProvider, DatabaseDumpingUtilsProvider } from '@admin/providers';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -59,7 +61,8 @@ import { AntiSpamModule } from '@restriction/modules/antispam/anti-spam.module';
     StaffService,
     BoardService,
     BanService,
-    ModerationService
+    ModerationService,
+    CorsSettingsService
   ],
   controllers: [
     AuthController,
@@ -71,7 +74,8 @@ import { AntiSpamModule } from '@restriction/modules/antispam/anti-spam.module';
     StaffController,
     BoardController,
     BanController,
-    ModerationController
+    ModerationController,
+    CorsSettingsController
   ]
 })
 export class AdminModule implements NestModule {

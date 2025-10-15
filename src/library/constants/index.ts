@@ -42,6 +42,9 @@ export class Constants {
   /** `global-settings` file name */
   public static FILE_GLOBAL_SETTINGS = 'global-settings';
 
+  /** `allowed-origins` file name */
+  public static FILE_ALLOWED_ORIGINS = 'allowed-origins';
+
   /** Default thumbnail side size */
   public static DEFAULT_THUMBNAIL_SIDE = 200;
 
