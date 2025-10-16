@@ -4,6 +4,9 @@ import { PinoLogger } from 'nestjs-pino';
 import { UserAgentRestrictionModule } from '@restriction/modules/user-agent-restriction/user-agent-restriction.module';
 import { Constants } from '@library/constants';
 
+/**
+ * Service responsible for initializing the forbidden user agents list from persistent storage when the module is loaded
+ */
 @Injectable()
 export class InitModuleProvider implements OnModuleInit {
   constructor(
@@ -18,6 +21,9 @@ export class InitModuleProvider implements OnModuleInit {
     this.extractFromFile().then();
   }
 
+  /**
+   * Reads the forbidden user agents from persistent storage and updates the site context with compiled RegExp patterns
+   */
   private async extractFromFile(): Promise<void> {
     this.logger.info('extractFromFile');
 
@@ -25,10 +31,16 @@ export class InitModuleProvider implements OnModuleInit {
     this.siteContext.setForbiddenUserAgents(this.compileRegExps(storageFileContent));
   }
 
+  /**
+   * Compiles an array of string patterns into case-insensitive regular expressions
+   */
   private compileRegExps(regExpsSources: string[]): RegExp[] {
     return regExpsSources.map(pattern => new RegExp(pattern, 'i'));
   }
 
+  /**
+   * Reads the forbidden user agents file from disk and splits it into lines
+   */
   private async readFile(): Promise<string[]> {
     const fileRelativePath = [Constants.SETTINGS_DIR, Constants.FILE_FORBIDDEN_USER_AGENTS];
 

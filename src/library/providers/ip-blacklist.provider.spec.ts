@@ -48,6 +48,22 @@ describe('IpBlacklistProvider', () => {
       expect(provider.isIpBlocked('abcd:1234:5678:ffff:ffff:ffff:ffff:ffff')).toBe(true);
       expect(provider.isIpBlocked('abcd:1234:5677:0000:0000:0000:0000:0001')).toBe(false);
     });
+
+    it('should block IPv4 addresses in CIDR range', () => {
+      siteContextMock.getIpBlackList.mockReturnValue(['10.0.0.0/24']);
+      provider.reloadBlacklist();
+      expect(provider.isIpBlocked('10.0.0.1')).toBe(true);
+      expect(provider.isIpBlocked('10.0.0.255')).toBe(true);
+      expect(provider.isIpBlocked('10.0.1.1')).toBe(false);
+    });
+
+    it('should block IPv6 addresses in CIDR range', () => {
+      siteContextMock.getIpBlackList.mockReturnValue(['2001:db8::/32']);
+      provider.reloadBlacklist();
+      expect(provider.isIpBlocked('2001:db8::1')).toBe(true);
+      expect(provider.isIpBlocked('2001:db8:0:0:0:0:0:1')).toBe(true);
+      expect(provider.isIpBlocked('2001:db9::1')).toBe(false);
+    });
   });
 
   describe('reloadBlacklist', () => {

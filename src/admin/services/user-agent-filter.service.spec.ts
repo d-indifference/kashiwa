@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserAgentFilterService } from '@admin/services/user-agent-filter.service';
 import { FileSystemProvider, SiteContextProvider } from '@library/providers';
-import { ForbiddenUserAgentsProvider } from '@restriction/modules/user-agent-restriction/providers';
 import { PinoLogger } from 'nestjs-pino';
 import { UserAgentForm } from '@admin/forms';
 import { Constants } from '@library/constants';
@@ -11,7 +10,6 @@ describe('UserAgentFilterService', () => {
   let service: UserAgentFilterService;
   let fileSystem: jest.Mocked<FileSystemProvider>;
   let siteContext: jest.Mocked<SiteContextProvider>;
-  let forbiddenProvider: jest.Mocked<ForbiddenUserAgentsProvider>;
   let logger: jest.Mocked<PinoLogger>;
 
   beforeEach(async () => {
@@ -20,7 +18,6 @@ describe('UserAgentFilterService', () => {
       getForbiddenUserAgents: jest.fn(),
       setForbiddenUserAgents: jest.fn()
     } as any;
-    forbiddenProvider = {} as any;
     logger = {
       setContext: jest.fn(),
       debug: jest.fn(),
@@ -32,7 +29,6 @@ describe('UserAgentFilterService', () => {
         UserAgentFilterService,
         { provide: FileSystemProvider, useValue: fileSystem },
         { provide: SiteContextProvider, useValue: siteContext },
-        { provide: ForbiddenUserAgentsProvider, useValue: forbiddenProvider },
         { provide: PinoLogger, useValue: logger }
       ]
     }).compile();

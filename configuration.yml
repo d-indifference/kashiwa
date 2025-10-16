@@ -4,6 +4,11 @@ application:
 
 http:
   port: 3000
+  cors:
+    allowed-origins:
+      default-preset:
+        - 'http://127.0.0.1'
+        - 'http://localhost'
 
 file-storage:
   path: /var/lib/application.kashiwa/data
