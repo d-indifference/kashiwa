@@ -3,7 +3,7 @@ import { FileSystemProvider, SiteContextProvider } from '@library/providers';
 import { PinoLogger } from 'nestjs-pino';
 import { ISession } from '@admin/interfaces';
 import { FormPage, RenderableSessionFormPage } from '@admin/lib';
-import { CorsSettingsForm } from '@admin/forms/cors-settings.form';
+import { CorsSettingsForm } from '@admin/forms';
 import { LOCALE } from '@locale/locale';
 import { Response } from 'express';
 import { Constants } from '@library/constants';

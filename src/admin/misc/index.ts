@@ -86,6 +86,7 @@ export const moderationCommentsTableConstructor = new TableConstructor<CommentMo
   )
   .dateTimeValue(LOCALE.CREATED_AT as string, 'createdAt')
   .plainValue(LOCALE.IP as string, 'ip')
+  .plainValue(LOCALE.USER_AGENT as string, 'userAgent')
   .plainValue(LOCALE.FORM_NAME as string, 'name')
   .nullablePlainValue(LOCALE.FORM_EMAIL as string, 'email')
   .nullablePlainValue(LOCALE.FORM_SUBJECT as string, 'subject')

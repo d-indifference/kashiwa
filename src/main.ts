@@ -25,6 +25,8 @@ import { AntiSpamService, InitModuleService } from '@restriction/modules/antispa
 import { SwaggerModule } from '@nestjs/swagger';
 import * as process from 'node:process';
 import { enableCors } from '@library/misc';
+import { ForbiddenUserAgentsProvider } from '@restriction/modules/user-agent-restriction/providers';
+import { UserAgentGuard } from '@restriction/modules/user-agent-restriction/guards';
 
 const bootstrap = async (): Promise<void> => {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
@@ -58,8 +60,6 @@ const bootstrap = async (): Promise<void> => {
 
   const ipBlacklistProvider = app.get(IpBlacklistProvider);
   const ipFilterGuard = new IpFilterGuard(fileSystem, ipBlacklistProvider, siteContext);
-  app.useGlobalGuards(ipFilterGuard);
-  await ipFilterGuard.load();
 
   const globalSettingsProvider = new GlobalSettingsProvider(fileSystem, siteContext);
   await globalSettingsProvider.load();
@@ -79,6 +79,12 @@ const bootstrap = async (): Promise<void> => {
     enableCors(app, siteContext);
     NestLogger.debug(`[CORS] Updated allowed origins: ${val.join(', ')}`);
   });
+
+  const forbiddenUserAgentProvider = new ForbiddenUserAgentsProvider(siteContext, new PinoLogger(loggerConfig()));
+  const userAgentGuard = new UserAgentGuard(forbiddenUserAgentProvider);
+
+  app.useGlobalGuards(ipFilterGuard, userAgentGuard);
+  await ipFilterGuard.load();
 
   app.getHttpAdapter().getInstance().set('trust proxy', true);
 

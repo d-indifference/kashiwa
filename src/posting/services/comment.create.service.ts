@@ -34,6 +34,7 @@ export class CommentCreateService {
    * @param url Board URL
    * @param form Form for thread creation
    * @param ip Poster's IP
+   * @param userAgent User-agent
    * @param res `Express.js` response
    * @param isAdmin Check if poster is admin
    */
@@ -41,13 +42,14 @@ export class CommentCreateService {
     url: string,
     form: ThreadCreateForm,
     ip: string,
+    userAgent: string,
     res: Response,
     isAdmin: boolean = false
   ): Promise<void> {
     this.logger.info({ url, form, ip, isAdmin }, 'createThread');
 
     const board = await this.boardPersistenceService.findByUrl(url);
-    const input = await this.toThreadCreateInput(board, form, ip, isAdmin);
+    const input = await this.toThreadCreateInput(board, form, ip, isAdmin, userAgent);
     const newThread = await this.commentPersistenceService.createComment(url, input);
 
     await this.deleteOldestPostOnMaxThreadsOnBoard(board);
@@ -66,6 +68,7 @@ export class CommentCreateService {
    * @param parentNum Parent thread for a new comment
    * @param form Form for thread creation
    * @param ip Poster's IP
+   * @param userAgent User-agent
    * @param res `Express.js` response
    * @param isAdmin Check if poster is admin
    */
@@ -74,13 +77,14 @@ export class CommentCreateService {
     parentNum: bigint,
     form: ReplyCreateForm,
     ip: string,
+    userAgent: string,
     res: Response,
     isAdmin: boolean = false
   ): Promise<void> {
     this.logger.info({ url, parentNum, form, ip, isAdmin }, 'createReply');
 
     const board = await this.boardPersistenceService.findByUrl(url);
-    const input = await this.toReplyCreateInput(board, parentNum, form, ip, isAdmin);
+    const input = await this.toReplyCreateInput(board, parentNum, form, ip, userAgent, isAdmin);
     const newReply = await this.commentPersistenceService.createComment(url, input);
 
     await this.updateLastHit(board, form, parentNum);
@@ -99,9 +103,10 @@ export class CommentCreateService {
     board: BoardDto,
     form: ThreadCreateForm,
     ip: string,
-    isAdmin: boolean
+    isAdmin: boolean,
+    userAgent: string
   ): Promise<Prisma.CommentCreateInput> {
-    const input = await this.toCommentCreateInput(board, isAdmin, ip, form, false);
+    const input = await this.toCommentCreateInput(board, isAdmin, ip, form, userAgent, false);
     input.lastHit = new Date();
     return input;
   }
@@ -114,9 +119,10 @@ export class CommentCreateService {
     parentNum: bigint,
     form: ReplyCreateForm,
     ip: string,
+    userAgent: string,
     isAdmin: boolean
   ): Promise<Prisma.CommentCreateInput> {
-    const input = await this.toCommentCreateInput(board, isAdmin, ip, form, form.sage);
+    const input = await this.toCommentCreateInput(board, isAdmin, ip, form, userAgent, form.sage);
     const parent = await this.commentPersistenceService.findOpeningPost(board.url, parentNum);
     input.parent = { connect: { id: parent.id } };
     return input;
@@ -130,6 +136,7 @@ export class CommentCreateService {
     isAdmin: boolean,
     ip: string,
     form: ThreadCreateForm | ReplyCreateForm,
+    userAgent: string,
     hasSage: boolean
   ): Promise<Prisma.CommentCreateInput> {
     const { attachedFile } = await this.attachedFileService.createAttachedFile(form.file, board.url);
@@ -155,7 +162,8 @@ export class CommentCreateService {
       comment,
       password,
       attachedFile,
-      hasSage
+      hasSage,
+      userAgent
     };
   }
 

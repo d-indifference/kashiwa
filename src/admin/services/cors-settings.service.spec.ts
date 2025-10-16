@@ -2,7 +2,7 @@ import { CorsSettingsService } from './cors-settings.service';
 import { FileSystemProvider, SiteContextProvider } from '@library/providers';
 import { PinoLogger } from 'nestjs-pino';
 import { ISession } from '@admin/interfaces';
-import { CorsSettingsForm } from '@admin/forms/cors-settings.form';
+import { CorsSettingsForm } from '@admin/forms';
 import { Response } from 'express';
 import { Constants } from '@library/constants';
 

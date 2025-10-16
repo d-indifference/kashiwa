@@ -20,7 +20,7 @@ export class IpFilterController {
   }
 
   @Get()
-  @Roles(UserRole.ADMINISTRATOR)
+  @Roles(UserRole.ADMINISTRATOR, UserRole.MODERATOR)
   @UseGuards(SessionGuard)
   @Render('admin/common_form_page')
   public async getIpFilterListForm(@Session() session: ISession): Promise<RenderableSessionFormPage> {
@@ -30,7 +30,7 @@ export class IpFilterController {
   }
 
   @Post()
-  @Roles(UserRole.ADMINISTRATOR)
+  @Roles(UserRole.ADMINISTRATOR, UserRole.MODERATOR)
   @UseGuards(SessionGuard)
   @FormDataRequest()
   public async updateIpFilter(

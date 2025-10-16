@@ -8,7 +8,7 @@ import { ISession } from '@admin/interfaces';
 import { RenderableSessionFormPage } from '@admin/lib';
 import { FormDataRequest } from 'nestjs-form-data';
 import { Response } from 'express';
-import { CorsSettingsForm } from '@admin/forms/cors-settings.form';
+import { CorsSettingsForm } from '@admin/forms';
 
 @Controller('kashiwa/cors-settings')
 export class CorsSettingsController {

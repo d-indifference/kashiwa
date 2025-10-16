@@ -271,7 +271,11 @@ export const locale: Record<string, LocaleArgument> = {
   OPERATION_ONLY_FOR_DEVELOPMENT: 'Please do not use this operation in production mode!',
   ALLOWED_ORIGINS: 'CORS Allowed origins',
   CORS_SETTINGS: 'CORS settings',
-  EDIT_CORS_SETTINGS: 'Edit CORS settings'
+  EDIT_CORS_SETTINGS: 'Edit CORS settings',
+  BLOCKED_REQUEST: 'Your request has been blocked!',
+  BLOCKED_USER_AGENTS_LIST: 'List of blocked user-agents',
+  EDIT_BLOCKED_USER_AGENTS: 'Edit forbidden user-agents',
+  USER_AGENT: 'User-Agent'
 };
 
 export const localeValidators: Record<string, (...args: unknown[]) => string> = {

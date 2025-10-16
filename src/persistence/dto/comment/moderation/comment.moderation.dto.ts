@@ -69,6 +69,11 @@ export class CommentModerationDto {
    */
   attachedFile: AttachedFileModerationDto | null;
 
+  /**
+   * Poster's User-agent
+   */
+  userAgent: string | null;
+
   constructor(
     id: string,
     ip: string,
@@ -82,7 +87,8 @@ export class CommentModerationDto {
     comment: string,
     pinnedAt: Date | null,
     isPostingEnabled: boolean,
-    attachedFile: AttachedFileModerationDto | null
+    attachedFile: AttachedFileModerationDto | null,
+    userAgent: string | null
   ) {
     this.id = id;
     this.ip = ip;
@@ -97,5 +103,6 @@ export class CommentModerationDto {
     this.pinnedAt = pinnedAt;
     this.isPostingEnabled = isPostingEnabled;
     this.attachedFile = attachedFile;
+    this.userAgent = userAgent;
   }
 }

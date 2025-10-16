@@ -8,6 +8,7 @@ const KEY_GLOBAL_SETTINGS = 'KEY_GLOBAL_SETTINGS';
 const KEY_SPAM_EXPRESSIONS = 'KEY_SPAM_EXPRESSIONS';
 const KEY_IP_BLACK_LIST = 'KEY_IP_BLACK_LIST';
 const KEY_CORS_ALLOWED_ORIGINS = 'KEY_CORS_ALLOWED_ORIGINS';
+const KEY_FORBIDDEN_USER_AGENTS = 'KEY_FORBIDDEN_USER_AGENTS';
 
 /**
  * Provider that manages global site-related runtime data in memory,
@@ -79,6 +80,14 @@ export class SiteContextProvider extends EventEmitter {
   public setCorsAllowedOrigins(val: string[]): void {
     this.inMemoryCache.set(KEY_CORS_ALLOWED_ORIGINS, val);
     this.emit('corsUpdated', val);
+  }
+
+  public getForbiddenUserAgents(): RegExp[] | undefined {
+    return this.inMemoryCache.get<RegExp[]>(KEY_FORBIDDEN_USER_AGENTS);
+  }
+
+  public setForbiddenUserAgents(val: RegExp[]): void {
+    this.inMemoryCache.set(KEY_FORBIDDEN_USER_AGENTS, val);
   }
 
   /**
