@@ -29,6 +29,8 @@ model Comment {
   parent   Comment?  @relation(fields: [parentId], references: [id], onDelete: Cascade, name: "parent_to_children")
   children Comment[] @relation("parent_to_children")
 
+  reports Report[]
+
   @@unique([boardId, num])
   @@map("comment")
 }

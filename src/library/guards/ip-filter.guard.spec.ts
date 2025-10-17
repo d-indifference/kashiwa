@@ -1,7 +1,6 @@
 import { IpFilterGuard } from './ip-filter.guard';
 import { ForbiddenException, ExecutionContext } from '@nestjs/common';
 
-// Моки для зависимостей
 const fileSystemMock = {
   pathExists: jest.fn(),
   writeTextFile: jest.fn(),
@@ -15,13 +14,11 @@ const siteContextMock = {
   setIpBlackList: jest.fn()
 };
 
-// Мок для getClientIp
 jest.mock('@supercharge/request-ip', () => ({
   getClientIp: jest.fn()
 }));
 import { getClientIp } from '@supercharge/request-ip';
 
-// Мок констант и LOCALE
 const Constants = {
   SETTINGS_DIR: '_settings',
   BLACK_LIST_FILE_NAME: 'black_list'

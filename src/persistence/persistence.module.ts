@@ -1,13 +1,14 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { PrismaService } from '@persistence/lib';
 import { ConfigModule } from '@nestjs/config';
-import { BanMapper, BoardMapper, CommentMapper, UserMapper } from '@persistence/mappers';
+import { BanMapper, BoardMapper, CommentMapper, ReportMapper, UserMapper } from '@persistence/mappers';
 import {
   AttachedFilePersistenceService,
   BoardPersistenceService,
   UserPersistenceService,
   CommentPersistenceService,
-  BanPersistenceService
+  BanPersistenceService,
+  ReportPersistenceService
 } from '@persistence/services';
 import { LibraryModule } from '@library/library.module';
 
@@ -26,14 +27,17 @@ import { LibraryModule } from '@library/library.module';
     CommentPersistenceService,
     AttachedFilePersistenceService,
     BanMapper,
-    BanPersistenceService
+    BanPersistenceService,
+    ReportMapper,
+    ReportPersistenceService
   ],
   exports: [
     UserPersistenceService,
     BoardPersistenceService,
     CommentPersistenceService,
     AttachedFilePersistenceService,
-    BanPersistenceService
+    BanPersistenceService,
+    ReportPersistenceService
   ]
 })
 export class PersistenceModule {}

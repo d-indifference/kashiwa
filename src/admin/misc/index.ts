@@ -6,7 +6,9 @@ import { AttachedFileModerationDto, CommentModerationDto } from '@persistence/dt
 import { BanCreateForm } from '@admin/forms/ban';
 import { TimeUnits } from '@persistence/dto/ban';
 
-const mapAttachedFileHtml = (file: AttachedFileModerationDto): string => {
+export * from './report-table-constructor';
+
+export const mapAttachedFileHtml = (file: AttachedFileModerationDto): string => {
   if (file.isImage) {
     if (file.name === 'NO_THUMB') {
       return `<div class="nothumb">${LOCALE.POST_NO_FILE as string}</div>`;

@@ -275,7 +275,12 @@ export const locale: Record<string, LocaleArgument> = {
   BLOCKED_REQUEST: 'Your request has been blocked!',
   BLOCKED_USER_AGENTS_LIST: 'List of blocked user-agents',
   EDIT_BLOCKED_USER_AGENTS: 'Edit forbidden user-agents',
-  USER_AGENT: 'User-Agent'
+  USER_AGENT: 'User-Agent',
+  REPORT: 'Report',
+  REPORTS: 'Reports',
+  COMMENT_DELETION_SUBMIT_TYPE: 'Comment deletion submit type',
+  REPORTS_EXPLANATION: 'Please review all current reports',
+  DELETE_THIS_REPORT: 'Delete this report'
 };
 
 export const localeValidators: Record<string, (...args: unknown[]) => string> = {

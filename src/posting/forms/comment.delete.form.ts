@@ -1,6 +1,7 @@
 import { Transform } from 'class-transformer';
-import { KIsArray, KIsBigint, KIsBoolean, KIsNotEmpty, KIsString, KLength } from '@library/validators';
+import { KIsArray, KIsBigint, KIsBoolean, KIsIn, KIsNotEmpty, KIsString, KLength } from '@library/validators';
 import { normalizeBigintArray, normalizeBooleanCheckbox } from '@library/transforms';
+import { LOCALE } from '@locale/locale';
 
 /**
  * Form for user's comment deletion
@@ -29,4 +30,14 @@ export class CommentDeleteForm {
   @KIsNotEmpty('FORM_PASSWORD')
   @KLength('FORM_PASSWORD', 8, 8)
   password: string;
+
+  /**
+   * Comment deletion submit type
+   * - `Delete`: comment or file will be deleted
+   * - `Report`: comment or file will be reported to the administration
+   */
+  @KIsString('COMMENT_DELETION_SUBMIT_TYPE')
+  @KIsNotEmpty('COMMENT_DELETION_SUBMIT_TYPE')
+  @KIsIn('COMMENT_DELETION_SUBMIT_TYPE', [LOCALE.DELETE, LOCALE.REPORT])
+  submitType: string;
 }

@@ -17,7 +17,8 @@ import {
   IpFilterService,
   ModerationService,
   SpamListService,
-  StaffService
+  StaffService,
+  ReportService
 } from '@admin/services';
 import {
   AuthController,
@@ -31,7 +32,8 @@ import {
   BanController,
   ModerationController,
   CorsSettingsController,
-  UserAgentFilterController
+  UserAgentFilterController,
+  ReportController
 } from '@admin/controllers';
 import { DashboardUtilsProvider, DatabaseDumpingUtilsProvider } from '@admin/providers';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -67,7 +69,8 @@ import { UserAgentRestrictionModule } from '@restriction/modules/user-agent-rest
     BanService,
     ModerationService,
     CorsSettingsService,
-    UserAgentFilterService
+    UserAgentFilterService,
+    ReportService
   ],
   controllers: [
     AuthController,
@@ -81,7 +84,8 @@ import { UserAgentRestrictionModule } from '@restriction/modules/user-agent-rest
     BanController,
     ModerationController,
     CorsSettingsController,
-    UserAgentFilterController
+    UserAgentFilterController,
+    ReportController
   ]
 })
 export class AdminModule implements NestModule {

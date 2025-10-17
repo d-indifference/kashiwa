@@ -10,3 +10,4 @@ export * from './ban.service';
 export * from './moderation.service';
 export * from './cors-settings.service';
 export * from './user-agent-filter.service';
+export * from './report.service';

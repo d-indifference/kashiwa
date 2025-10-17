@@ -61,14 +61,14 @@ After saving the source code, do the following:
 
    Example default section in configuration.yml:
 
-    ```yaml
-   http:
-    port: 3000
-    cors:
-      allowed-origins:
-      default-preset:
-        - 'http://127.0.0.1'
-        - 'http://localhost'
+   ```yaml
+    http:
+      port: 3000
+      cors:
+        allowed-origins:
+          default-preset:
+            - 'http://127.0.0.1'
+            - 'http://localhost'
    ```
 
     You must add to this list the addresses from which your application will be accessible, for example, if your domain is https://example.com/, add the following lines to your `configuration.yml`:
@@ -76,12 +76,12 @@ After saving the source code, do the following:
    ```yaml
     http:
       port: 3000
-    cors:
-      allowed-origins:
-        default-preset:
-          - 'http://127.0.0.1'
-          - 'http://localhost'
-          - 'https://example.com'
+      cors:
+        allowed-origins:
+          default-preset:
+            - 'http://127.0.0.1'
+            - 'http://localhost'
+            - 'https://example.com'
    ```
 
     On the first startup, Kashiwa will create the file `allowed-origins` (inside the application volume)

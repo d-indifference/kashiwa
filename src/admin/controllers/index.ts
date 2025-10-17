@@ -10,3 +10,4 @@ export * from './ban.controller';
 export * from './moderation.controller';
 export * from './cors-settings.controller';
 export * from './user-agent-filter.controller';
+export * from './report.controller';

@@ -6,6 +6,7 @@ import {
   Post,
   Query,
   Render,
+  Req,
   Res,
   Session,
   UseGuards,
@@ -16,7 +17,7 @@ import { SessionGuard } from '@admin/guards';
 import { PageRequest } from '@persistence/lib/page';
 import { ISession } from '@admin/interfaces';
 import { TablePage } from '@admin/pages';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { ParseBigintPipe } from '@library/pipes';
 import { PinoLogger } from 'nestjs-pino';
 
@@ -81,11 +82,12 @@ export class ModerationController {
   public async deletePost(
     @Param('url') url: string,
     @Param('num', ParseBigintPipe) num: bigint,
+    @Req() req: Request,
     @Res() res: Response
   ): Promise<void> {
     this.logger.debug(`URL called: POST /kashiwa/moderation/delete-post/${url}/${num}`);
 
-    await this.moderationService.deleteComment(url, num, res);
+    await this.moderationService.deleteComment(url, num, res, req.headers.referer);
   }
 
   @Post('delete-file/:url/:num')
@@ -93,18 +95,24 @@ export class ModerationController {
   public async deleteFile(
     @Param('url') url: string,
     @Param('num', ParseBigintPipe) num: bigint,
+    @Req() req: Request,
     @Res() res: Response
   ): Promise<void> {
     this.logger.debug(`URL called: POST /kashiwa/moderation/delete-file/${url}/${num}`);
 
-    await this.moderationService.clearFile(url, num, res);
+    await this.moderationService.clearFile(url, num, res, req.headers.referer);
   }
 
   @Post('delete-by-ip/:url/:ip')
   @UseGuards(SessionGuard)
-  public async deleteByIp(@Param('url') url: string, @Param('ip') ip: string, @Res() res: Response): Promise<void> {
+  public async deleteByIp(
+    @Param('url') url: string,
+    @Param('ip') ip: string,
+    @Req() req: Request,
+    @Res() res: Response
+  ): Promise<void> {
     this.logger.debug(`URL called: POST /kashiwa/moderation/delete-by-ip/${url}/${ip}`);
 
-    await this.moderationService.deleteAllByIp(url, ip, res);
+    await this.moderationService.deleteAllByIp(url, ip, res, req.headers.referer);
   }
 }

@@ -117,8 +117,9 @@ export class ModerationService {
    * @param url Board URL
    * @param num Post number
    * @param res `Express.js` response
+   * @param referer Request URL referer
    */
-  public async deleteComment(url: string, num: bigint, res: Response): Promise<void> {
+  public async deleteComment(url: string, num: bigint, res: Response, referer: string | undefined): Promise<void> {
     this.logger.info({ url, num: num.toString() }, 'deleteComment');
 
     await this.commentPersistenceService.remove(url, num);
@@ -128,7 +129,7 @@ export class ModerationService {
     this.cache.del(`api.findPost:${url}:${num}`);
     this.cache.delKeyStartWith(`api.findThreadsPage:${board.url}`);
 
-    res.redirect(`/kashiwa/moderation/${board.id}`);
+    res.redirect(referer ?? `/kashiwa/moderation/${board.id}`);
   }
 
   /**
@@ -136,8 +137,9 @@ export class ModerationService {
    * @param url Board URL
    * @param num Post number
    * @param res `Express.js` response
+   * @param referer Request URL referer
    */
-  public async clearFile(url: string, num: bigint, res: Response): Promise<void> {
+  public async clearFile(url: string, num: bigint, res: Response, referer: string | undefined): Promise<void> {
     this.logger.info({ url, num: num.toString() }, 'clearFile');
 
     await this.attachedFilePersistenceService.clearFromComment(url, num);
@@ -147,7 +149,7 @@ export class ModerationService {
     this.cache.del(`api.findPost:${url}:${num}`);
     this.cache.delKeyStartWith(`api.findThreadsPage:${url}`);
 
-    res.redirect(`/kashiwa/moderation/${board.id}`);
+    res.redirect(referer ?? `/kashiwa/moderation/${board.id}`);
   }
 
   /**
@@ -155,8 +157,9 @@ export class ModerationService {
    * @param url Board URL
    * @param ip Poster's IP
    * @param res `Express.js` response
+   * @param referer Request URL referer
    */
-  public async deleteAllByIp(url: string, ip: string, res: Response): Promise<void> {
+  public async deleteAllByIp(url: string, ip: string, res: Response, referer: string | undefined): Promise<void> {
     this.logger.info({ url, ip }, 'deleteAllByIp');
 
     await this.commentPersistenceService.removeByIp(url, ip);
@@ -166,7 +169,7 @@ export class ModerationService {
     this.cache.delKeyStartWith(`api.findPost:${url}`);
     this.cache.delKeyStartWith(`api.findThreadsPage:${url}`);
 
-    res.redirect(`/kashiwa/moderation/${board.id}`);
+    res.redirect(referer ?? `/kashiwa/moderation/${board.id}`);
   }
 
   private async clearThreadCacheAndRedirect(url: string, num: bigint, res: Response): Promise<void> {

@@ -8,7 +8,7 @@ block content
 
     div.logo #{SITE_SETTINGS().siteName}
     hr
-    +AdminLinks(session.payload.role)
+    +AdminLinks(session.payload)
     | [
     a(href=commons.goBack)= LOCALE.GO_BACK
     | ]
