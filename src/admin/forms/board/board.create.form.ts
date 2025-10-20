@@ -311,6 +311,16 @@ export class BoardCreateForm {
   allowOekakiReplies: boolean = false;
 
   /**
+   * Allows you to determine the user's location by their IP address
+   * and display a flag indicating their country of location
+   */
+  @FormCheckbox({ displayName: LOCALE.ALLOW_GEO_IP as string })
+  @Transform(normalizeBooleanCheckbox)
+  @KIsBoolean('ALLOW_GEO_IP')
+  @KIsNotEmpty('ALLOW_GEO_IP')
+  allowGeoIp: boolean = false;
+
+  /**
    * HTML fragment with board rules
    */
   @FormTextarea({ displayName: LOCALE.RULES as string, rows: 6, cols: 60 })

@@ -1,4 +1,5 @@
 import { AttachedFileDto } from '@persistence/dto/comment/common/attached-file.dto';
+import { WhoisDto } from '@whois/dto';
 
 /**
  * DTO for comment and its replies
@@ -23,6 +24,11 @@ export class CommentDto {
    * Is comment written by admin
    */
   isAdmin: boolean;
+
+  /**
+   * Poster's country info
+   */
+  country: WhoisDto | null;
 
   /**
    * Poster's name
@@ -78,6 +84,7 @@ export class CommentDto {
     num: bigint,
     createdAt: Date,
     isAdmin: boolean,
+    country: WhoisDto | null,
     name: string,
     email: string | null,
     tripcode: string | null,
@@ -92,6 +99,7 @@ export class CommentDto {
     this.num = num;
     this.createdAt = createdAt;
     this.isAdmin = isAdmin;
+    this.country = country;
     this.name = name;
     this.email = email;
     this.tripcode = tripcode;

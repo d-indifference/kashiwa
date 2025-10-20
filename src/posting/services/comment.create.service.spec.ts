@@ -9,6 +9,7 @@ describe('CommentCreateService', () => {
   let boardPersistenceService: any;
   let commentPersistenceService: any;
   let attachedFileService: any;
+  let whoisProvider: any;
   let wakabaMarkdown: any;
   let cachingProvider: any;
   let cache: any;
@@ -40,9 +41,13 @@ describe('CommentCreateService', () => {
       del: jest.fn(),
       delKeyStartWith: jest.fn()
     };
+    whoisProvider = {
+      provideCountryInfo: jest.fn()
+    };
     service = new CommentCreateService(
       boardPersistenceService,
       commentPersistenceService,
+      whoisProvider,
       attachedFileService,
       wakabaMarkdown,
       cachingProvider,
@@ -183,6 +188,9 @@ describe('CommentCreateService', () => {
         | ReplyCreateForm;
       attachedFileService.createAttachedFile.mockResolvedValue({ attachedFile: 'fileObj' });
       wakabaMarkdown.formatAsWakaba.mockResolvedValue('<p>msg</p>');
+      whoisProvider.provideCountryInfo.mockResolvedValue(
+        '{"country":"Bulgaria","flag":"https://example.cdn.com/bg.svg"}'
+      );
       const enrichName = jest.fn().mockReturnValue({ name: 'user', tripcode: 'trip' });
       const setPassword = jest.fn().mockReturnValue('hashedPwd');
       jest.mock('@posting/lib/functions', () => ({
@@ -201,6 +209,9 @@ describe('CommentCreateService', () => {
       expect(result.createdAt).toBeInstanceOf(Date);
       expect(result.hasSage).toBe(false);
       expect(result.userAgent).toBe(userAgent);
+      expect(result.country).toBe(
+        '\"{\\\"country\\\":\\\"Bulgaria\\\",\\\"flag\\\":\\\"https://example.cdn.com/bg.svg\\\"}\"'
+      );
     });
   });
 

@@ -22,6 +22,7 @@ module.exports = {
     '^@persistence/(.*)$': '<rootDir>/src/persistence/$1',
     '^@posting/(.*)$': '<rootDir>/src/posting/$1',
     '^@restriction/(.*)$': '<rootDir>/src/restriction/$1',
+    '^@whois/(.*)$': '<rootDir>/src/whois/$1',
   },
   extensionsToTreatAsEsm: ['.ts'],
   globals: {

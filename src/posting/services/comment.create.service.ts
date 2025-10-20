@@ -11,6 +11,7 @@ import { AttachedFileService } from '@posting/services/attached-file.service';
 import { CachingProvider } from '@caching/providers';
 import { InMemoryCacheProvider } from '@library/providers';
 import { PinoLogger } from 'nestjs-pino';
+import { WhoisProvider } from '@whois/providers';
 
 /**
  * Service for comment creation
@@ -20,6 +21,7 @@ export class CommentCreateService {
   constructor(
     private readonly boardPersistenceService: BoardPersistenceService,
     private readonly commentPersistenceService: CommentPersistenceService,
+    private readonly whoisProvider: WhoisProvider,
     private readonly attachedFileService: AttachedFileService,
     private readonly wakabaMarkdown: WakabaMarkdownProvider,
     private readonly cachingProvider: CachingProvider,
@@ -146,6 +148,10 @@ export class CommentCreateService {
       board.boardSettings ? board.boardSettings.allowMarkdown : false,
       isAdmin
     );
+    const country = await this.whoisProvider.provideCountryInfo(
+      ip,
+      board.boardSettings ? board.boardSettings.allowGeoIp : false
+    );
     const { name, tripcode } = enrichName(form.name, board, isAdmin);
     const password = setPassword(form.password);
     const createdAt = new Date();
@@ -163,7 +169,8 @@ export class CommentCreateService {
       password,
       attachedFile,
       hasSage,
-      userAgent
+      userAgent,
+      country: country ? JSON.stringify(country) : Prisma.DbNull
     };
   }
 

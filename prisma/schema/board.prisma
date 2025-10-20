@@ -44,6 +44,7 @@ model BoardSettings {
   allowedFileTypes         Json               @map("allowed_file_types")
   allowOekakiThreads       Boolean            @default(false) @map("allow_oekaki_threads") @db.Boolean
   allowOekakiReplies       Boolean            @default(false) @map("allow_oekaki_replies") @db.Boolean
+  allowGeoIp               Boolean            @default(false) @map("allow_geo_ip") @db.Boolean
   rules                    String             @db.Text
 
   @@map("board_settings")

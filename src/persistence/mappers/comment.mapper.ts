@@ -15,6 +15,7 @@ export class CommentMapper {
       id: comment.id,
       num: comment.num,
       createdAt: comment.createdAt,
+      country: comment.country ? JSON.parse(comment.country as string) : null,
       isAdmin: comment.isAdmin,
       name: comment.name,
       tripcode: comment.tripcode,

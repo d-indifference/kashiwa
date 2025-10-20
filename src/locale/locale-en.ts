@@ -280,7 +280,8 @@ export const locale: Record<string, LocaleArgument> = {
   REPORTS: 'Reports',
   COMMENT_DELETION_SUBMIT_TYPE: 'Comment deletion submit type',
   REPORTS_EXPLANATION: 'Please review all current reports',
-  DELETE_THIS_REPORT: 'Delete this report'
+  DELETE_THIS_REPORT: 'Delete this report',
+  ALLOW_GEO_IP: 'Allow GeoIP'
 };
 
 export const localeValidators: Record<string, (...args: unknown[]) => string> = {

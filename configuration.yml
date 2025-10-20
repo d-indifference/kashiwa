@@ -26,3 +26,10 @@ captcha:
   noise: 3
   color: true
   background: '#cc9966'
+
+whois:
+  enabled: true
+  api:
+    address: 'http://ipwho.is/#{ip}'
+    method: 'GET'
+    timeout: 5000

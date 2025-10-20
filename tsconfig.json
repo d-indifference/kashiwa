@@ -28,7 +28,8 @@
       "@locale/*": ["src/locale/*"],
       "@persistence/*": ["src/persistence/*"],
       "@posting/*": ["src/posting/*"],
-      "@restriction/*": ["src/restriction/*"]
+      "@restriction/*": ["src/restriction/*"],
+      "@whois/*": ["src/whois/*"]
     }
   }
 }

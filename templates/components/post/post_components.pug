@@ -88,6 +88,9 @@ mixin CommentLabel(_board, _comment, _is_reply)
         else
             span.commentpostername= _comment.name
         =' '
+        if _board.boardSettings.allowGeoIp && _comment.country
+          img(src=_comment.country.flag, alt=_comment.country.country, title=_comment.country.country, width=15)
+
         if _comment.tripcode
             span.postertrip
                 | !#{_comment.tripcode}
