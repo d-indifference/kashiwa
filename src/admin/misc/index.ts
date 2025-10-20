@@ -6,7 +6,9 @@ import { AttachedFileModerationDto, CommentModerationDto } from '@persistence/dt
 import { BanCreateForm } from '@admin/forms/ban';
 import { TimeUnits } from '@persistence/dto/ban';
 
-const mapAttachedFileHtml = (file: AttachedFileModerationDto): string => {
+export * from './report-table-constructor';
+
+export const mapAttachedFileHtml = (file: AttachedFileModerationDto): string => {
   if (file.isImage) {
     if (file.name === 'NO_THUMB') {
       return `<div class="nothumb">${LOCALE.POST_NO_FILE as string}</div>`;
@@ -86,6 +88,7 @@ export const moderationCommentsTableConstructor = new TableConstructor<CommentMo
   )
   .dateTimeValue(LOCALE.CREATED_AT as string, 'createdAt')
   .plainValue(LOCALE.IP as string, 'ip')
+  .plainValue(LOCALE.USER_AGENT as string, 'userAgent')
   .plainValue(LOCALE.FORM_NAME as string, 'name')
   .nullablePlainValue(LOCALE.FORM_EMAIL as string, 'email')
   .nullablePlainValue(LOCALE.FORM_SUBJECT as string, 'subject')

@@ -8,6 +8,7 @@ import { AttachedFileService, CatalogService, CommentCreateService, CommentDelet
 import { DeletionController, ForumController, PostingController } from '@posting/controllers';
 import { CachingModule } from '@caching/caching.module';
 import { RestrictionModule } from '@restriction/restriction.module';
+import { WhoisModule } from '@whois/whois.module';
 
 /**
  * Module for thread posting
@@ -18,7 +19,8 @@ import { RestrictionModule } from '@restriction/restriction.module';
     LibraryModule,
     PersistenceModule,
     CachingModule,
-    RestrictionModule
+    RestrictionModule,
+    WhoisModule
   ],
   providers: [
     FormFileProvider,

@@ -9,6 +9,7 @@ describe('CommentCreateService', () => {
   let boardPersistenceService: any;
   let commentPersistenceService: any;
   let attachedFileService: any;
+  let whoisProvider: any;
   let wakabaMarkdown: any;
   let cachingProvider: any;
   let cache: any;
@@ -40,9 +41,13 @@ describe('CommentCreateService', () => {
       del: jest.fn(),
       delKeyStartWith: jest.fn()
     };
+    whoisProvider = {
+      provideCountryInfo: jest.fn()
+    };
     service = new CommentCreateService(
       boardPersistenceService,
       commentPersistenceService,
+      whoisProvider,
       attachedFileService,
       wakabaMarkdown,
       cachingProvider,
@@ -73,12 +78,19 @@ describe('CommentCreateService', () => {
         'b',
         { password: 'pass' } as ThreadCreateForm,
         '127.0.0.1',
+        'Mozilla 5.0',
         res as unknown as Response,
         false
       );
 
       expect(boardPersistenceService.findByUrl).toHaveBeenCalledWith('b');
-      expect(service['toThreadCreateInput']).toHaveBeenCalledWith(board, { password: 'pass' }, '127.0.0.1', false);
+      expect(service['toThreadCreateInput']).toHaveBeenCalledWith(
+        board,
+        { password: 'pass' },
+        '127.0.0.1',
+        false,
+        'Mozilla 5.0'
+      );
       expect(commentPersistenceService.createComment).toHaveBeenCalledWith('b', input);
       expect(service['deleteOldestPostOnMaxThreadsOnBoard']).toHaveBeenCalledWith(board);
       expect(cachingProvider.reloadCacheForThread).toHaveBeenCalledWith('b', newThread.num);
@@ -112,6 +124,7 @@ describe('CommentCreateService', () => {
         BigInt(111),
         { password: 'pass', sage: false } as ReplyCreateForm,
         '127.0.0.1',
+        'Mozilla 5.0',
         res as unknown as Response,
         false
       );
@@ -122,6 +135,7 @@ describe('CommentCreateService', () => {
         BigInt(111),
         { password: 'pass', sage: false },
         '127.0.0.1',
+        'Mozilla 5.0',
         false
       );
       expect(commentPersistenceService.createComment).toHaveBeenCalledWith('b', input);
@@ -137,8 +151,8 @@ describe('CommentCreateService', () => {
       const form = { name: 'test', comment: 'hi', password: 'pwd' };
       const input = { foo: 'bar' };
       jest.spyOn(service as any, 'toCommentCreateInput').mockResolvedValue(input);
-      const result = await service['toThreadCreateInput'](board, form, 'ip', false);
-      expect(service['toCommentCreateInput']).toHaveBeenCalledWith(board, false, 'ip', form, false);
+      const result = await service['toThreadCreateInput'](board, form, 'ip', false, 'Mozilla 5.0');
+      expect(service['toCommentCreateInput']).toHaveBeenCalledWith(board, false, 'ip', form, 'Mozilla 5.0', false);
       expect(result.lastHit).toBeInstanceOf(Date);
     });
   });
@@ -151,8 +165,8 @@ describe('CommentCreateService', () => {
       const input = { foo: 'bar' };
       jest.spyOn(service as any, 'toCommentCreateInput').mockResolvedValue(input);
       commentPersistenceService.findOpeningPost.mockResolvedValue({ id: 'abc' });
-      const result = await service['toReplyCreateInput'](board, parentNum, form, 'ip', false);
-      expect(service['toCommentCreateInput']).toHaveBeenCalledWith(board, false, 'ip', form, form.sage);
+      const result = await service['toReplyCreateInput'](board, parentNum, form, 'ip', 'Mozilla 5.0', false);
+      expect(service['toCommentCreateInput']).toHaveBeenCalledWith(board, false, 'ip', form, 'Mozilla 5.0', form.sage);
       expect(commentPersistenceService.findOpeningPost).toHaveBeenCalledWith(board.url, parentNum);
       expect(result.parent).toEqual({ connect: { id: 'abc' } });
     });
@@ -168,11 +182,15 @@ describe('CommentCreateService', () => {
       };
       const isAdmin = false;
       const ip = 'ip';
+      const userAgent = 'Mozilla 5.0';
       const form = { name: 'user', comment: 'msg', password: 'pwd', email: '', subject: '', file: {} } as
         | ThreadCreateForm
         | ReplyCreateForm;
       attachedFileService.createAttachedFile.mockResolvedValue({ attachedFile: 'fileObj' });
       wakabaMarkdown.formatAsWakaba.mockResolvedValue('<p>msg</p>');
+      whoisProvider.provideCountryInfo.mockResolvedValue(
+        '{"country":"Bulgaria","flag":"https://example.cdn.com/bg.svg"}'
+      );
       const enrichName = jest.fn().mockReturnValue({ name: 'user', tripcode: 'trip' });
       const setPassword = jest.fn().mockReturnValue('hashedPwd');
       jest.mock('@posting/lib/functions', () => ({
@@ -180,7 +198,7 @@ describe('CommentCreateService', () => {
         setPassword
       }));
 
-      const result = await service['toCommentCreateInput'](board, isAdmin, ip, form, false);
+      const result = await service['toCommentCreateInput'](board, isAdmin, ip, form, userAgent, false);
       expect(attachedFileService.createAttachedFile).toHaveBeenCalledWith(form.file, board.url);
       expect(wakabaMarkdown.formatAsWakaba).toHaveBeenCalledWith(form.comment, board.url, true, isAdmin);
       expect(result.name).toBe('user');
@@ -190,6 +208,10 @@ describe('CommentCreateService', () => {
       expect(result.board).toEqual({ connect: { id: 'abc' } });
       expect(result.createdAt).toBeInstanceOf(Date);
       expect(result.hasSage).toBe(false);
+      expect(result.userAgent).toBe(userAgent);
+      expect(result.country).toBe(
+        '\"{\\\"country\\\":\\\"Bulgaria\\\",\\\"flag\\\":\\\"https://example.cdn.com/bg.svg\\\"}\"'
+      );
     });
   });
 

@@ -174,3 +174,11 @@ a:hover {
 .reply-link-container {
   background-color: #f0e0d6 !important;
 }
+
+.hide-button {
+  color: #133b5e;
+}
+
+.hide-button:hover {
+  color: #d60c0c;
+}

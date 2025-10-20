@@ -37,6 +37,7 @@ export class BoardMapper {
           allowedFileTypes: JSON.stringify(dto.allowedFileTypes),
           allowOekakiThreads: dto.allowOekakiThreads,
           allowOekakiReplies: dto.allowOekakiReplies,
+          allowGeoIp: dto.allowGeoIp,
           rules: dto.rules
         }
       },
@@ -75,6 +76,7 @@ export class BoardMapper {
           allowedFileTypes: dto.allowedFileTypes ? JSON.stringify(dto.allowedFileTypes) : [],
           allowOekakiThreads: dto.allowOekakiThreads ?? undefined,
           allowOekakiReplies: dto.allowOekakiReplies ?? undefined,
+          allowGeoIp: dto.allowGeoIp ?? undefined,
           rules: dto.rules ?? undefined
         }
       }
@@ -116,6 +118,7 @@ export class BoardMapper {
         this.mapStringArray(boardSettings.allowedFileTypes),
         boardSettings.allowOekakiThreads,
         boardSettings.allowOekakiReplies,
+        boardSettings.allowGeoIp,
         boardSettings.rules
       );
 

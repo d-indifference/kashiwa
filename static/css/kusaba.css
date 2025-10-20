@@ -190,3 +190,10 @@ a:hover {
     background-color: #daf0d6 !important;
 }
 
+.hide-button {
+    color: #345c34;
+}
+
+.hide-button:hover {
+    color: #117743;
+}

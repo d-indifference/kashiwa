@@ -8,7 +8,7 @@ block content
 
     div.logo #{SITE_SETTINGS().siteName}
     hr
-    +AdminLinks(session.payload.role)
+    +AdminLinks(session.payload)
 
     div.theader= commons.pageSubtitle
 

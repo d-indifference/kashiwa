@@ -23,11 +23,13 @@
       "@caching/*": ["src/caching/*"],
       "@captcha/*": ["src/captcha/*"],
       "@config/*": ["src/config/*"],
+      "@debug/*": ["src/debug/*"],
       "@library/*": ["src/library/*"],
       "@locale/*": ["src/locale/*"],
       "@persistence/*": ["src/persistence/*"],
       "@posting/*": ["src/posting/*"],
-      "@restriction/*": ["src/restriction/*"]
+      "@restriction/*": ["src/restriction/*"],
+      "@whois/*": ["src/whois/*"]
     }
   }
 }

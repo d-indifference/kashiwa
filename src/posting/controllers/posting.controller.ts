@@ -1,7 +1,7 @@
-import { Body, Controller, Param, Post, Res, Session, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Param, Post, Req, Res, Session, ValidationPipe } from '@nestjs/common';
 import { FormDataRequest, MemoryStoredFile } from 'nestjs-form-data';
 import { ReplyCreateForm, ThreadCreateForm } from '@posting/forms';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { RealIP } from 'nestjs-real-ip';
 import { ISession } from '@admin/interfaces';
 import { CommentCreateService } from '@posting/services';
@@ -22,13 +22,21 @@ export class PostingController {
   public async createThread(
     @Param('url') url: string,
     @Body(new ValidationPipe({ transform: true })) form: ThreadCreateForm,
+    @Req() req: Request,
     @Res() res: Response,
     @RealIP() ip: string,
     @Session() session: ISession
   ): Promise<void> {
     await this.restrictionService.checkRestrictions(RestrictionType.THREAD, ip, url, form, Boolean(session.payload));
     await this.normalizeOekaki(form);
-    await this.commentCreateService.createThread(url, form, ip, res, Boolean(session.payload));
+    await this.commentCreateService.createThread(
+      url,
+      form,
+      ip,
+      req.get('user-agent') ?? 'UNKNOWN USER-AGENT',
+      res,
+      Boolean(session.payload)
+    );
   }
 
   @Post(':url/:num')
@@ -37,6 +45,7 @@ export class PostingController {
     @Param('url') url: string,
     @Param('num') num: string,
     @Body(new ValidationPipe({ transform: true })) form: ReplyCreateForm,
+    @Req() req: Request,
     @Res() res: Response,
     @RealIP() ip: string,
     @Session() session: ISession
@@ -50,7 +59,15 @@ export class PostingController {
       num
     );
     await this.normalizeOekaki(form);
-    await this.commentCreateService.createReply(url, BigInt(num), form, ip, res, Boolean(session.payload));
+    await this.commentCreateService.createReply(
+      url,
+      BigInt(num),
+      form,
+      ip,
+      req.get('user-agent') ?? 'UNKNOWN USER-AGENT',
+      res,
+      Boolean(session.payload)
+    );
   }
 
   private async normalizeOekaki(form: ThreadCreateForm): Promise<void> {

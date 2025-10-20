@@ -128,6 +128,12 @@ export class BoardCreateDto {
   allowOekakiReplies: boolean;
 
   /**
+   * Allows you to determine the user's location by their IP address
+   * and display a flag indicating their country of location
+   */
+  allowGeoIp: boolean;
+
+  /**
    * HTML fragment with board rules
    */
   rules: string;
@@ -156,6 +162,7 @@ export class BoardCreateDto {
     allowedFileTypes: string[],
     allowOekakiThreads: boolean,
     allowOekakiReplies: boolean,
+    allowGeoIp: boolean,
     rules: string
   ) {
     this.url = url;
@@ -181,6 +188,7 @@ export class BoardCreateDto {
     this.allowedFileTypes = allowedFileTypes;
     this.allowOekakiThreads = allowOekakiThreads;
     this.allowOekakiReplies = allowOekakiReplies;
+    this.allowGeoIp = allowGeoIp;
     this.rules = rules;
   }
 }

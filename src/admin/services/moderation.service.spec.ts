@@ -95,7 +95,7 @@ describe('ModerationService', () => {
       commentPersistenceService.remove.mockResolvedValue(undefined);
       cachingProvider.fullyReloadCache.mockResolvedValue(undefined);
       boardPersistenceService.findByUrl.mockResolvedValue({ id: 'boardId' } as BoardDto);
-      await service.deleteComment('b', 123n, mockRes as Response);
+      await service.deleteComment('b', 123n, mockRes as Response, '/kashiwa/moderation/boardId');
       expect(commentPersistenceService.remove).toHaveBeenCalledWith('b', 123n);
       expect(cachingProvider.fullyReloadCache).toHaveBeenCalledWith('b');
       expect(boardPersistenceService.findByUrl).toHaveBeenCalledWith('b');
@@ -108,7 +108,7 @@ describe('ModerationService', () => {
       attachedFilePersistenceService.clearFromComment.mockResolvedValue(undefined);
       cachingProvider.fullyReloadCache.mockResolvedValue(undefined);
       boardPersistenceService.findByUrl.mockResolvedValue({ id: 'boardId' } as BoardDto);
-      await service.clearFile('b', 123n, mockRes as Response);
+      await service.clearFile('b', 123n, mockRes as Response, '/kashiwa/moderation/boardId');
       expect(attachedFilePersistenceService.clearFromComment).toHaveBeenCalledWith('b', 123n);
       expect(cachingProvider.fullyReloadCache).toHaveBeenCalledWith('b');
       expect(boardPersistenceService.findByUrl).toHaveBeenCalledWith('b');
@@ -121,7 +121,7 @@ describe('ModerationService', () => {
       commentPersistenceService.removeByIp.mockResolvedValue(undefined);
       cachingProvider.fullyReloadCache.mockResolvedValue(undefined);
       boardPersistenceService.findByUrl.mockResolvedValue({ id: 'boardId' } as BoardDto);
-      await service.deleteAllByIp('b', '127.0.0.1', mockRes as Response);
+      await service.deleteAllByIp('b', '127.0.0.1', mockRes as Response, '/kashiwa/moderation/boardId');
       expect(commentPersistenceService.removeByIp).toHaveBeenCalledWith('b', '127.0.0.1');
       expect(cachingProvider.fullyReloadCache).toHaveBeenCalledWith('b');
       expect(boardPersistenceService.findByUrl).toHaveBeenCalledWith('b');

@@ -2,18 +2,23 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InMemoryCacheProvider } from '@library/providers/in-memory-cache.provider';
 import { GlobalSettingsForm } from '@admin/forms';
 import { LOCALE } from '@locale/locale';
+import { EventEmitter } from 'events';
 
 const KEY_GLOBAL_SETTINGS = 'KEY_GLOBAL_SETTINGS';
 const KEY_SPAM_EXPRESSIONS = 'KEY_SPAM_EXPRESSIONS';
 const KEY_IP_BLACK_LIST = 'KEY_IP_BLACK_LIST';
+const KEY_CORS_ALLOWED_ORIGINS = 'KEY_CORS_ALLOWED_ORIGINS';
+const KEY_FORBIDDEN_USER_AGENTS = 'KEY_FORBIDDEN_USER_AGENTS';
 
 /**
  * Provider that manages global site-related runtime data in memory,
  * including global settings, spam expressions, and IP blacklists.
  */
 @Injectable()
-export class SiteContextProvider {
-  constructor(private readonly inMemoryCache: InMemoryCacheProvider) {}
+export class SiteContextProvider extends EventEmitter {
+  constructor(private readonly inMemoryCache: InMemoryCacheProvider) {
+    super();
+  }
 
   /**
    * Retrieves global site settings from memory.
@@ -59,6 +64,30 @@ export class SiteContextProvider {
    */
   public setIpBlackList(val: string[]): void {
     this.inMemoryCache.set(KEY_IP_BLACK_LIST, val);
+  }
+
+  /**
+   * Retrieves allowed CORS origins from memory.
+   */
+  public getCorsAllowedOrigins(): string[] | undefined {
+    return this.inMemoryCache.get<string[]>(KEY_CORS_ALLOWED_ORIGINS);
+  }
+
+  /**
+   * Stores allowed CORS origins in memory.
+   * @param val The list of allowed CORS origins to store
+   */
+  public setCorsAllowedOrigins(val: string[]): void {
+    this.inMemoryCache.set(KEY_CORS_ALLOWED_ORIGINS, val);
+    this.emit('corsUpdated', val);
+  }
+
+  public getForbiddenUserAgents(): RegExp[] | undefined {
+    return this.inMemoryCache.get<RegExp[]>(KEY_FORBIDDEN_USER_AGENTS);
+  }
+
+  public setForbiddenUserAgents(val: RegExp[]): void {
+    this.inMemoryCache.set(KEY_FORBIDDEN_USER_AGENTS, val);
   }
 
   /**

@@ -23,8 +23,12 @@ export class IpBlacklistProvider {
     let binary: string;
     if (this.isIPv4Pattern(ip)) {
       binary = this.ipv4ToBinary(ip);
-    } else if (this.isIPv6Pattern(ip)) {
-      binary = this.ipv6ToBinary(ip);
+    } else if (this.isIPv6Pattern(ip) || ip.includes('::')) {
+      const expanded = ip.includes('::') ? (this.expandIPv6(ip) ?? ip) : ip;
+      if (!this.isIPv6Pattern(expanded)) {
+        return false;
+      }
+      binary = this.ipv6ToBinary(expanded);
     } else {
       return false;
     }
@@ -33,7 +37,7 @@ export class IpBlacklistProvider {
   }
 
   /**
-   * Rebuild the IP adresses tree
+   * Rebuild the IP addresses tree
    */
   public reloadBlacklist(): void {
     this.trie = { children: {}, isBlocked: false };
@@ -47,8 +51,12 @@ export class IpBlacklistProvider {
     const ipBlackList: string[] = this.siteContext.getIpBlackList() || [];
 
     for (const pattern of ipBlackList) {
-      const binary = this.patternToBinary(pattern);
-      this.insertIntoTrie(binary);
+      if (pattern.includes('/')) {
+        this.insertCidr(pattern);
+      } else {
+        const binary = this.patternToBinary(pattern);
+        this.insertIntoTrie(binary);
+      }
     }
   }
 
@@ -60,9 +68,8 @@ export class IpBlacklistProvider {
       return this.ipv4ToBinary(pattern);
     } else if (this.isIPv6Pattern(pattern)) {
       return this.ipv6ToBinary(pattern);
-    } else {
-      throw new Error(`Invalid IP pattern: ${pattern}`);
     }
+    throw new Error(`Invalid IP pattern: ${pattern}`);
   }
 
   /**
@@ -76,7 +83,12 @@ export class IpBlacklistProvider {
    * Checks whether the pattern is a valid IPv6 address with optional wildcards.
    */
   private isIPv6Pattern(pattern: string): boolean {
-    return /^((([0-9A-Fa-f]{1,4}|\*):){1,6}:|(([0-9A-Fa-f]{1,4}|\*):){7})([0-9A-Fa-f]{1,4}|\*)$/.test(pattern);
+    try {
+      const full = pattern.replace('::', ':'.repeat(8 - pattern.split(':').length + 1));
+      return /^[0-9A-Fa-f:*]{1,4}(:[0-9A-Fa-f:*]{1,4}){7}$/.test(full);
+    } catch {
+      return false;
+    }
   }
 
   /**
@@ -88,13 +100,13 @@ export class IpBlacklistProvider {
 
     for (const part of parts) {
       if (part === '*') {
-        binary += '*'.repeat(32);
+        binary += '*'.repeat(8);
       } else {
         const num = parseInt(part, 10);
         if (num < 0 || num > 255) {
           throw new Error(`Invalid IPv4 part: ${part}`);
         }
-        binary += num.toString(2).padStart(32, '0');
+        binary += num.toString(2).padStart(8, '0');
       }
     }
 
@@ -133,9 +145,58 @@ export class IpBlacklistProvider {
   }
 
   /**
+   * Inserts a CIDR-based IP pattern into the internal trie for fast blacklist lookup
+   * @param pattern The CIDR notation string representing the subnet to block
+   */
+  private insertCidr(pattern: string): void {
+    const [ip, prefixLengthStr] = pattern.split('/');
+    const prefixLength = parseInt(prefixLengthStr, 10);
+    let binary: string;
+    let totalBits: number;
+
+    if (this.isIPv4Pattern(ip)) {
+      totalBits = 32;
+      binary = this.ipv4ToBinary(ip);
+    } else if (this.isIPv6Pattern(ip) || ip.includes('::')) {
+      totalBits = 128;
+      const expanded = this.expandIPv6(ip);
+      if (!expanded) {
+        throw new Error(`Invalid CIDR address: ${pattern}`);
+      }
+      binary = this.ipv6ToBinary(expanded);
+    } else {
+      throw new Error(`Invalid CIDR address: ${pattern}`);
+    }
+
+    const maskedBinary = binary.substring(0, prefixLength).padEnd(totalBits, '*');
+    this.insertIntoTrie(maskedBinary);
+  }
+
+  /**
+   * Expands a compressed IPv6 address (with '::') to full 8-group representation.
+   * Returns null if the address is invalid.
+   */
+  private expandIPv6(ip: string): string | null {
+    const parts = ip.split('::');
+    if (parts.length > 2) {
+      return null;
+    }
+
+    const left = parts[0] ? parts[0].split(':') : [];
+    const right = parts[1] ? parts[1].split(':') : [];
+    const missing = 8 - (left.length + right.length);
+    if (missing < 0) {
+      return null;
+    }
+
+    const zeros = Array(missing).fill('0');
+    return [...left, ...zeros, ...right].join(':');
+  }
+
+  /**
    * Inserts a binary IP representation into the trie.
    */
-  private insertIntoTrie(binary: string) {
+  private insertIntoTrie(binary: string): void {
     let node = this.trie;
     for (const bit of binary) {
       if (!node.children[bit]) {
@@ -155,7 +216,14 @@ export class IpBlacklistProvider {
     }
 
     const bit = binary[index];
-    const possibleBits = [bit, '*'].filter(b => node.children[b]);
+    const possibleBits: string[] = [];
+    if (node.children[bit]) {
+      possibleBits.push(bit);
+    }
+    if (node.children['*']) {
+      possibleBits.push('*');
+    }
+
     for (const b of possibleBits) {
       if (this.checkTrie(binary, node.children[b], index + 1)) {
         return true;

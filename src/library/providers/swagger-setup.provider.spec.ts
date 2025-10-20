@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ApiModule } from '@api/api.module';
+import { DebugModule } from '@debug/debug.module';
 
 jest.mock('@nestjs/swagger', () => ({
   ...jest.requireActual('@nestjs/swagger'),
@@ -53,7 +54,9 @@ describe('SwaggerSetupProvider', () => {
 
       const result = provider.setupDocs(appMock);
 
-      expect(SwaggerModule.createDocument).toHaveBeenCalledWith(appMock, expectedConfig, { include: [ApiModule] });
+      expect(SwaggerModule.createDocument).toHaveBeenCalledWith(appMock, expectedConfig, {
+        include: [ApiModule, DebugModule]
+      });
       expect(result).toEqual({ openapi: '3.0.0' });
     });
   });

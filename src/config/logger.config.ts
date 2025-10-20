@@ -12,13 +12,13 @@ export const loggerConfig = (): Params => ({
           options: {
             colorize: true,
             translateTime: 'SYS:standard',
-            ignore: 'req,res,req.hostname,req.remoteAddress,form.file.buffer'
+            ignore: 'req,res,req.hostname,req.remoteAddress,form.file.buffer,file.buffer'
           }
         }
       : undefined,
     redact: {
       remove: true,
-      paths: ['req', 'res', 'form.file.buffer']
+      paths: ['req', 'res', 'form.file.buffer', 'file.buffer']
     }
   }
 });

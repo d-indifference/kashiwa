@@ -241,6 +241,8 @@ export class CommentPersistenceService {
    * @param ip Poster's IP
    */
   public async findLastThreadByIp(ip: string): Promise<Pick<Comment, 'createdAt'> | null> {
+    this.logger.debug({ ip }, 'findLastThreadByIp');
+
     return (
       (await this.prisma.comment.findFirst({
         where: { ip, parentId: null },

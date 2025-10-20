@@ -91,6 +91,7 @@ export class BoardService {
     form.allowedFileTypes = boardSettings.allowedFileTypes as string[];
     form.allowOekakiThreads = boardSettings.allowOekakiThreads;
     form.allowOekakiReplies = boardSettings.allowOekakiReplies;
+    form.allowGeoIp = boardSettings.allowGeoIp;
     form.rules = boardSettings.rules;
 
     return FormPage.toSessionTemplateContent(session, form, {
@@ -132,6 +133,7 @@ export class BoardService {
       form.allowedFileTypes,
       form.allowOekakiThreads,
       form.allowOekakiReplies,
+      form.allowGeoIp,
       form.rules
     );
 
@@ -147,7 +149,7 @@ export class BoardService {
    * @param res Express.js `res` object
    */
   public async update(form: BoardUpdateForm, res: Response): Promise<void> {
-    this.logger.info({ form }, 'create');
+    this.logger.info({ form }, 'update');
 
     const board = await this.boardPersistenceService.findById(form.id);
     const dto = new BoardUpdateDto(
@@ -175,6 +177,7 @@ export class BoardService {
       form.allowedFileTypes,
       form.allowOekakiThreads,
       form.allowOekakiReplies,
+      form.allowGeoIp,
       form.rules
     );
 

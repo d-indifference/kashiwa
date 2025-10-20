@@ -4,17 +4,27 @@ mixin AdminLink(url, display_name)
     | ]
 
 
-mixin AdminLinks(role)
+mixin AdminLinks(payload)
+    script(src='/js/admin.js')
+
     div(align='center')
         +AdminLink('/kashiwa', LOCALE.DASHBOARD)
         +AdminLink(`/api/${applicationVersion()}/docs`, LOCALE.SWAGGER)
-        if role === 'ADMINISTRATOR'
+        if payload.role === 'ADMINISTRATOR'
             +AdminLink('/kashiwa/global-settings', LOCALE.SITE_SETTINGS)
             +AdminLink('/kashiwa/staff', LOCALE.STAFF_PANEL)
             +AdminLink('/kashiwa/board', LOCALE.BOARDS)
         +AdminLink('/kashiwa/moderation', LOCALE.MODERATION)
         +AdminLink('/kashiwa/ban', LOCALE.BANNED_POSTERS)
-        if role === 'ADMINISTRATOR'
+        | [
+        a(href='/kashiwa/reports' id='reports-btn')= LOCALE.REPORTS
+        | ]
+        +AdminLink('/kashiwa/ip-filter', LOCALE.IP_FILTER)
+        +AdminLink('/kashiwa/user-agents', LOCALE.BLOCKED_USER_AGENTS_LIST)
+        if payload.role === 'ADMINISTRATOR'
             +AdminLink('/kashiwa/spam', LOCALE.SPAM_LIST)
-            +AdminLink('/kashiwa/ip-filter', LOCALE.IP_FILTER)
+            +AdminLink('/kashiwa/cors-settings', LOCALE.CORS_SETTINGS)
             +AdminLink('/kashiwa/dump', LOCALE.SITE_DUMP)
+
+    script.
+      fetchActualReports('#{payload.id}');

@@ -1,0 +1,16 @@
+enum ReportType {
+  COMMENT
+  FILE
+}
+
+model Report {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  reportType ReportType @map("report_type")
+
+  commentId String  @map("comment_id") @db.Uuid
+  comment   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@map("report")
+}

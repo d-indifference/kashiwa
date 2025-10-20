@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { ApiModule } from '@api/api.module';
+import { DebugModule } from '@debug/debug.module';
 
 @Injectable()
 export class SwaggerSetupProvider {
@@ -10,7 +11,7 @@ export class SwaggerSetupProvider {
 
   public setupDocs(app: NestExpressApplication): OpenAPIObject {
     const swaggerConfig = this.buildConfig();
-    return SwaggerModule.createDocument(app, swaggerConfig, { include: [ApiModule] });
+    return SwaggerModule.createDocument(app, swaggerConfig, { include: [ApiModule, DebugModule] });
   }
 
   private buildConfig(): Omit<OpenAPIObject, 'paths'> {

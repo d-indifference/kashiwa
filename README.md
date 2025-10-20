@@ -13,11 +13,12 @@ follow it through to the final release :).
 - Extensive capabilities for creating and customizing boards
 - Traditional imageboard features such as sage, tripcodes, text formatting (still a work in progress), captcha, anti-flood, thread hiding, and style switching
 - Oekaki board support is available (for browsers that support ECMAScript6+)
+- The ability to configure the receipt of the poster's country flag by its IP
 - The ability to pin threads and disable posting in them individually
 - Support for uploading the most popular image, video, and audio formats, as well as the ability to upload torrents (yo-ho-ho! 🏴‍☠️) and .swf files
 - Ability to add an administrative team: registered users can be either administrators or regular moderators
 - Configure a spam filter using JavaScript regular expressions
-- Ability to temporarily ban users who break the board’s rules, as well as set up an IP blacklist to block access entirely
+- Ability to temporarily ban users who break the board’s rules, as well as set up an IP and User-Agents blacklists to block access entirely
 - The engine supports database dumps and cached board backups — your data will be safe
 - Initial REST API support for retrieving post information (detailed Swagger documentation available)
 - Adding banners. Simply upload your banner images to `./kashiwa/static/img/banners`
@@ -52,6 +53,42 @@ After saving the source code, do the following:
     ```
 3. Edit configurations in the file `configuration.yml` as you wish,
    but we strongly recommend you to change default values by paths `secure.user.salt-rounds` and `secure.session.secret`.
+
+   When the application starts for the first time and no persistent application volume (`KASHIWA_PHYSICS_VOLUME_APPLICATION`) exists yet,
+   Kashiwa automatically creates it and writes several default configuration files inside — including the list of allowed CORS origins.
+
+   This list defines which domains (origins) are allowed to access your API from a browser.
+   If you don’t configure it beforehand, the application will use the preset from your `configuration.yml`
+
+   Example default section in configuration.yml:
+
+   ```yaml
+    http:
+      port: 3000
+      cors:
+        allowed-origins:
+          default-preset:
+            - 'http://127.0.0.1'
+            - 'http://localhost'
+   ```
+
+    You must add to this list the addresses from which your application will be accessible, for example, if your domain is https://example.com/, add the following lines to your `configuration.yml`:
+
+   ```yaml
+    http:
+      port: 3000
+      cors:
+        allowed-origins:
+          default-preset:
+            - 'http://127.0.0.1'
+            - 'http://localhost'
+            - 'https://example.com'
+   ```
+
+    On the first startup, Kashiwa will create the file `allowed-origins` (inside the application volume)
+and populate it using this preset.
+You can later edit that file directly to update allowed origins without rebuilding the container.
+
 4. Next run the following commands:
     ```sh
     $ docker compose build
@@ -130,6 +167,7 @@ So, after completing the steps above, let’s proceed with installing the imageb
     NODE_ENV='production'
    ```
 5. Edit the `configuration.yml` file as you wish. However, for security reasons we strongly recommend changing the values of `secure.user.salt-rounds` and `secure.session.secret`.
+   It is also highly recommended to add your domain to the list of allowed hosts in the `configuration.yml` in the parameter `http.cors.allowed-origins.default-preset` before the first startup
 6. Run the database migration. Prisma will generate the client automatically:
    ```sh
    $ npm run migrate:dev
@@ -146,6 +184,32 @@ So, after completing the steps above, let’s proceed with installing the imageb
    Then go to [localhost:3000](http://localhost:3000).
    Now you can go to [localhost:3000/kashiwa/auth/sign-up](http://localhost:3000/kashiwa/auth/sign-up) and create your first admin profile.
 9. (Optionally) Now you can set up a reverse proxy for the website, instructions will not be given here.
+
+## CORS Configuration
+
+### What is CORS and why it is needed
+
+CORS (Cross-Origin Resource Sharing) is a security mechanism implemented by web browsers that restricts web pages from making requests to a domain different from the one that served the web page.
+
+In this project, the Nest.js imageboard is a monolithic website that:
+- Serves static HTML pages pre-rendered with Pug.
+- Provides AJAX-based functionality via REST API endpoints.
+- Runs inside a Docker container.
+
+Even though your frontend and backend are served from the same application, some features may require cross-origin requests. 
+CORS ensures that only requests from trusted origins are allowed to interact with the API, preventing unauthorized websites from making requests on behalf of your users.
+
+### How to configure allowed origins
+
+The list of allowed origins for CORS is managed through the administrative panel. Follow these steps to configure it:
+
+1. Log in to your administrator account.
+2. Go to the admin panel, in the section labeled "CORS settings".
+3. Enter the desired origins in the form field. Each origin should be on a separate line (e.g., https://example.com).
+4. Click Save to apply the changes.
+
+Once saved, the new allowed origins are applied immediately to the application without restarting the server. 
+The CORS policy will restrict API access to the specified origins only.
 
 ## Supported markdown
 
@@ -168,20 +232,25 @@ Administrators cannot write using markup under their account, however, they have
 
 The following is a list of application configuration parameters from the `configuration.yml` file.
 
-| Parameter name            | Type      | Description                                                                                 | Remarks                                     |
-|---------------------------|-----------|---------------------------------------------------------------------------------------------|---------------------------------------------|
-| `application.name`        | `string`  | The name of the application that will be displayed in the Swagger                           |                                             |
-| `application.description` | `string`  | The description of the application that will be displayed in the Swagger                    |                                             |
-| `http.port`               | `number`  | Node.js HTTP server port on which the application will run                                  |                                             |
-| `file-storage.path`       | `string`  | The absolute path to the application where generated pages and downloaded files are stored. |                                             |
-| `secure.user.salt-rounds` | `number`  | Number of password encryption iterations                                                    | It is recommended to increase in production |
-| `secure.session.secret`   | `string`  | A secret for session encryption                                                             | It is recommended to change in production   |
-| `captcha.salt-rounds`     | `number`  | Number of captcha answer encryption iterations                                              |                                             |
-| `captcha.size`            | `number`  | The length of the random captcha string                                                     |                                             |
-| `captcha.ignoreChars`     | `string`  | Filter out some characters from the captcha                                                 |                                             |
-| `captcha.noise`           | `number`  | Number of noise lines on captcha image                                                      |                                             |
-| `captcha.color`           | `boolean` | If false, captcha will be black and white otherwise, it will be randomly colorized          |                                             |
-| `captcha.background`      | `string`  | Background color of svg captcha image                                                       |                                             |
+| Parameter name                             | Type            | Description                                                                                                                                                                           | Remarks                                             |
+|--------------------------------------------|-----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------|
+| `application.name`                         | `string`        | The name of the application that will be displayed in the Swagger                                                                                                                     |                                                     |
+| `application.description`                  | `string`        | The description of the application that will be displayed in the Swagger                                                                                                              |                                                     |
+| `http.port`                                | `number`        | Node.js HTTP server port on which the application will run                                                                                                                            |                                                     |
+| `http.cors.allowed-origins.default-preset` | `Array<string>` | A list of default domains (origins) allowed to access the API from browsers. Used to initialize the allowed CORS origins file on the first startup when no application volume exists. | It is recommended to change in before first startup |
+| `file-storage.path`                        | `string`        | The absolute path to the application where generated pages and downloaded files are stored.                                                                                           |                                                     |
+| `secure.user.salt-rounds`                  | `number`        | Number of password encryption iterations                                                                                                                                              | It is recommended to increase in production         |
+| `secure.session.secret`                    | `string`        | A secret for session encryption                                                                                                                                                       | It is recommended to change in production           |
+| `captcha.salt-rounds`                      | `number`        | Number of captcha answer encryption iterations                                                                                                                                        |                                                     |
+| `captcha.size`                             | `number`        | The length of the random captcha string                                                                                                                                               |                                                     |
+| `captcha.ignoreChars`                      | `string`        | Filter out some characters from the captcha                                                                                                                                           |                                                     |
+| `captcha.noise`                            | `number`        | Number of noise lines on captcha image                                                                                                                                                |                                                     |
+| `captcha.color`                            | `boolean`       | If false, captcha will be black and white otherwise, it will be randomly colorized                                                                                                    |                                                     |
+| `captcha.background`                       | `string`        | Background color of svg captcha image                                                                                                                                                 |                                                     |
+| `whois.enabled`                            | `boolean`       | Allow user country detection globally                                                                                                                                                 |                                                     |
+| `whois.api.address`                        | `string`        | API service address for determining the user's GeoIP                                                                                                                                  |                                                     |
+| `whois.api.method`                         | `string`        | HTTP method for getting user information                                                                                                                                              |                                                     |
+| `whois.api.timeout`                        | `number`        | GeoIP request timeout                                                                                                                                                                 |                                                     |
 
 ## Supported file formats
 

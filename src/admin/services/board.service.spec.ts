@@ -90,6 +90,9 @@ describe('BoardService', () => {
         enableCaptcha: false,
         isCaptchaCaseSensitive: false,
         allowedFileTypes: ['jpg'],
+        allowOekakiThreads: false,
+        allowOekakiReplies: false,
+        allowGeoIp: true,
         rules: 'rules'
       } as BoardSettingsDto;
       boardPersistenceService.findById.mockResolvedValue({

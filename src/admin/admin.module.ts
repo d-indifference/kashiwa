@@ -9,13 +9,16 @@ import {
   AuthService,
   BanService,
   BoardService,
+  CorsSettingsService,
   DashboardService,
   DumpService,
+  UserAgentFilterService,
   GlobalSettingsService,
   IpFilterService,
   ModerationService,
   SpamListService,
-  StaffService
+  StaffService,
+  ReportService
 } from '@admin/services';
 import {
   AuthController,
@@ -27,12 +30,16 @@ import {
   StaffController,
   BoardController,
   BanController,
-  ModerationController
+  ModerationController,
+  CorsSettingsController,
+  UserAgentFilterController,
+  ReportController
 } from '@admin/controllers';
 import { DashboardUtilsProvider, DatabaseDumpingUtilsProvider } from '@admin/providers';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CachingModule } from '@caching/caching.module';
 import { AntiSpamModule } from '@restriction/modules/antispam/anti-spam.module';
+import { UserAgentRestrictionModule } from '@restriction/modules/user-agent-restriction/user-agent-restriction.module';
 
 /**
  * Module for administration panel
@@ -44,7 +51,8 @@ import { AntiSpamModule } from '@restriction/modules/antispam/anti-spam.module';
     LibraryModule,
     PersistenceModule,
     CachingModule,
-    AntiSpamModule
+    AntiSpamModule,
+    UserAgentRestrictionModule
   ],
   providers: [
     PrismaService,
@@ -59,7 +67,10 @@ import { AntiSpamModule } from '@restriction/modules/antispam/anti-spam.module';
     StaffService,
     BoardService,
     BanService,
-    ModerationService
+    ModerationService,
+    CorsSettingsService,
+    UserAgentFilterService,
+    ReportService
   ],
   controllers: [
     AuthController,
@@ -71,7 +82,10 @@ import { AntiSpamModule } from '@restriction/modules/antispam/anti-spam.module';
     StaffController,
     BoardController,
     BanController,
-    ModerationController
+    ModerationController,
+    CorsSettingsController,
+    UserAgentFilterController,
+    ReportController
   ]
 })
 export class AdminModule implements NestModule {

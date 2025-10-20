@@ -208,3 +208,11 @@ table td {
 .reply-link-container .reply {
   border: none;
 }
+
+.hide-button {
+  color: #ff6600;
+}
+
+.hide-button:hover {
+  color: #0066ff;
+}

@@ -92,6 +92,28 @@ describe('SiteContextProvider', () => {
     });
   });
 
+  describe('getCorsAllowedOrigins', () => {
+    it('should allowed cors origins from cache', () => {
+      const allowedOrigins = ['http://localhost:3000', 'https://mysite.com'];
+      cacheMock.get.mockReturnValueOnce(allowedOrigins);
+      expect(provider.getCorsAllowedOrigins()).toBe(allowedOrigins);
+      expect(cacheMock.get).toHaveBeenCalledWith('KEY_CORS_ALLOWED_ORIGINS');
+    });
+
+    it('should return undefined if not set', () => {
+      cacheMock.get.mockReturnValueOnce(undefined);
+      expect(provider.getCorsAllowedOrigins()).toBeUndefined();
+    });
+  });
+
+  describe('setCorsAllowedOrigins', () => {
+    it('should allowedOrigins in cache', () => {
+      const allowedOrigins = ['https://mysite.com'];
+      provider.setCorsAllowedOrigins(allowedOrigins);
+      expect(cacheMock.set).toHaveBeenCalledWith('KEY_CORS_ALLOWED_ORIGINS', allowedOrigins);
+    });
+  });
+
   describe('private get()', () => {
     it('should throw if value is not found', () => {
       cacheMock.get.mockReturnValueOnce(undefined);
