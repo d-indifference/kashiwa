@@ -126,7 +126,7 @@ So, after completing the steps above, let’s proceed with installing the imageb
 1. Clone the repository and install the dependencies:
    ```sh
    $ cd kashiwa
-   $ npm i
+   $ npm ci
    ```
    Optionally, to make sure the application works, you can run the tests:
    ```sh
